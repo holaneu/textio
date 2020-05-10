@@ -1,6 +1,6 @@
 # Textio
 Simple plain text modifier in HTML + JS. Just textarea + buttons with JS tranformation functions.
-Also create simple flash cards by one click, based on plain text from textarea.
+Also create simple flash cards on one click, based on plain text from textarea.
 
 ## Tranformation functions:
 
@@ -15,6 +15,14 @@ Also create simple flash cards by one click, based on plain text from textarea.
 * Convert to Slug 
 * Execute custom JS code (execute any custom JS code written in separate textarea using eval method)
 * Load text from external file - txt file from server (EN-slovicka.txt ... EN vocabulary)
-* Flash cards feature - create flash card by one click from text in editor or load text to editor from external file (EN vocabulary)
 * Encode URL
 * Dencode URL
+
+## Flash cards feature
+* Create flash card on one click. Tranform plain text in texarea (editor) into simple flashcards, showing cards randomly. Each text row is tranformed into one card, use separators ('=' or '...') to split row into front and back side of card. Buttons 'Next card' and 'Turn card'.
+
+## Load text from file
+* It loads static .txt file containing my personal vocabulary (EN -> CZ), list of dozens phrases with CZ translations.
+
+## Save modified text into .txt file on one click
+* Save modified text into .txt file on one click.
