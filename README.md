@@ -3,8 +3,10 @@ Simple plain text modifier in HTML + JS. Just textarea + buttons with JS tranfor
 Also create simple flash cards on one click, based on plain text from textarea.
 
 Demo:
-* https://textio.netlify.app ... auto-deployed from this GitHub repo (from master branch) to Netlify.
-* http://textio.holan.eu
+For demo visit:
+* https://holaneu.github.io/textio
+* or https://textio.netlify.app ... auto-deployed from this GitHub repo (from master branch) to Netlify.
+* backup on http://textio.holan.eu (not updated so often)
 
 
 ## Tranformation functions:
