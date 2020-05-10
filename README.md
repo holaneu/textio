@@ -4,8 +4,8 @@ Also create simple flash cards on one click, based on plain text from textarea.
 
 Demo:
 * just visit https://holaneu.github.io/textio
-* or https://textio.netlify.app ... auto-deployed from this GitHub repo (from master branch) to Netlify.
-* backup on http://textio.holan.eu (not updated so often)
+  * or https://textio.netlify.app ... auto-deployed from this GitHub repo (from master branch) to Netlify.
+  * backup is also on http://textio.holan.eu (not updated so often)
 
 
 ## Tranformation functions:
