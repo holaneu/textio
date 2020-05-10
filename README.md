@@ -19,7 +19,7 @@ Demo:
 * Remove line breaks 
 * Remove diacritics  
 * Convert to Slug 
-* Execute custom JS code (execute any custom JS code written in separate textarea using eval method)
+* Execute custom JS code (execute any custom JS code written in separate textarea, using JS eval method)
 * Load text from external file - txt file from server (EN-slovicka.txt ... EN vocabulary)
 * Encode URL
 * Dencode URL
