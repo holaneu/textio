@@ -1,5 +1,9 @@
 # Textio
-Simple text modifier in HTML + JS. Just textarea + buttons with JS functions.
+Simple plain text modifier in HTML + JS. Just textarea + buttons with JS tranformation functions.
+Also create simple flash cards by one click, based on plain text from textarea.
+
+## Tranformation functions:
+
 * Remove empty rows
 * Rows to List
 * 2 Excel columns to JSON map
@@ -11,6 +15,6 @@ Simple text modifier in HTML + JS. Just textarea + buttons with JS functions.
 * Convert to Slug 
 * Execute custom JS code (execute any custom JS code written in separate textarea using eval method)
 * Load text from external file - txt file from server (EN-slovicka.txt ... EN vocabulary)
-* Flash cards feature - start flash card from text in editor or load text to editor from external file (EN vocabulary)
+* Flash cards feature - create flash card by one click from text in editor or load text to editor from external file (EN vocabulary)
 * Encode URL
 * Dencode URL
