@@ -31,3 +31,8 @@ Demo:
 
 ## Save modified text into .txt file on one click
 * Save modified text into .txt file on one click.
+
+## Progressive Web App ready
+* on mobile phone try to save page to homescreen, then it behaves as separate 'app'.
+* more features planned: sharing content (text) from/to Textio and other Android apps.
+
