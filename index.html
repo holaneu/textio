@@ -42,6 +42,9 @@
     button.orange {
       color: rgb(255 209 41 / 1)
     }
+    button:disabled {
+      color: silver;
+    }
 		#textareaMain {
 		  width: calc(100% - 10px);
 		  min-height: 250px;
@@ -123,7 +126,8 @@
     function HistoryAdd() {
       historySteps.push(textareaMain.value);
       currentStepText.innerHTML = historySteps.length;
-      btnGoBack.style.display = "inline-block";
+      //btnGoBack.style.display = "inline-block";
+      btnGoBack.disabled = false;
     }
     
     function HistoryBack() {
@@ -132,7 +136,8 @@
         historySteps.pop();
         currentStep.innerHTML = historySteps.length;
         if(historySteps.length == 0) {
-          btnGoBack.style.display = "none";
+          //btnGoBack.style.display = "none";
+          btnGoBack.disabled = true;
         }
       } 
     }
@@ -353,6 +358,20 @@
       textareaMain.value = result;
     }
 
+    function openFile() {
+      HistoryAdd();
+      document.getElementById('inp').click();
+    }
+    function readFile(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        textareaMain.value = e.target.result;
+      }
+      reader.readAsText(file)
+    }
+
 
 	</script>
 </head>
@@ -360,9 +379,10 @@
 <header><a href="/"><strong>Textio</strong> <em>= text modifier by Holan.eu</em></a></header>
 <main>
     <nav>        
-	    <button id="goBack" onclick="HistoryBack();" style="display:none;">Step back</button>
+	    <button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
       <button onclick="DownloadFile()">Save to file</button>
-      <button onclick="LoadFile('slovicka-en.txt')">Load file</button>
+      <button onclick="openFile()">Open local file</button><input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
+      <button onclick="LoadFile('slovicka-en.txt')">Load file from server</button>
       <br>
       <span>Current step:<em id="currentStep">0</em></span>
     </nav>
