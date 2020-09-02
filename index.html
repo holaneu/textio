@@ -39,6 +39,9 @@
 		  color: #45edf5;
 		  cursor: pointer;
 		}
+    button.orange {
+      color: rgb(255 209 41 / 1)
+    }
 		#textareaMain {
 		  width: calc(100% - 10px);
 		  min-height: 250px;
@@ -176,29 +179,29 @@
 	    /* ** Czech ** */
 	    'Č': 'C', 'Ď': 'D', 'Ě': 'E', 'Ň': 'N', 'Ř': 'R', 'Š': 'S', 'Ť': 'T', 'Ů': 'U', 'Ž': 'Z',
 	    'č': 'c', 'ď': 'd', 'ě': 'e', 'ň': 'n', 'ř': 'r', 'š': 's', 'ť': 't', 'ů': 'u', 'ž': 'z'
-		};
+		};    
     
 		function RemoveDiacritics(input) {
 			var text = input;
-		    var result = '';
-		    for (var i=0;i<text.length;i++) {
-		        if (char_map[text[i]])
-		            result += char_map[text[i]];
-		        else
-		            result += text[i];
-		    }
+      var result = '';
+      for (var i=0;i<text.length;i++) {
+          if (char_map[text[i]])
+              result += char_map[text[i]];
+          else
+              result += text[i];
+      }
 			return result;
 		}
     
 		function ConvertToSlug(input) {
 			var text = input;
-		    var result = '';
-		    for (var i=0;i<text.length;i++) {
-		        if (char_map[text[i]])
-		            result += char_map[text[i]];
-		        else
-		            result += text[i];
-		    }
+      var result = '';
+      for (var i=0;i<text.length;i++) {
+          if (char_map[text[i]])
+              result += char_map[text[i]];
+          else
+              result += text[i];
+      }
 			return result.toLowerCase().replace(/[^\w |\n]+/g,'').replace(/ +|\n+/g,'-');
 		}
     
@@ -223,9 +226,9 @@
 			return result;
 		}
         
-        function ListSort(input) {
-          return input.split(",").sort();
-        }
+    function ListSort(input) {
+      return input.split(",").sort();
+    }
     
 		function EvalCustomScript() {
             HistoryAdd();
@@ -318,8 +321,18 @@
       return encodeURI(input);           
     }
     
+    //Encoding reference incl. list of characters: https://www.w3schools.com/tags/ref_urlencode.ASP
+    var url_encode_map = {
+      '%20': ' ', '%3A': ':', '%2F': '/', '%2B': '+', '%2C': ',', '%2D': '-'
+    };
+
     function DecodeUri(input) {
-      return decodeURI(input);     
+      var result = decodeURI(input);
+      for(const phrase in url_encode_map) {
+        result = result.replace(new RegExp(phrase,'g'), url_encode_map[phrase]);
+      }
+      return result;
+      //return decodeURI(input);   
     }
     
     function Transform(callback) {
@@ -373,10 +386,12 @@
       <button onclick="Transform(IncreaseLineBreaks);">TTS: increase line breaks</button>
   		<button onclick="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</button>
       <button onclick="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</button>
-      <button onclick="CreateFlashCards()">Create flash cards</button>
       
       <button onclick="Transform(EncodeUri)">Encode URL</button>
-      <button onclick="Transform(DecodeUri)">Dencode URL</button>
+      <button onclick="Transform(DecodeUri)">Decode URL</button>
+
+      <br>
+      <button onclick="CreateFlashCards()" class='orange'>Create flash cards</button>
       
       
     </section>
