@@ -114,6 +114,12 @@
 	</style>
 
 	<script>
+    if('serviceWorker' in navigator) {
+      navigator.serviceWorker
+      .register('/service–worker.js')
+      .then(function() { console.log("Service Worker Registered"); });
+    }
+
     window.onload = function() {
       textareaMain = document.querySelector("#textareaMain"); 
       flashcardsSection = document.querySelector("#flashcards-section"); 
@@ -383,6 +389,14 @@
         textareaMain.value = lcValue;
       }
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const parsedUrl = new URL(window.location);
+      // searchParams.get() will properly handle decoding the values.
+      console.log('Title shared: ' + parsedUrl.searchParams.get('title'));
+      console.log('Text shared: ' + parsedUrl.searchParams.get('text'));
+      console.log('URL shared: ' + parsedUrl.searchParams.get('url'));
+    });
 
 
 	</script>
