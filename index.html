@@ -88,7 +88,7 @@
       color: white;
       margin-top: 20px;
       margin-bottom: 20px;
-      font-size: 16px;
+      font-size: 20px;
     }
     .flashcards-hidden {
       display: none;
@@ -372,6 +372,18 @@
       reader.readAsText(file)
     }
 
+    function SaveToLC(lcKeyName){
+      localStorage.setItem(lcKeyName, textareaMain.value)
+      
+    }
+
+    function OpenFromLC(lcKeyName){
+      var lcValue = localStorage.getItem(lcKeyName); //localStorage[lcKeyName]
+      if(lcValue && typeof lcValue === 'string' && lcValue.length > 0){
+        textareaMain.value = lcValue;
+      }
+    }
+
 
 	</script>
 </head>
@@ -381,8 +393,10 @@
     <nav>        
 	    <button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
       <button onclick="DownloadFile()">Save to file</button>
+      <button onclick="SaveToLC('saved1')">Save to LC</button>
+      <button onclick="OpenFromLC('saved1')">Open from LC</button>
       <button onclick="openFile()">Open local file</button><input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
-      <button onclick="LoadFile('slovicka-en.txt')">Load file from server</button>
+      <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
       <br>
       <span>Current step:<em id="currentStep">0</em></span>
     </nav>
@@ -391,7 +405,8 @@
 		  <textarea id="textareaMain"></textarea>
     </section>
 
-    <section id="editor-buttons">  		
+    <section id="editor-buttons">
+      <button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
   		<button onclick="Transform(LinesToList);">Rows to List</button>
   		<button onclick="Transform(ListToArray);">List to Array</button>
   		<button onclick="Transform(ListToLines);">List to Rows</button>
@@ -409,9 +424,6 @@
       
       <button onclick="Transform(EncodeUri)">Encode URL</button>
       <button onclick="Transform(DecodeUri)">Decode URL</button>
-
-      <br>
-      <button onclick="CreateFlashCards()" class='orange'>Create flash cards</button>
       
       
     </section>
