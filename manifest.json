@@ -11,12 +11,10 @@
     "start_url": "/",
     "background_color": "#000000",
     "display": "standalone",
-    "scope": "/",
     "theme_color": "#000000",
     "description": "Textio",
     "share_target": {
-        "action": "/share-target/",
-        "method": "GET",
+        "action": "/share",
         "params": {
             "title": "title",
             "text": "text",
