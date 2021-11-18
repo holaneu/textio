@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Textio</title>
+    <meta name="version" content="1.25">
     <base href="/textio/">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="manifest" href="manifest.json">	  
@@ -118,7 +119,7 @@
 	<script>
     if('serviceWorker' in navigator) {
       navigator.serviceWorker
-      .register('/service–worker.js')
+      .register('service–worker.js')
       .then(function() { console.log("Service Worker Registered"); });
     }
 
