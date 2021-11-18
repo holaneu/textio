@@ -8,7 +8,7 @@
         "sizes": "256x256"
         }
     ],
-    "start_url": "/",
+    "start_url": "/textio/",
     "background_color": "#000000",
     "display": "standalone",
     "theme_color": "#000000",
