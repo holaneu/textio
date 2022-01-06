@@ -14,7 +14,7 @@
     "theme_color": "#000000",
     "description": "Textio",
     "share_target": {
-        "action": "/",
+        "action": "/textio",
         "params": {
             "title": "title",
             "text": "text",
