@@ -416,8 +416,12 @@
     <nav>        
 	    <button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
       <button onclick="DownloadFile()">Save to file</button>
-      <button onclick="SaveToLC('saved1')">Save to LC</button>
-      <button onclick="OpenFromLC('saved1')">Open from LC</button>
+      <button onclick="SaveToLC('saved1')">Save to LC 1</button>
+      <button onclick="SaveToLC('saved2')">Save to LC 2</button>
+      <button onclick="SaveToLC('saved3')">Save to LC 3</button>
+      <button onclick="OpenFromLC('saved1')">Open from LC 1</button>
+      <button onclick="OpenFromLC('saved2')">Open from LC 2</button>
+      <button onclick="OpenFromLC('saved3')">Open from LC 3</button>
       <button onclick="openFile()">Open local file</button><input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
       <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
       <br>
