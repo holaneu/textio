@@ -98,15 +98,27 @@
     }
     .flashcards-visible {
       display: block;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       padding: 70px 10px 30px 10px;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0);
       box-sizing: border-box;
       text-align: center;
+    }
+    .flashcards-visible nav {
+      position: absolute;
+      width: calc(100% - 20px);
+      text-align: center;
+      bottom: 20px;
+      box-sizing: border-box;
+    }
+    .flashcards-visible nav button {
+      padding: 12px 20px;
+      margin-left: 10px;
+      margin-right: 10px
     }
     #currentStep {
       margin-right: 6px;
@@ -128,6 +140,8 @@
       flashcardsSection = document.querySelector("#flashcards-section"); 
       currentStepText = document.querySelector("#currentStep"); 
       btnGoBack = document.querySelector("#goBack"); 
+      cardFront = document.querySelector(".card-front");
+      cardBack = document.querySelector(".card-back");
     };
      
     historySteps = [];
@@ -293,20 +307,37 @@
       window.cardsAll = textareaMain.value.split("\n").map(function(item){
         return item.split(/\s?\.{3}\s?|\s?=\s?/);
       });
+      window.shuffledCards = [];
       flashcardsSection.className = "flashcards-visible";
-      NextCard();
+      window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
+      RandomCard();
     }
     
-    function RandomCard(range){
+    function RandomIndex(range){
       var random = Math.random();
       return Math.floor(random * range);
     }
     
-    function NextCard() {
-      window.currentCard =  window.cardsAll[RandomCard(window.cardsAll.length)];
-      window.currentCardFront = currentCard[0];
-      document.querySelector(".card-front").innerHTML = window.currentCardFront;
-      document.querySelector(".card-back").innerHTML = "";
+    function NextCard() {       
+      console.log('*** cardIndex', cardIndex); 
+      if(cardIndex >= window.cardsAll.length-1){
+        // jump from last cart to first
+        cardIndex = 0;
+      } else {
+        cardIndex++;
+      }
+      console.log('*** cardIndex', cardIndex);
+      window.currentCard =  window.cardsAll[cardIndex];
+      cardFront.innerHTML = currentCard[0]; //window.currentCardFront;
+      cardBack.innerHTML = "";
+      window.currentCardBackLoop = 1;
+    }
+
+    function RandomCard() {
+      window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
+      //window.currentCardFront = currentCard[0];
+      cardFront.innerHTML = currentCard[0]; //window.currentCardFront;
+      cardBack.innerHTML = "";
       window.currentCardBackLoop = 1;
     }
     
@@ -415,13 +446,13 @@
 <main>
     <nav>        
 	    <button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
-      <button onclick="DownloadFile()">Save to file</button>
+      <button onclick="DownloadFile()">Save to file</button><br>
       <button onclick="SaveToLC('saved1')">Save to LC 1</button>
       <button onclick="SaveToLC('saved2')">Save to LC 2</button>
-      <button onclick="SaveToLC('saved3')">Save to LC 3</button>
-      <button onclick="OpenFromLC('saved1')">Open from LC 1</button>
-      <button onclick="OpenFromLC('saved2')">Open from LC 2</button>
-      <button onclick="OpenFromLC('saved3')">Open from LC 3</button>
+      <button onclick="SaveToLC('saved3')">Save to LC 3</button><br>
+      <button onclick="OpenFromLC('saved1')">Open LC 1</button>
+      <button onclick="OpenFromLC('saved2')">Open LC 2</button>
+      <button onclick="OpenFromLC('saved3')">Open LC 3</button>
       <button onclick="openFile()">Open local file</button><input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
       <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
       <br>
@@ -463,12 +494,17 @@ t.value = r;
       <button onclick="EvalCustomScript();">Execute custom script</button>
     </section>
   
-  <section id="flashcards-section" class="flashcards-hidden">
-    <button onclick="CloseFlashCards()" class="btn-close">X close</button><br><br>
-    <button onclick="NextCard()">Next card</button>
-    <button onclick="TurnCard()">Turn card</button>
+  <section id="flashcards-section" class="flashcards-hidden">    
     <article class="card-front"></article>
     <article class="card-back"></article>
+    <nav>
+      <button onclick="NextCard()">Next</button>
+      <button onclick="RandomCard()">Random</button>
+      <button onclick="TurnCard()">Turn</button>
+      <br><br>
+      <button onclick="CloseFlashCards()" class="btn-close">close</button>
+    </nav>
+    
   </section>
   
 </main>
