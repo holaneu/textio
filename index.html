@@ -32,7 +32,7 @@
 		  font-size: 14px;
 		  color:teal;
 		}
-		button {
+		button, select {
 		  margin-bottom: 7px;
 		  margin-right: 3px;
 		  padding: 7px 10px;
@@ -466,6 +466,26 @@
       <button onclick="OpenFromLC('saved3')">Open LC 3</button>
       <button onclick="openFile()">Open local file</button><input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
       <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
+      
+      <br>
+
+      <select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+        <option value="">Open</option>
+        <option value="OpenFromLC('saved1')" >Open LC 1</option>
+        <option value="OpenFromLC('saved2')" >Open LC 2</option>
+        <option value="OpenFromLC('saved3')" >Open LC 3</option>
+        <option value="openFile()" >Open local file</option>
+        <option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>
+      </select>
+      
+      <select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+        <option value="">Save</option>
+        <option value="DownloadFile()">Save to file</option>
+        <option value="SaveToLC('saved1')">Save to LC 1</option>
+        <option value="SaveToLC('saved2')">Save to LC 2</option>
+        <option value="SaveToLC('saved3')">Save to LC 3</option>
+      </select>
+      
       <br>
       <span>Current step:<em id="currentStep">0</em></span>
     </nav>
@@ -492,8 +512,7 @@
       <button onclick="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</button>
       
       <button onclick="Transform(EncodeUri)">Encode URL</button>
-      <button onclick="Transform(DecodeUri)">Decode URL</button>
-      
+      <button onclick="Transform(DecodeUri)">Decode URL</button>      
       
     </section>
 
