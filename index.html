@@ -89,8 +89,8 @@
 		}
     #flashcards-section article {
       color: white;
-      margin-top: 20px;
-      margin-bottom: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
       font-size: 20px;
     }
     .flashcards-hidden {
@@ -301,42 +301,53 @@
       });
       // textareaMain.value = c.join("\n");
       return c.join("\n");
-    }    
-    
-    function CreateFlashCards() {
-      window.cardsAll = textareaMain.value.split("\n").map(function(item){
-        return item.split(/\s?\.{3}\s?|\s?=\s?/);
-      });
-      window.shuffledCards = [];
-      flashcardsSection.className = "flashcards-visible";
-      window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
-      RandomCard();
     }
     
+    function ShuffleArray(inputArray) {
+      var array = inputArray;
+      for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+      return array;
+    }
+
     function RandomIndex(range){
       var random = Math.random();
       return Math.floor(random * range);
     }
     
+    function CreateFlashCards() {
+      window.cardsAll = textareaMain.value.split("\n").map(function(item){
+        return item.split(/\s?\.{3}\s?|\s?=\s?/);
+      });
+      window.cardsShuffled = ShuffleArray(cardsAll);
+      console.log('*** cardsShuffled', cardsShuffled);
+      flashcardsSection.className = "flashcards-visible";
+      window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
+      RandomCard();
+    }    
+    
     function NextCard() {       
-      console.log('*** cardIndex', cardIndex); 
-      if(cardIndex >= window.cardsAll.length-1){
+      if(cardIndex >= window.cardsShuffled.length-1){
         // jump from last cart to first
         cardIndex = 0;
       } else {
         cardIndex++;
       }
+      window.currentCard = cardsShuffled[cardIndex]; //window.cardsAll[cardIndex];
       console.log('*** cardIndex', cardIndex);
-      window.currentCard =  window.cardsAll[cardIndex];
-      cardFront.innerHTML = currentCard[0]; //window.currentCardFront;
+      console.log('*** currentCard', currentCard);
+      cardFront.innerHTML = currentCard[0]; 
       cardBack.innerHTML = "";
       window.currentCardBackLoop = 1;
     }
 
     function RandomCard() {
       window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
-      //window.currentCardFront = currentCard[0];
-      cardFront.innerHTML = currentCard[0]; //window.currentCardFront;
+      cardFront.innerHTML = currentCard[0]; 
       cardBack.innerHTML = "";
       window.currentCardBackLoop = 1;
     }
