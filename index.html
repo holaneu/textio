@@ -457,17 +457,6 @@
 <main>
     <nav>        
 	    <button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
-      <button onclick="DownloadFile()">Save to file</button><br>
-      <button onclick="SaveToLC('saved1')">Save to LC 1</button>
-      <button onclick="SaveToLC('saved2')">Save to LC 2</button>
-      <button onclick="SaveToLC('saved3')">Save to LC 3</button><br>
-      <button onclick="OpenFromLC('saved1')">Open LC 1</button>
-      <button onclick="OpenFromLC('saved2')">Open LC 2</button>
-      <button onclick="OpenFromLC('saved3')">Open LC 3</button>
-      <button onclick="openFile()">Open local file</button><input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
-      <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
-      
-      <br>
 
       <select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
         <option value="">Open</option>
@@ -477,6 +466,7 @@
         <option value="openFile()" >Open local file</option>
         <option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>
       </select>
+      <input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
       
       <select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
         <option value="">Save</option>
@@ -485,6 +475,18 @@
         <option value="SaveToLC('saved2')">Save to LC 2</option>
         <option value="SaveToLC('saved3')">Save to LC 3</option>
       </select>
+      <!--
+        <br>
+        <button onclick="DownloadFile()">Save to file</button>
+        <button onclick="SaveToLC('saved1')">Save to LC 1</button>
+        <button onclick="SaveToLC('saved2')">Save to LC 2</button>
+        <button onclick="SaveToLC('saved3')">Save to LC 3</button>
+        <button onclick="OpenFromLC('saved1')">Open LC 1</button>
+        <button onclick="OpenFromLC('saved2')">Open LC 2</button>
+        <button onclick="OpenFromLC('saved3')">Open LC 3</button>
+        <button onclick="openFile()">Open local file</button>
+        <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
+      -->  
       
       <br>
       <span>Current step:<em id="currentStep">0</em></span>
@@ -496,24 +498,38 @@
 
     <section id="editor-buttons">
       <button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
+
+      <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+        <option value="">Tools</option>
+        <option value="Transform(LinesToList);">Rows to List</option>
+        <option value="Transform(ListToArray);">List to Array</option>
+        <option value="Transform(ListToLines);">List to Rows</option>
+        <option value="Transform(ListSort);">Sort list</option>        
+        <option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
+        <option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
+        <option value="Transform(RemoveDiacritics);">Remove diacritics</option>
+        <option value="Transform(ConvertToSlug);">Convert to Slug</option>        
+        <option value="Transform(IncreaseLineBreaks);">TTS: increase line breaks</option>
+        <option value="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
+        <option value="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
+        <option value="Transform(EncodeUri)">Encode URL</option>
+        <option value="Transform(DecodeUri)">Decode URL</option>
+      </select>
+      <!--
   		<button onclick="Transform(LinesToList);">Rows to List</button>
   		<button onclick="Transform(ListToArray);">List to Array</button>
   		<button onclick="Transform(ListToLines);">List to Rows</button>
-      <button onclick="Transform(ListSort);">Sort list</button>
-        
+      <button onclick="Transform(ListSort);">Sort list</button>        
       <button onclick="Transform(RemoveEmptyLines);">Remove empty rows</button>  		
-  		<!--<input onclick="Transform(ShowLineBreaks);">Show line breaks</button>-->
   		<button onclick="Transform(RemoveLineBreaks);">Remove line breaks</button>
   		<button onclick="Transform(RemoveDiacritics);">Remove diacritics</button>
-  		<button onclick="Transform(ConvertToSlug);">Convert to Slug</button>
-        
+  		<button onclick="Transform(ConvertToSlug);">Convert to Slug</button>        
       <button onclick="Transform(IncreaseLineBreaks);">TTS: increase line breaks</button>
   		<button onclick="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</button>
-      <button onclick="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</button>
-      
+      <button onclick="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</button>      
       <button onclick="Transform(EncodeUri)">Encode URL</button>
       <button onclick="Transform(DecodeUri)">Decode URL</button>      
-      
+      -->
     </section>
 
     <section id="editor-textarea-custom">
