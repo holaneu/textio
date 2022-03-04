@@ -469,11 +469,11 @@
       <input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
       
       <select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-        <option value="">Save</option>
-        <option value="DownloadFile()">Save to file</option>
+        <option value="">Save</option>        
         <option value="SaveToLC('saved1')">Save to LC 1</option>
         <option value="SaveToLC('saved2')">Save to LC 2</option>
         <option value="SaveToLC('saved3')">Save to LC 3</option>
+        <option value="DownloadFile()">Save to file</option>
       </select>
       <!--
         <br>
