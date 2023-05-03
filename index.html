@@ -166,11 +166,16 @@
     }
 		function ParseMarkdownLinks(input) {
 			rows = input.replace(/\n\n/g,'\n').split('\n');
-			o=[];
-			for (let row of rows){
-			o.push(row.trim().split('](')[1].replace(')',''));
+			links = [];
+			for ( let row of rows ){
+			    var splitRow = row.trim().split('](');
+			    if (splitRow && splitRow[1]) {
+				links.push(splitRow[1].trim().replace(')',''));
+			    }
 			}
-			t.value = o.join('\n');
+			if ( links && links.length > 0 ){
+			    return links.join('\n');
+			}
 		}
     
 		function RemoveLineBreaks(input) {
