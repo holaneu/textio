@@ -164,6 +164,14 @@
         }
       } 
     }
+		function ParseMarkdownLinks(input) {
+			rows = input.replace(/\n\n/g,'\n').split('\n');
+			o=[];
+			for (let row of rows){
+			o.push(row.trim().split('](')[1].replace(')',''));
+			}
+			t.value = o.join('\n');
+		}
     
 		function RemoveLineBreaks(input) {
 			return input.replace(/\n/g,'');
@@ -508,12 +516,13 @@
         <option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
         <option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
         <option value="Transform(RemoveDiacritics);">Remove diacritics</option>
-        <option value="Transform(ConvertToSlug);">Convert to Slug</option>        
+        <option value="Transform(ConvertToSlug);">Convert to Slug</option>
+	<option value="Transform(ParseMarkdownLinks)">Parse markdown links</option>
         <option value="Transform(IncreaseLineBreaks);">TTS: increase line breaks</option>
         <option value="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
         <option value="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
         <option value="Transform(EncodeUri)">Encode URL</option>
-        <option value="Transform(DecodeUri)">Decode URL</option>
+        <option value="Transform(DecodeUri)">Decode URL</option>	      
       </select>
       <!--
   		<button onclick="Transform(LinesToList);">Rows to List</button>
