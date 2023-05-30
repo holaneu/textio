@@ -224,13 +224,13 @@
     
 		function RemoveDiacritics(input) {
 			var text = input;
-      var result = '';
-      for (var i=0;i<text.length;i++) {
-          if (char_map[text[i]])
-              result += char_map[text[i]];
-          else
-              result += text[i];
-      }
+			var result = '';
+			for (var i=0;i<text.length;i++) {
+				if (char_map[text[i]])
+					result += char_map[text[i]];
+				else
+					result += text[i];
+			}
 			return result;
 		}
     
@@ -246,38 +246,46 @@
 			return result.toLowerCase().replace(/[^\w |\n]+/g,'').replace(/ +|\n+/g,'-');
 		}
     
-		function ExcelColumnsToJSONMap(input) {
-			var rows = input.split("\n");
-			if(rows[rows.length-1] == "") {
-				rows.pop();
-			}
-			var result = "{\n";
-			if(rows.length > 0) {
-				for(var i=0,len=rows.length; i<len; i++) {
-					var row = rows[i].split("\t");
-					if(row.length == 2) {
-							result += "\""+ row[0] +"\":\""+ row[1] +"\"";
-							if(i != rows.length-1) {
-								result += ",\n";
-							}
-					}
+	function ExcelColumnsToJSONMap(input) {
+		var rows = input.split("\n");
+		if(rows[rows.length-1] == "") {
+			rows.pop();
+		}
+		var result = "{\n";
+		if(rows.length > 0) {
+			for(var i=0,len=rows.length; i<len; i++) {
+				var row = rows[i].split("\t");
+				if(row.length == 2) {
+						result += "\""+ row[0] +"\":\""+ row[1] +"\"";
+						if(i != rows.length-1) {
+							result += ",\n";
+						}
 				}
-				result += "\n}";
 			}
-			return result;
+			result += "\n}";
 		}
+		return result;
+	}
         
-    function ListSort(input) {
-      return input.split(",").sort();
-    }
+	function ListSort(input) {
+		return input.split(/[,\|]/).sort();
+	}
+		
+	function RemoveSpaces(input) {
+    return input.trim().replace(/ /g, '');
+	}
+		
+	function RemoveSpaces(input) {
+		return input.trim().replace(/ /g, '');
+	}
     
-		function EvalCustomScript() {
-            HistoryAdd();
-			var customScript = document.querySelector("#textareaEval").value;
-			eval(customScript);
-		}
+	function EvalCustomScript() {
+		HistoryAdd();
+		var customScript = document.querySelector("#textareaEval").value;
+		eval(customScript);
+	}
         
-    function yyyymmdd(dateIn) {
+  function yyyymmdd(dateIn) {
       var yyyy = dateIn.getFullYear();
       var mm = dateIn.getMonth() + 1; // getMonth() is zero-based
       var dd = dateIn.getDate();
@@ -517,7 +525,8 @@
         <option value="Transform(LinesToList);">Rows to List</option>
         <option value="Transform(ListToArray);">List to Array</option>
         <option value="Transform(ListToLines);">List to Rows</option>
-        <option value="Transform(ListSort);">Sort list</option>        
+        <option value="Transform(ListSort);">Sort list</option>
+				<option value="Transform(RemoveSpaces);">Remove spaces</option>
         <option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
         <option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
         <option value="Transform(RemoveDiacritics);">Remove diacritics</option>
