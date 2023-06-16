@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Text Synthesis Example</title>
+	<style>
+		body {background-color: black; color: gray;}
+		#spoken-words {font-size: 80px; color: gray;}
+		#wrapper {margin-left: auto; margin-right: auto;}
+	</style>
+</head>
+<body>
+	<div id ="wrapper">
+		<label for="voice-select">voice: </label>
+		<select id="voice-select"></select></br>
+		<label for="rate-select">rate: </label>
+		<select id="rate-select">
+			<option value="0.3">very slow</option>
+			<option value="0.6">slow</option>
+			<option value="1" selected>normal</option>
+			<option value="1.5">fast</option>
+			<option value="1.8">very fast</option>
+		</select></br>
+		<label for="pitch-select">pitch: </label>
+		<select id="pitch-select">
+			<option value="0">low</option>
+			<option value="1" selected>normal</option>
+			<option value="2">high</option>
+		</select></br>
+		<div id="status-msg-1"></div>
+		<div id="status-msg-2"></div>
+		<textarea id="text-input" rows="8" cols="70"></textarea></br>
+		<button id="play-btn">Play</button>
+		<button id="reset-btn">Stop</button></br>
+		<div id="spoken-words"></div>
+	</div>
+  
+  <script>
+		// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
+    // Global variables
+		const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
+    let tts_msg;
+    let voices_all; 
+		let voices_supported;
+		let voice_selected;
+		let rate_selected;
+		let pitch_selected;
+		let tts_msg_speaking_position;
+		let testText = "I love my family so much! <mark name='hello'/> My son Max is a smart and kind boy who always makes me proud. My daughter Sofie is a beautiful and creative girl who always makes me smile. My wife Vercha is a wonderful and supportive partner who always makes me happy. We live a happy life together in harmony and peace. We are very lucky and grateful!";
+		const domTextArea = document.getElementById("text-input");
+		domTextArea.value = testText;
+		let unspoken_text = domTextArea.value;
+		const nav_texts = {
+			'play': 'Play',
+			'pause': 'Pause'
+		};
+		
+		const domVoiceSelect = document.getElementById("voice-select");
+		const domRateSelect = document.getElementById("rate-select");
+		const domPitchSelect = document.getElementById("pitch-select");
+		const domStatusMsg1 = document.getElementById("status-msg-1");
+		const domStatusMsg2 = document.getElementById("status-msg-2");		
+		const domPlayPauseBtn = document.getElementById("play-btn");
+		const domResetBtn = document.getElementById("reset-btn");
+		const domSpokenWords = document.getElementById("spoken-words");
+  
+    // Fetch available voices and populate the select element
+    function generateVoiceOptions()  {
+			voices_all = speechSynthesis.getVoices();
+			voices_supported = voices_all.filter(item => supportedLanguages.includes(item.lang))
+      voices_supported.forEach((voice, index) => {
+				const option = document.createElement("option");
+				option.value = voice.voiceURI; //index
+				option.text = voice.lang +'; '+ voice.name;
+				domVoiceSelect.appendChild(option);    
+      });  
+      // Set the first voice as selected by default
+      domVoiceSelect.selectedIndex = 0;
+			applySelectedVoice();
+    } 
+		
+		function pauseSynth() {
+			if (speechSynthesis.speaking && !speechSynthesis.paused) {
+        speechSynthesis.pause();
+				domPlayPauseBtn.innerText = nav_texts.play;
+				domStatusMsg1.innerText = "Paused";
+      }
+			return;
+		}
+
+		function resumeSynth() {
+			if (speechSynthesis.speaking && speechSynthesis.paused) {
+        speechSynthesis.resume();
+				domPlayPauseBtn.innerText = nav_texts.pause;
+				domStatusMsg1.innerText = "Resumed";
+      }
+			return;
+		}
+  
+    // Select voice when an option is clicked or select options are initialized
+    function applySelectedVoice() {
+			voice_selected = voices_supported.filter(item => item.voiceURI === domVoiceSelect.value)[0];
+			console.log('voice selected:', voice_selected.name);
+    }
+
+		function applySelectedRate() {
+			rate_selected = domRateSelect.value;
+			console.log('rate selected:', rate_selected);
+    }
+		
+		function applySelectedPitch() {
+			pitch_selected = domPitchSelect.value;
+			console.log('pitch selected:', pitch_selected);
+    }		
+
+		function handleVoiceSelection() {
+			applySelectedVoice();
+			applySelectedRate();
+			applySelectedPitch();
+			unspoken_text = String(unspoken_text).slice(tts_msg_speaking_position);
+			if (speechSynthesis.speaking) {
+				if (!speechSynthesis.paused) {
+					speechSynthesis.cancel();
+					speechSynthesis.speak(createNewTtsMsgInstance(unspoken_text));
+					domPlayPauseBtn.innerText = nav_texts.pause;
+				}
+				else if (speechSynthesis.paused){
+					speechSynthesis.cancel();
+					speechSynthesis.speak(createNewTtsMsgInstance(unspoken_text));
+					speechSynthesis.pause();
+				}				
+			}			
+		}
+
+		function resetSynth() {
+			speechSynthesis.cancel();
+			domStatusMsg1.innerText = "reseted";
+			domPlayPauseBtn.innerText = nav_texts.play;
+			return;
+		}
+
+		function createNewTtsMsgInstance(textToRead) {
+			tts_msg = new SpeechSynthesisUtterance(textToRead);
+			tts_msg.voice = voice_selected;
+			tts_msg.rate = rate_selected;
+			tts_msg.pitch = pitch_selected;
+			//tts_msg.volume
+			//tts_msg.lang
+			tts_msg.addEventListener('boundary', (event) => {
+				domStatusMsg2.innerText = `boundary - name: ${event.name}, charIndex: ${event.charIndex}, charLength: ${event.charLength}`;
+				tts_msg_speaking_position = event.charIndex;
+				domSpokenWords.innerText = textToRead.substr(event.charIndex, event.charLength);
+			});
+			tts_msg.addEventListener('end', function(event) {
+				console.log(`ended - charIndex: ${event.charIndex}`);
+				unspoken_text = domTextArea.value;
+				domStatusMsg1.innerText = "finished";
+				domPlayPauseBtn.innerText = nav_texts.play;
+				domSpokenWords.innerText = '';
+			});
+			tts_msg.addEventListener('start', function(event) {
+				console.log(`started - charIndex: ${event.charIndex}`);
+				//domStatusMsg1.innerText = "started";
+			});
+			tts_msg.addEventListener('pause', (event) => {
+				domStatusMsg2.innerText = `paused - charIndex: ${event.charIndex}, charLength: ${event.charLength}`;
+				console.log(`test second event listener`);
+				//domStatusMsg1.innerText = "paused";
+			});
+			tts_msg.addEventListener('resume', function(event) {
+				console.log(`resumed - charIndex: ${event.charIndex}`);
+				//domStatusMsg1.innerText = "resumed";
+			});
+			tts_msg.onmark = function(event) {
+				console.log(`mark - name: ${event.name}`);
+			};
+			tts_msg.onerror = function(event) {
+				console.log(`error - error: ${event.error}`);
+			};
+
+			return tts_msg;
+		}
+  
+    // Start or pause/resume reading aloud
+    function togglePlay() {
+			if (!domTextArea.value) {
+				resetSynth();
+				return;
+			}
+
+      if (tts_msg && speechSynthesis.speaking && !speechSynthesis.paused) {
+        pauseSynth();
+        return;
+      }
+			
+			if (tts_msg && speechSynthesis.speaking && speechSynthesis.paused) {
+        resumeSynth();
+        return;
+      }
+
+			if (!speechSynthesis.speaking) {
+				speechSynthesis.cancel();
+				speechSynthesis.speak(createNewTtsMsgInstance(domTextArea.value));
+				domPlayPauseBtn.innerText = nav_texts.pause;
+        return;
+      }      
+      
+    }
+  
+    // Initial setup
+		window.speechSynthesis.cancel();
+    window.speechSynthesis.onvoiceschanged = generateVoiceOptions;
+		window.addEventListener('load', function(){
+			applySelectedRate();
+			applySelectedPitch();
+		});
+
+		// Event listeners
+    domVoiceSelect.addEventListener("change", handleVoiceSelection);
+		domRateSelect.addEventListener("change", handleVoiceSelection);
+		domPitchSelect.addEventListener("change", handleVoiceSelection);
+    domPlayPauseBtn.addEventListener("click", togglePlay);
+		domResetBtn.addEventListener('click', resetSynth);
+		domTextArea.onchange = function(){console.log('textarea updated');};
+  </script>
+</body>
+</html>
