@@ -5,578 +5,784 @@
     <meta name="version" content="1.25">
     <base href="/textio/">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="manifest" href="manifest.json">	  
+    <link rel="manifest" href="manifest.json">
   	<meta name="viewport" content="width=device-width, initial-scale=1">
   	<meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
-    <link rel="icon" type="image/png" href="textio.png">
-    
+    <link rel="icon" type="image/png" href="textio.png"> 
 
-	<style>
-		@-ms-viewport {
-		  width: device-width;
-		}
-		body {
-		  text-align: left;
-		  font-family: "OpenSans", Verdana, sans-serif;
-		  margin:0;
-		  padding:0;
-          box-sizing: border-box;
-          background: black;
-          color: gray;
-		}
-		h2 {
-		  margin-bottom: 5px;
-		  margin-top: 10px;
-		  padding: 0;
-		  font-size: 14px;
-		  color:teal;
-		}
-		button, select {
-		  margin-bottom: 7px;
-		  margin-right: 3px;
-		  padding: 7px 10px;
-		  background: #292929;
-      border: 1px solid transparent;
-		  border-radius: 5px;
-		  color: #45edf5;
-		  cursor: pointer;
-		}
-    button.orange {
-      color: rgb(255 209 41 / 1)
-    }
-    button:disabled {
-      color: silver;
-    }
-		#textareaMain {
-		  width: calc(100% - 10px);
-		  min-height: 250px;
-		  margin-bottom: 10px;
-		  border: 1px dotted gray;
-          background: black;
-          color: silver;
-		}
-		#textareaEval {
-		  width: calc(100% - 10px);
-		  min-height: 80px;
-		  margin-bottom: 5px;
-		  border: 1px dotted gray;
-		  margin-top: 10px;
-          background: black;
-          color: silver;
-		}
-		header {
-		  background:black;
-		  padding: 5px 10px;
-		  color:white;
-		  text-align:center;
-		  margin-bottom: 5px;
-		}
-		header a {
-		  text-decoration: none;
-		  color: #00BCD4;
-		}
-		main {
-		  padding: 5px;
-		}
-    nav {
-      padding: 5px;
-      font-size: 12px;
-    }
-		header em {
-		  font-style: italic;
-		  font-size: 14px;
-		}
-    #flashcards-section article {
-      color: white;
-      padding-top: 20px;
-      padding-bottom: 20px;
-      font-size: 20px;
-    }
-    .flashcards-hidden {
-      display: none;
-    }
-    .flashcards-visible {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      padding: 70px 10px 30px 10px;
-      background: rgba(0,0,0);
-      box-sizing: border-box;
-      text-align: center;
-    }
-    .flashcards-visible nav {
-      position: absolute;
-      width: calc(100% - 20px);
-      text-align: center;
-      bottom: 20px;
-      box-sizing: border-box;
-    }
-    .flashcards-visible nav button {
-      padding: 12px 20px;
-      margin-left: 10px;
-      margin-right: 10px
-    }
-    #currentStep {
-      margin-right: 6px;
-    }
-    .btn-close {
-      color: gray;
-    }
-	</style>
+		<script>
+			if('serviceWorker' in navigator) {
+				navigator.serviceWorker
+				.register('service–worker.js')
+				.then(function() { console.log("Service Worker Registered"); });
+			}
 
-	<script>
-    if('serviceWorker' in navigator) {
-      navigator.serviceWorker
-      .register('service–worker.js')
-      .then(function() { console.log("Service Worker Registered"); });
-    }
+			window.addEventListener('DOMContentLoaded', () => {
+				const parsedUrl = new URL(window.location);
+				// searchParams.get() will properly handle decoding the values.
+				var sharedTitle = parsedUrl.searchParams.get('title');
+				var sharedText = parsedUrl.searchParams.get('text');
+				var sharedUrl = parsedUrl.searchParams.get('url');
+				console.log('Title shared: ', sharedTitle);
+				console.log('Text shared: ', sharedText);
+				console.log('URL shared: ', sharedUrl);
+				if(sharedText){
+					textareaMain.value = sharedText;
+				}
+			});
+		</script>
 
-    window.onload = function() {
-      textareaMain = document.querySelector("#textareaMain"); 
-      flashcardsSection = document.querySelector("#flashcards-section"); 
-      currentStepText = document.querySelector("#currentStep"); 
-      btnGoBack = document.querySelector("#goBack"); 
-      cardFront = document.querySelector(".card-front");
-      cardBack = document.querySelector(".card-back");
-    };
-     
-    historySteps = [];
-    
-    function HistoryAdd() {
-      historySteps.push(textareaMain.value);
-      currentStepText.innerHTML = historySteps.length;
-      //btnGoBack.style.display = "inline-block";
-      btnGoBack.disabled = false;
-    }
-    
-    function HistoryBack() {
-      if(historySteps.length > 0){
-        textareaMain.value = historySteps[historySteps.length-1];
-        historySteps.pop();
-        currentStep.innerHTML = historySteps.length;
-        if(historySteps.length == 0) {
-          //btnGoBack.style.display = "none";
-          btnGoBack.disabled = true;
-        }
-      } 
-    }
-		function ParseMarkdownLinks(input) {
-			rows = input.replace(/\n\n/g,'\n').split('\n');
-			links = [];
-			for ( let row of rows ){
-			    var splitRow = row.trim().split('](');
-			    if (splitRow && splitRow[1]) {
-				links.push(splitRow[1].trim().replace(')',''));
-			    }
+		<style>
+			@-ms-viewport {
+				width: device-width;
 			}
-			if ( links && links.length > 0 ){
-			    return links.join('\n');
+			body {
+				text-align: left;
+				font-family: "OpenSans", Verdana, sans-serif;
+				margin:0;
+				padding:0;
+						box-sizing: border-box;
+						background: black;
+						color: gray;
 			}
-		}
-    
-		function RemoveLineBreaks(input) {
-			return input.replace(/\n/g,'');
-		}
-    
-		function LinesToList(input) {
-			return input.replace(/\n$/g,'').replace(/\n/g,',');
-		}
-    
-		function ListToLines(input) {
-            return input.replace(/,/g,'\n');
-		}
-    
-		function RemoveEmptyLines(input) {
-			return input.replace(/\n\s*\n/g,'\n').replace(/^\s*\n/,'');
-		}
-    
-		function IncreaseLineBreaks(input) {
-			return input.replace(/\n$/,'').replace(/\n{2,}/g,'\n\n').replace(/\n/g,'\n\n').replace(/\n{4,}/g,'\n\n\n\n');
-		}
-    
-		function ShowLineBreaks(input) {
-			return input.replace(/\n/g,'~\n');
-		}
-    
-		function ListToArray(input) {
-			return '["'+ input.replace(/,/g,'","') +'"]';
-		}
-    
-		var char_map = {
-	    /* ** Latin ** */
-	    'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE', 'Ç': 'C',
-	    'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E', 'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
-	    'Ð': 'D', 'Ñ': 'N', 'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O', 'Ő': 'O',
-	    'Ø': 'O', 'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U', 'Ű': 'U', 'Ý': 'Y', 'Þ': 'TH',
-	    'ß': 'ss',
-	    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c',
-	    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
-	    'ð': 'd', 'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ő': 'o',
-	    'ø': 'o', 'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ű': 'u', 'ý': 'y', 'þ': 'th', 'ÿ': 'y',
-	    /* ** Czech ** */
-	    'Č': 'C', 'Ď': 'D', 'Ě': 'E', 'Ň': 'N', 'Ř': 'R', 'Š': 'S', 'Ť': 'T', 'Ů': 'U', 'Ž': 'Z',
-	    'č': 'c', 'ď': 'd', 'ě': 'e', 'ň': 'n', 'ř': 'r', 'š': 's', 'ť': 't', 'ů': 'u', 'ž': 'z'
-		};    
-    
-		function RemoveDiacritics(input) {
-			var text = input;
-			var result = '';
-			for (var i=0;i<text.length;i++) {
-				if (char_map[text[i]])
-					result += char_map[text[i]];
-				else
-					result += text[i];
+			h2 {
+				margin-bottom: 5px;
+				margin-top: 10px;
+				padding: 0;
+				font-size: 14px;
+				color:teal;
 			}
-			return result;
-		}
-    
-		function ConvertToSlug(input) {
-			var text = input;
-      var result = '';
-      for (var i=0;i<text.length;i++) {
-          if (char_map[text[i]])
-              result += char_map[text[i]];
-          else
-              result += text[i];
-      }
-			return result.toLowerCase().replace(/[^\w |\n]+/g,'').replace(/ +|\n+/g,'-');
-		}
-    
-	function ExcelColumnsToJSONMap(input) {
-		var rows = input.split("\n");
-		if(rows[rows.length-1] == "") {
-			rows.pop();
-		}
-		var result = "{\n";
-		if(rows.length > 0) {
-			for(var i=0,len=rows.length; i<len; i++) {
-				var row = rows[i].split("\t");
-				if(row.length == 2) {
-						result += "\""+ row[0] +"\":\""+ row[1] +"\"";
-						if(i != rows.length-1) {
-							result += ",\n";
-						}
+			button, select {
+				margin-bottom: 7px;
+				margin-right: 3px;
+				padding: 7px 10px;
+				background: #292929;
+				border: 1px solid transparent;
+				border-radius: 5px;
+				color: #45edf5;
+				cursor: pointer;
+			}
+			button.orange {
+				color: rgb(255 209 41 / 1)
+			}
+			button:disabled {
+				color: silver;
+			}
+			#textareaMain {
+				width: calc(100% - 10px);
+				min-height: 250px;
+				margin-bottom: 10px;
+				border: 1px dotted gray;
+						background: black;
+						color: silver;
+			}
+			#textareaEval {
+				width: calc(100% - 10px);
+				min-height: 80px;
+				margin-bottom: 5px;
+				border: 1px dotted gray;
+				margin-top: 10px;
+						background: black;
+						color: silver;
+			}
+			header {
+				background:black;
+				padding: 5px 10px;
+				color:white;
+				text-align:center;
+				margin-bottom: 5px;
+			}
+			header a {
+				text-decoration: none;
+				color: #00BCD4;
+			}
+			main {
+				padding: 5px;
+			}
+			nav {
+				padding: 5px;
+				font-size: 12px;
+			}
+			header em {
+				font-style: italic;
+				font-size: 14px;
+			}
+			#flashcards-section article {
+				color: white;
+				padding-top: 20px;
+				padding-bottom: 20px;
+				font-size: 20px;
+			}
+			.flashcards-hidden {
+				display: none;
+			}
+			.flashcards-visible {
+				display: block;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				padding: 70px 10px 30px 10px;
+				background: rgba(0,0,0);
+				box-sizing: border-box;
+				text-align: center;
+			}
+			.flashcards-visible nav {
+				position: absolute;
+				width: calc(100% - 20px);
+				text-align: center;
+				bottom: 20px;
+				box-sizing: border-box;
+			}
+			.flashcards-visible nav button {
+				padding: 12px 20px;
+				margin-left: 10px;
+				margin-right: 10px
+			}
+			#currentStep {
+				margin-right: 6px;
+			}
+			.btn-close {
+				color: gray;
+			}
+			#spoken-words {font-size: 80px; color: gray;}
+		</style>
+	</head>
+
+	<body>
+
+		<header>
+			<a href="/"><strong>Textio</strong> <em>= text modifier by Holan.eu</em></a>
+		</header>
+
+		<main>
+			<section>
+				<nav>        
+					<button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
+	
+					<select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+						<option value="">Open</option>
+						<option value="OpenFromLC('saved1')" >Open LC 1</option>
+						<option value="OpenFromLC('saved2')" >Open LC 2</option>
+						<option value="OpenFromLC('saved3')" >Open LC 3</option>
+						<option value="openFile()" >Open local file</option>
+						<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>
+					</select>
+					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
+					
+					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+						<option value="">Save</option>        
+						<option value="SaveToLC('saved1')">Save to LC 1</option>
+						<option value="SaveToLC('saved2')">Save to LC 2</option>
+						<option value="SaveToLC('saved3')">Save to LC 3</option>
+						<option value="DownloadFile()">Save to file</option>
+					</select>				
+					
+					<br>
+					<span>Current step:<em id="currentStep">0</em></span>
+				</nav>
+			</section>			
+			
+			<section id="editor-textarea-main">
+				<textarea id="textareaMain"></textarea>
+			</section>
+
+			<section id="editor-buttons">
+				<select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+					<option value="">Tools</option>
+					<option value="Transform(LinesToList);">Rows to List</option>
+					<option value="Transform(ListToArray);">List to Array</option>
+					<option value="Transform(ListToLines);">List to Rows</option>
+					<option value="Transform(ListSort);">Sort list</option>
+					<option value="Transform(RemoveSpaces);">Remove spaces</option>
+					<option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
+					<option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
+					<option value="Transform(RemoveDiacritics);">Remove diacritics</option>
+					<option value="Transform(ConvertToSlug);">Convert to Slug</option>
+		<option value="Transform(ParseMarkdownLinks)">Parse markdown links</option>
+					<option value="Transform(IncreaseLineBreaks);">TTS: increase line breaks</option>
+					<option value="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
+					<option value="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
+					<option value="Transform(EncodeUri)">Encode URL</option>
+					<option value="Transform(DecodeUri)">Decode URL</option>	      
+				</select>
+				
+				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
+
+			</section>
+
+			<section id="editor-textarea-custom">
+				<textarea id="textareaEval">t = textareaMain; tv = t.value;
+	r = tv.replace(/,/g,'|');
+	t.value = r;
+				</textarea>    
+				<button onclick="EvalCustomScript();">Execute custom script</button>
+			</section>
+
+			<section id ="tts-controls">
+				<nav>
+					<label for="voice-select">voice: </label>
+					<select id="voice-select"></select></br>
+					<label for="rate-select">rate: </label>
+					<select id="rate-select">
+						<option value="0.3">very slow</option>
+						<option value="0.6">slow</option>
+						<option value="1" selected>normal</option>
+						<option value="1.5">fast</option>
+						<option value="1.8">very fast</option>
+					</select>
+					<label for="pitch-select">pitch: </label>
+					<select id="pitch-select">
+						<option value="0">low</option>
+						<option value="1" selected>normal</option>
+						<option value="2">high</option>
+					</select></br>					
+					<button id="play-btn">Play</button>
+					<button id="reset-btn">Stop</button></br>
+					<div id="status-msg-1"></div>
+					<div id="status-msg-2"></div>
+					<div id="spoken-words"></div>
+				</naV>
+			</section>
+			
+			<section id="flashcards-section" class="flashcards-hidden">    
+				<article class="card-front"></article>
+				<article class="card-back"></article>
+				<nav>
+					<button onclick="NextCard()">Next</button>
+					<button onclick="RandomCard()">Random</button>
+					<button onclick="TurnCard()">Turn</button>
+					<br><br>
+					<button onclick="CloseFlashCards()" class="btn-close">close</button>
+				</nav>    
+			</section>
+			
+		</main>
+		<script>			
+			const	textareaMain = document.querySelector("#textareaMain"); 
+			const	flashcardsSection = document.querySelector("#flashcards-section"); 
+			const	currentStepText = document.querySelector("#currentStep"); 
+			const	btnGoBack = document.querySelector("#goBack"); 
+			const	cardFront = document.querySelector(".card-front");
+			const	cardBack = document.querySelector(".card-back");
+			
+			// TTS
+			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
+			// Global variables
+			const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
+			let tts_msg;
+			let voices_all; 
+			let voices_supported;
+			let voice_selected;
+			let rate_selected;
+			let pitch_selected;
+			let tts_msg_speaking_position;
+			let unspoken_text = textareaMain.value;
+			//const domTextArea = document.getElementById("text-input");
+			const domVoiceSelect = document.getElementById("voice-select");
+			const domRateSelect = document.getElementById("rate-select");
+			const domPitchSelect = document.getElementById("pitch-select");
+			const domStatusMsg1 = document.getElementById("status-msg-1");
+			const domStatusMsg2 = document.getElementById("status-msg-2");		
+			const domPlayPauseBtn = document.getElementById("play-btn");
+			const domResetBtn = document.getElementById("reset-btn");
+			const domSpokenWords = document.getElementById("spoken-words");
+			
+			const nav_texts = {
+				'play': 'Play',
+				'pause': 'Pause'
+			};
+			
+			historySteps = [];
+
+			function GetTextareaMainValue() {
+				var el = document.querySelector("#textareaMain");
+				return el ? el.value : null;
+			}
+
+			function UpdateTextareaMainValue(newText) {
+				var el = document.querySelector("#textareaMain");
+				if (el) {
+					el.value = newText;
 				}
 			}
-			result += "\n}";
-		}
-		return result;
-	}
-        
-	function ListSort(input) {
-		return input.split(/[,\|]/).sort();
-	}
+			
+			function HistoryAdd() {
+				historySteps.push(textareaMain.value);
+				currentStepText.innerHTML = historySteps.length;
+				//btnGoBack.style.display = "inline-block";
+				btnGoBack.disabled = false;
+			}
+			
+			function HistoryBack() {
+				if(historySteps.length > 0){
+					//textareaMain.value = historySteps[historySteps.length-1];
+					UpdateTextareaMainValue(historySteps[historySteps.length-1]);
+					historySteps.pop();
+					currentStep.innerHTML = historySteps.length;
+					if(historySteps.length == 0) {
+						//btnGoBack.style.display = "none";
+						btnGoBack.disabled = true;
+					}
+				} 
+			}
+
+			function ParseMarkdownLinks(input) {
+				rows = input.replace(/\n\n/g,'\n').split('\n');
+				links = [];
+				for ( let row of rows ){
+						var splitRow = row.trim().split('](');
+						if (splitRow && splitRow[1]) {
+					links.push(splitRow[1].trim().replace(')',''));
+						}
+				}
+				if ( links && links.length > 0 ){
+						return links.join('\n');
+				}
+			}
+			
+			function RemoveLineBreaks(input) {
+				return input.replace(/\n/g,'');
+			}
+			
+			function LinesToList(input) {
+				return input.replace(/\n$/g,'').replace(/\n/g,',');
+			}
+			
+			function ListToLines(input) {
+				return input.replace(/,/g,'\n');
+			}
+			
+			function RemoveEmptyLines(input) {
+				return input.replace(/\n\s*\n/g,'\n').replace(/^\s*\n/,'');
+			}
+			
+			function IncreaseLineBreaks(input) {
+				return input.replace(/\n$/,'').replace(/\n{2,}/g,'\n\n').replace(/\n/g,'\n\n').replace(/\n{4,}/g,'\n\n\n\n');
+			}
+			
+			function ShowLineBreaks(input) {
+				return input.replace(/\n/g,'~\n');
+			}
+			
+			function ListToArray(input) {
+				return '["'+ input.replace(/,/g,'","') +'"]';
+			}
+			
+			var char_map = {
+				/* ** Latin ** */
+				'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE', 'Ç': 'C',
+				'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E', 'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
+				'Ð': 'D', 'Ñ': 'N', 'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O', 'Ő': 'O',
+				'Ø': 'O', 'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U', 'Ű': 'U', 'Ý': 'Y', 'Þ': 'TH',
+				'ß': 'ss',
+				'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c',
+				'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+				'ð': 'd', 'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ő': 'o',
+				'ø': 'o', 'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ű': 'u', 'ý': 'y', 'þ': 'th', 'ÿ': 'y',
+				/* ** Czech ** */
+				'Č': 'C', 'Ď': 'D', 'Ě': 'E', 'Ň': 'N', 'Ř': 'R', 'Š': 'S', 'Ť': 'T', 'Ů': 'U', 'Ž': 'Z',
+				'č': 'c', 'ď': 'd', 'ě': 'e', 'ň': 'n', 'ř': 'r', 'š': 's', 'ť': 't', 'ů': 'u', 'ž': 'z'
+			};    
+			
+			function RemoveDiacritics(input) {
+				var text = input;
+				var result = '';
+				for (var i=0;i<text.length;i++) {
+					if (char_map[text[i]])
+						result += char_map[text[i]];
+					else
+						result += text[i];
+				}
+				return result;
+			}
+			
+			function ConvertToSlug(input) {
+				var text = input;
+				var result = '';
+				for (var i=0;i<text.length;i++) {
+						if (char_map[text[i]])
+								result += char_map[text[i]];
+						else
+								result += text[i];
+				}
+				return result.toLowerCase().replace(/[^\w |\n]+/g,'').replace(/ +|\n+/g,'-');
+			}
+			
+			function ExcelColumnsToJSONMap(input) {
+				var rows = input.split("\n");
+				if(rows[rows.length-1] == "") {
+					rows.pop();
+				}
+				var result = "{\n";
+				if(rows.length > 0) {
+					for(var i=0,len=rows.length; i<len; i++) {
+						var row = rows[i].split("\t");
+						if(row.length == 2) {
+								result += "\""+ row[0] +"\":\""+ row[1] +"\"";
+								if(i != rows.length-1) {
+									result += ",\n";
+								}
+						}
+					}
+					result += "\n}";
+				}
+				return result;
+			}
+					
+			function ListSort(input) {
+				return input.split(/[,\|]/).sort();
+			}
+				
+			function RemoveSpaces(input) {
+				return input.trim().replace(/ /g, '');
+			}
+				
+			function RemoveSpaces(input) {
+				return input.trim().replace(/ /g, '');
+			}
+				
+			function EvalCustomScript() {
+				HistoryAdd();
+				var customScript = document.querySelector("#textareaEval").value;
+				eval(customScript);
+			}
+
+			function GetDateTime(){
+				const date = new Date();
+				const year = date.getFullYear();
+				const month = String(date.getMonth() + 1).padStart(2, '0');
+				const day = String(date.getDate()).padStart(2, '0');
+				const hour = String(date.getHours()).padStart(2, '0');
+				const minute = String(date.getMinutes()).padStart(2, '0');
+				const second = String(date.getSeconds()).padStart(2, '0');
+				const formattedDate = `${year}${month}${day}_${hour}${minute}${second}`;
+				return formattedDate;
+			}
+			
+			function DownloadFile() {       
+				var hiddenElement = document.createElement('a');
+				hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
+				hiddenElement.target = '_blank';
+				hiddenElement.download = "textio_"+GetDateTime()+".txt";
+				hiddenElement.click();
+			}
+			
+			function TTSedit(input) {
+				// historyAdd();
+				// var b = textareaMain.value.toLowerCase().split("\n");
+				var b = input.toLowerCase().split("\n");
+				var c = [];
+				b.forEach(function(item){
+					var line = item;
+					var firstChar = line.charAt(0);
+					var lastChar = line.charAt(line.length-1);
+					if(line) {
+						if( !/\.|,|:/.test(lastChar) ){
+							line += "."
+						}
+						line = firstChar.toUpperCase() +""+ line.slice(1);
+					}
+					c.push(line);
+				});
+				// textareaMain.value = c.join("\n");
+				return c.join("\n");
+			}
+			
+			function ShuffleArray(inputArray) {
+				var array = inputArray;
+				for (var i = array.length - 1; i > 0; i--) {
+					var j = Math.floor(Math.random() * (i + 1));
+					var temp = array[i];
+					array[i] = array[j];
+					array[j] = temp;
+				}
+				return array;
+			}
+
+			function RandomIndex(range){
+				var random = Math.random();
+				return Math.floor(random * range);
+			}
+			
+			function CreateFlashCards() {
+				window.cardsAll = textareaMain.value.split("\n").map(function(item){
+					return item.split(/\s?\.{3}\s?|\s?=\s?/);
+				});
+				window.cardsShuffled = ShuffleArray(cardsAll);
+				console.log('*** cardsShuffled', cardsShuffled);
+				flashcardsSection.className = "flashcards-visible";
+				window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
+				RandomCard();
+			}    
+			
+			function NextCard() {       
+				if(cardIndex >= window.cardsShuffled.length-1){
+					// jump from last cart to first
+					cardIndex = 0;
+				} else {
+					cardIndex++;
+				}
+				window.currentCard = cardsShuffled[cardIndex]; //window.cardsAll[cardIndex];
+				console.log('*** cardIndex', cardIndex);
+				console.log('*** currentCard', currentCard);
+				cardFront.innerHTML = currentCard[0]; 
+				cardBack.innerHTML = "";
+				window.currentCardBackLoop = 1;
+			}
+
+			function RandomCard() {
+				window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
+				cardFront.innerHTML = currentCard[0]; 
+				cardBack.innerHTML = "";
+				window.currentCardBackLoop = 1;
+			}
+			
+			function TurnCard() {
+				if(currentCard.length >= 2) {
+					window.currentCardBack = currentCard[window.currentCardBackLoop];
+					document.querySelector(".card-back").innerHTML = window.currentCardBack;
+					if(window.currentCardBackLoop < currentCard.length - 1)
+					{
+						window.currentCardBackLoop ++;
+					}
+					else 
+					{
+						window.currentCardBackLoop = 1;
+					}
+				} else {
+					document.querySelector(".card-back").innerHTML = "no back side";
+				}
+			}
+			
+			function CloseFlashCards() {
+				flashcardsSection.className = "flashcards-hidden";
+			}
+			
+			function EncodeUri(input) {
+				return encodeURI(input);           
+			}
+			
+			//Encoding reference incl. list of characters: https://www.w3schools.com/tags/ref_urlencode.ASP
+			var url_encode_map = {
+				'%20': ' ', '%3A': ':', '%2F': '/', '%2B': '+', '%2C': ',', '%2D': '-'
+			};
+
+			function DecodeUri(input) {
+				var result = decodeURI(input);
+				for(const phrase in url_encode_map) {
+					result = result.replace(new RegExp(phrase,'g'), url_encode_map[phrase]);
+				}
+				return result;
+				//return decodeURI(input);   
+			}
+			
+			function Transform(callback) {
+				if(callback) {
+					HistoryAdd();
+					var result = callback(textareaMain.value);
+					textareaMain.value = result;
+				}      
+			}
+			
+			function LoadFile(fileHref) {
+				HistoryAdd();
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.open("GET", fileHref, false);
+				xmlhttp.send();
+				//return xmlhttp.responseText;
+				var result = xmlhttp.responseText;
+				textareaMain.value = result;
+			}
+
+			function openFile() {
+				HistoryAdd();
+				document.getElementById('inp').click();
+			}
+			function readFile(e) {
+				var file = e.target.files[0];
+				if (!file) return;
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					textareaMain.value = e.target.result;
+				}
+				reader.readAsText(file);
+			}
+
+			function SaveToLC(lcKeyName){
+				localStorage.setItem(lcKeyName, textareaMain.value);      
+			}
+
+			function OpenFromLC(lcKeyName){
+				var lcValue = localStorage.getItem(lcKeyName); //localStorage[lcKeyName]
+				if(lcValue && typeof lcValue === 'string' && lcValue.length > 0){
+					textareaMain.value = lcValue;
+				}
+			}
+
+			// Fetch available voices and populate the select element
+			function generateVoiceOptions()  {
+				voices_all = speechSynthesis.getVoices();
+				voices_supported = voices_all.filter(item => supportedLanguages.includes(item.lang))
+				voices_supported.forEach((voice, index) => {
+					const option = document.createElement("option");
+					option.value = voice.voiceURI; //index
+					option.text = voice.lang +'; '+ voice.name;
+					domVoiceSelect.appendChild(option);    
+				});  
+				// Set the first voice as selected by default
+				domVoiceSelect.selectedIndex = 0;
+				applySelectedVoice();
+			} 
+			
+			function pauseSynth() {
+				if (speechSynthesis.speaking && !speechSynthesis.paused) {
+					speechSynthesis.pause();
+					domPlayPauseBtn.innerText = nav_texts.play;
+					domStatusMsg1.innerText = "Paused";
+				}
+				return;
+			}
+
+			function resumeSynth() {
+				if (speechSynthesis.speaking && speechSynthesis.paused) {
+					speechSynthesis.resume();
+					domPlayPauseBtn.innerText = nav_texts.pause;
+					domStatusMsg1.innerText = "Resumed";
+				}
+				return;
+			}
 		
-	function RemoveSpaces(input) {
-    return input.trim().replace(/ /g, '');
-	}
+			// Select voice when an option is clicked or select options are initialized
+			function applySelectedVoice() {
+				voice_selected = voices_supported.filter(item => item.voiceURI === domVoiceSelect.value)[0];
+				console.log('voice selected:', voice_selected.name);
+			}
+
+			function applySelectedRate() {
+				rate_selected = domRateSelect.value;
+				console.log('rate selected:', rate_selected);
+			}
+			
+			function applySelectedPitch() {
+				pitch_selected = domPitchSelect.value;
+				console.log('pitch selected:', pitch_selected);
+			}		
+
+			function handleVoiceSelection() {
+				applySelectedVoice();
+				applySelectedRate();
+				applySelectedPitch();
+				unspoken_text = String(unspoken_text).slice(tts_msg_speaking_position);
+				if (speechSynthesis.speaking) {
+					if (!speechSynthesis.paused) {
+						speechSynthesis.cancel();
+						speechSynthesis.speak(createNewTtsMsgInstance(unspoken_text));
+						domPlayPauseBtn.innerText = nav_texts.pause;
+					}
+					else if (speechSynthesis.paused){
+						speechSynthesis.cancel();
+						speechSynthesis.speak(createNewTtsMsgInstance(unspoken_text));
+						speechSynthesis.pause();
+					}				
+				}			
+			}
+
+			function resetSynth() {
+				speechSynthesis.cancel();
+				domStatusMsg1.innerText = "reseted";
+				domPlayPauseBtn.innerText = nav_texts.play;
+				return;
+			}
+
+			function createNewTtsMsgInstance(textToRead) {
+				tts_msg = new SpeechSynthesisUtterance(textToRead);
+				tts_msg.voice = voice_selected;
+				tts_msg.rate = rate_selected;
+				tts_msg.pitch = pitch_selected;
+				//tts_msg.volume
+				//tts_msg.lang
+				tts_msg.addEventListener('boundary', (event) => {
+					domStatusMsg2.innerText = `boundary - name: ${event.name}, charIndex: ${event.charIndex}, charLength: ${event.charLength}`;
+					tts_msg_speaking_position = event.charIndex;
+					domSpokenWords.innerText = textToRead.substr(event.charIndex, event.charLength);
+				});
+				tts_msg.addEventListener('end', function(event) {
+					console.log(`ended - charIndex: ${event.charIndex}`);
+					unspoken_text = textareaMain.value;
+					domStatusMsg1.innerText = "finished";
+					domPlayPauseBtn.innerText = nav_texts.play;
+					domSpokenWords.innerText = '';
+				});
+				tts_msg.addEventListener('start', function(event) {
+					console.log(`started - charIndex: ${event.charIndex}`);
+					//domStatusMsg1.innerText = "started";
+				});
+				tts_msg.addEventListener('pause', (event) => {
+					domStatusMsg2.innerText = `paused - charIndex: ${event.charIndex}, charLength: ${event.charLength}`;
+					console.log(`test second event listener`);
+					//domStatusMsg1.innerText = "paused";
+				});
+				tts_msg.addEventListener('resume', function(event) {
+					console.log(`resumed - charIndex: ${event.charIndex}`);
+					//domStatusMsg1.innerText = "resumed";
+				});
+				tts_msg.onmark = function(event) {
+					console.log(`mark - name: ${event.name}`);
+				};
+				tts_msg.onerror = function(event) {
+					console.log(`error - error: ${event.error}`);
+				};
+
+				return tts_msg;
+			}
 		
-	function RemoveSpaces(input) {
-		return input.trim().replace(/ /g, '');
-	}
-    
-	function EvalCustomScript() {
-		HistoryAdd();
-		var customScript = document.querySelector("#textareaEval").value;
-		eval(customScript);
-	}
-        
-  function yyyymmdd(dateIn) {
-      var yyyy = dateIn.getFullYear();
-      var mm = dateIn.getMonth() + 1; // getMonth() is zero-based
-      var dd = dateIn.getDate();
-      return String(10000 * yyyy + 100 * mm + dd); // Leading zeros for mm and dd
-    }       
+			// Start or pause/resume reading aloud
+			function togglePlay() {
+				if (!textareaMain.value) {
+					resetSynth();
+					return;
+				}
 
-    
-    function DownloadFile() {       
-        var hiddenElement = document.createElement('a');
-        var today = new Date();
-        var date = yyyymmdd(today);
-        hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = "textio-"+date+".txt";
-        hiddenElement.click();
-      }
-    
-    function TTSedit(input) {
-      // historyAdd();
-      // var b = textareaMain.value.toLowerCase().split("\n");
-      var b = input.toLowerCase().split("\n");
-      var c = [];
-      b.forEach(function(item){
-        var line = item;
-        var firstChar = line.charAt(0);
-        var lastChar = line.charAt(line.length-1);
-        if(line) {
-          if( !/\.|,|:/.test(lastChar) ){
-            line += "."
-          }
-          line = firstChar.toUpperCase() +""+ line.slice(1);
-        }
-        c.push(line);
-      });
-      // textareaMain.value = c.join("\n");
-      return c.join("\n");
-    }
-    
-    function ShuffleArray(inputArray) {
-      var array = inputArray;
-      for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-      }
-      return array;
-    }
+				if (tts_msg && speechSynthesis.speaking && !speechSynthesis.paused) {
+					pauseSynth();
+					return;
+				}
+				
+				if (tts_msg && speechSynthesis.speaking && speechSynthesis.paused) {
+					resumeSynth();
+					return;
+				}
 
-    function RandomIndex(range){
-      var random = Math.random();
-      return Math.floor(random * range);
-    }
-    
-    function CreateFlashCards() {
-      window.cardsAll = textareaMain.value.split("\n").map(function(item){
-        return item.split(/\s?\.{3}\s?|\s?=\s?/);
-      });
-      window.cardsShuffled = ShuffleArray(cardsAll);
-      console.log('*** cardsShuffled', cardsShuffled);
-      flashcardsSection.className = "flashcards-visible";
-      window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
-      RandomCard();
-    }    
-    
-    function NextCard() {       
-      if(cardIndex >= window.cardsShuffled.length-1){
-        // jump from last cart to first
-        cardIndex = 0;
-      } else {
-        cardIndex++;
-      }
-      window.currentCard = cardsShuffled[cardIndex]; //window.cardsAll[cardIndex];
-      console.log('*** cardIndex', cardIndex);
-      console.log('*** currentCard', currentCard);
-      cardFront.innerHTML = currentCard[0]; 
-      cardBack.innerHTML = "";
-      window.currentCardBackLoop = 1;
-    }
+				if (!speechSynthesis.speaking) {
+					speechSynthesis.cancel();
+					speechSynthesis.speak(createNewTtsMsgInstance(textareaMain.value));
+					domPlayPauseBtn.innerText = nav_texts.pause;
+					return;
+				}      
+				
+			}
+		
+			// Initial setup
+			window.speechSynthesis.cancel();
+			window.speechSynthesis.onvoiceschanged = generateVoiceOptions;
+			window.addEventListener('load', function(){
+				applySelectedRate();
+				applySelectedPitch();
+			});
 
-    function RandomCard() {
-      window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
-      cardFront.innerHTML = currentCard[0]; 
-      cardBack.innerHTML = "";
-      window.currentCardBackLoop = 1;
-    }
-    
-    function TurnCard() {
-      if(currentCard.length >= 2) {
-        window.currentCardBack = currentCard[window.currentCardBackLoop];
-        document.querySelector(".card-back").innerHTML = window.currentCardBack;
-        if(window.currentCardBackLoop < currentCard.length - 1)
-        {
-          window.currentCardBackLoop ++;
-        }
-        else 
-        {
-          window.currentCardBackLoop = 1;
-        }
-      } else {
-        document.querySelector(".card-back").innerHTML = "no back side";
-      }
-    }
-    
-    function CloseFlashCards() {
-      flashcardsSection.className = "flashcards-hidden";
-    }
-    
-    function EncodeUri(input) {
-      return encodeURI(input);           
-    }
-    
-    //Encoding reference incl. list of characters: https://www.w3schools.com/tags/ref_urlencode.ASP
-    var url_encode_map = {
-      '%20': ' ', '%3A': ':', '%2F': '/', '%2B': '+', '%2C': ',', '%2D': '-'
-    };
+			// Event listeners
+			domVoiceSelect.addEventListener("change", handleVoiceSelection);
+			domRateSelect.addEventListener("change", handleVoiceSelection);
+			domPitchSelect.addEventListener("change", handleVoiceSelection);
+			domPlayPauseBtn.addEventListener("click", togglePlay);
+			domResetBtn.addEventListener('click', resetSynth);
+			textareaMain.onchange = function(){console.log('textarea updated');};
 
-    function DecodeUri(input) {
-      var result = decodeURI(input);
-      for(const phrase in url_encode_map) {
-        result = result.replace(new RegExp(phrase,'g'), url_encode_map[phrase]);
-      }
-      return result;
-      //return decodeURI(input);   
-    }
-    
-    function Transform(callback) {
-      if(callback) {
-        HistoryAdd();
-        var result = callback(textareaMain.value);
-        textareaMain.value = result;
-      }      
-    }
-    
-    function LoadFile(fileHref) {
-      HistoryAdd();
-      var xmlhttp = new XMLHttpRequest();
-      xmlhttp.open("GET", fileHref, false);
-      xmlhttp.send();
-      //return xmlhttp.responseText;
-      var result = xmlhttp.responseText;
-      textareaMain.value = result;
-    }
+		</script>
+		
+	</body>
 
-    function openFile() {
-      HistoryAdd();
-      document.getElementById('inp').click();
-    }
-    function readFile(e) {
-      var file = e.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        textareaMain.value = e.target.result;
-      }
-      reader.readAsText(file)
-    }
-
-    function SaveToLC(lcKeyName){
-      localStorage.setItem(lcKeyName, textareaMain.value)
-      
-    }
-
-    function OpenFromLC(lcKeyName){
-      var lcValue = localStorage.getItem(lcKeyName); //localStorage[lcKeyName]
-      if(lcValue && typeof lcValue === 'string' && lcValue.length > 0){
-        textareaMain.value = lcValue;
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const parsedUrl = new URL(window.location);
-      // searchParams.get() will properly handle decoding the values.
-      var sharedTitle = parsedUrl.searchParams.get('title');
-      var sharedText = parsedUrl.searchParams.get('text');
-      var sharedUrl = parsedUrl.searchParams.get('url');
-      console.log('Title shared: ', sharedTitle);
-      console.log('Text shared: ', sharedText);
-      console.log('URL shared: ', sharedUrl);
-      if(sharedText){
-        textareaMain.value = sharedText;
-      }
-    });
-
-
-	</script>
-</head>
-<body>
-<header><a href="/"><strong>Textio</strong> <em>= text modifier by Holan.eu</em></a></header>
-<main>
-    <nav>        
-	    <button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
-
-      <select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-        <option value="">Open</option>
-        <option value="OpenFromLC('saved1')" >Open LC 1</option>
-        <option value="OpenFromLC('saved2')" >Open LC 2</option>
-        <option value="OpenFromLC('saved3')" >Open LC 3</option>
-        <option value="openFile()" >Open local file</option>
-        <option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>
-      </select>
-      <input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
-      
-      <select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-        <option value="">Save</option>        
-        <option value="SaveToLC('saved1')">Save to LC 1</option>
-        <option value="SaveToLC('saved2')">Save to LC 2</option>
-        <option value="SaveToLC('saved3')">Save to LC 3</option>
-        <option value="DownloadFile()">Save to file</option>
-      </select>
-      <!--
-        <br>
-        <button onclick="DownloadFile()">Save to file</button>
-        <button onclick="SaveToLC('saved1')">Save to LC 1</button>
-        <button onclick="SaveToLC('saved2')">Save to LC 2</button>
-        <button onclick="SaveToLC('saved3')">Save to LC 3</button>
-        <button onclick="OpenFromLC('saved1')">Open LC 1</button>
-        <button onclick="OpenFromLC('saved2')">Open LC 2</button>
-        <button onclick="OpenFromLC('saved3')">Open LC 3</button>
-        <button onclick="openFile()">Open local file</button>
-        <button onclick="LoadFile('slovicka-en.txt')">Open file from server</button>
-      -->  
-      
-      <br>
-      <span>Current step:<em id="currentStep">0</em></span>
-    </nav>
-    
-    <section id="editor-textarea-main">
-		  <textarea id="textareaMain"></textarea>
-    </section>
-
-    <section id="editor-buttons">
-      <button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
-
-      <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-        <option value="">Tools</option>
-        <option value="Transform(LinesToList);">Rows to List</option>
-        <option value="Transform(ListToArray);">List to Array</option>
-        <option value="Transform(ListToLines);">List to Rows</option>
-        <option value="Transform(ListSort);">Sort list</option>
-				<option value="Transform(RemoveSpaces);">Remove spaces</option>
-        <option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
-        <option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
-        <option value="Transform(RemoveDiacritics);">Remove diacritics</option>
-        <option value="Transform(ConvertToSlug);">Convert to Slug</option>
-	<option value="Transform(ParseMarkdownLinks)">Parse markdown links</option>
-        <option value="Transform(IncreaseLineBreaks);">TTS: increase line breaks</option>
-        <option value="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
-        <option value="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
-        <option value="Transform(EncodeUri)">Encode URL</option>
-        <option value="Transform(DecodeUri)">Decode URL</option>	      
-      </select>
-      <!--
-  		<button onclick="Transform(LinesToList);">Rows to List</button>
-  		<button onclick="Transform(ListToArray);">List to Array</button>
-  		<button onclick="Transform(ListToLines);">List to Rows</button>
-      <button onclick="Transform(ListSort);">Sort list</button>        
-      <button onclick="Transform(RemoveEmptyLines);">Remove empty rows</button>  		
-  		<button onclick="Transform(RemoveLineBreaks);">Remove line breaks</button>
-  		<button onclick="Transform(RemoveDiacritics);">Remove diacritics</button>
-  		<button onclick="Transform(ConvertToSlug);">Convert to Slug</button>        
-      <button onclick="Transform(IncreaseLineBreaks);">TTS: increase line breaks</button>
-  		<button onclick="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</button>
-      <button onclick="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</button>      
-      <button onclick="Transform(EncodeUri)">Encode URL</button>
-      <button onclick="Transform(DecodeUri)">Decode URL</button>      
-      -->
-    </section>
-
-    <section id="editor-textarea-custom">
-      <textarea id="textareaEval">t = textareaMain; tv = t.value;
-r = tv.replace(/,/g,'|');
-t.value = r;
-  		</textarea>    
-      <button onclick="EvalCustomScript();">Execute custom script</button>
-    </section>
-  
-  <section id="flashcards-section" class="flashcards-hidden">    
-    <article class="card-front"></article>
-    <article class="card-back"></article>
-    <nav>
-      <button onclick="NextCard()">Next</button>
-      <button onclick="RandomCard()">Random</button>
-      <button onclick="TurnCard()">Turn</button>
-      <br><br>
-      <button onclick="CloseFlashCards()" class="btn-close">close</button>
-    </nav>
-    
-  </section>
-  
-</main>
-
-</body>
 </html>
