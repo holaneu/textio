@@ -200,8 +200,10 @@
 					<option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
 					<option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
 					<option value="Transform(RemoveDiacritics);">Remove diacritics</option>
+					<option value="Transform(EncodeBase64)">Encode Base64</option>
+					<option value="Transform(DecodeBase64)">Decode Base64</option>
 					<option value="Transform(ConvertToSlug);">Convert to Slug</option>
-		<option value="Transform(ParseMarkdownLinks)">Parse markdown links</option>
+					<option value="Transform(ParseMarkdownLinks)">Parse markdown links</option>
 					<option value="Transform(IncreaseLineBreaks);">TTS: increase line breaks</option>
 					<option value="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
 					<option value="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
@@ -559,6 +561,14 @@
 			
 			function CloseFlashCards() {
 				flashcardsSection.className = "flashcards-hidden";
+			}
+
+			function EncodeBase64(input) {
+				return btoa(input);
+			}
+
+			function DecodeBase64(input) {
+				return atob(input);
 			}
 			
 			function EncodeUri(input) {
