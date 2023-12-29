@@ -663,10 +663,16 @@
         if (userInput !== null && userInput !== "") {
           //localStorage.setItem(userInput, textareaMain.value);
           var key = 'saved_' + GetDateTime();
-          var value = JSON.stringify({"name": userInput, "content": textareaMain.value});
+          var value = JSON.stringify({"name": userInput.trim(), "content": textareaMain.value});
           localStorage.setItem(key, value);
         }				      
 			}
+
+      function ListSavedLC() {
+        var x = localStorage.filter(function(item){
+          return item.key;
+        });
+      }
 
 			function OpenFromLC(lcKeyName){
 				var lcValue = localStorage.getItem(lcKeyName); //localStorage[lcKeyName]
