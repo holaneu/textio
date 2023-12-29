@@ -164,20 +164,21 @@
 	
 					<select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Open</option>
+            <option value="openFile()" >Load file</option>
 						<option value="OpenFromLC('saved1')" >Open LC 1</option>
 						<option value="OpenFromLC('saved2')" >Open LC 2</option>
-						<option value="OpenFromLC('saved3')" >Open LC 3</option>
-						<option value="openFile()" >Open local file</option>
-						<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>
+						<option value="OpenFromLC('saved3')" >Open LC 3</option>						
+						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>
 					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
 					
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-						<option value="">Save</option>        
+						<option value="">Save</option>
+            <option value="DownloadFile()">Save to file</option>
+            <option value="SaveToLC('saved1')">Save to LC</option> 
 						<option value="SaveToLC('saved1')">Save to LC 1</option>
 						<option value="SaveToLC('saved2')">Save to LC 2</option>
-						<option value="SaveToLC('saved3')">Save to LC 3</option>
-						<option value="DownloadFile()">Save to file</option>
+						<option value="SaveToLC('saved3')">Save to LC 3</option>						
 					</select>				
 					
 					<br>
@@ -212,10 +213,12 @@
 				</select>
 				
 				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
+        <button id="btnToggleCustomCodeSection" onclick="toggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
+        <button id="btnToggleTtsSection" onclick="toggleVisibility('#tts-controls', this.id)">Show TTS</button>
 
 			</section>
 
-			<section id="editor-textarea-custom">
+			<section id="editor-textarea-custom" style="display: none;">
 				<textarea id="textareaEval">t = textareaMain; tv = t.value;
 	r = tv.replace(/,/g,'|');
 	t.value = r;
@@ -223,7 +226,7 @@
 				<button onclick="EvalCustomScript();">Execute custom script</button>
 			</section>
 
-			<section id ="tts-controls">
+			<section id="tts-controls" style="display: none;">
 				<nav>
 					<label for="voice-select">voice: </label>
 					<select id="voice-select"></select></br>
@@ -330,6 +333,26 @@
 					}
 				} 
 			}
+
+      function toggleVisibility ( selector, triggeringElementId ) {
+        var element = document.querySelector(selector);
+        var triggeringElement = document.getElementById(triggeringElementId);
+        if (element) {
+          //console.log(element);
+          console.log(document.getElementById(triggeringElementId).innerHTML);
+          if (element.style.display === "none") {
+            element.style.display = "block";
+            if (triggeringElement) {
+              triggeringElement.innerHTML = triggeringElement.innerHTML.replace('Show', 'Hide');
+            }
+          } else {
+            element.style.display = "none";
+            if (triggeringElement) {
+              triggeringElement.innerHTML = triggeringElement.innerHTML.replace('Hide', 'Show');
+            }
+          }
+        }
+      }
 
 			function ParseMarkdownLinks(input) {
 				rows = input.replace(/\n\n/g,'\n').split('\n');
