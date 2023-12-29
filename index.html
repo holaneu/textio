@@ -70,22 +70,32 @@
 				color: silver;
 			}
 			#textareaMain {
-				width: calc(100% - 10px);
+				width: calc(100% - 25px);
+        background: #181818;
+        padding: 5px 10px;
 				min-height: 250px;
 				margin-bottom: 10px;
-				border: 1px dotted gray;
-						background: black;
-						color: silver;
+				border: none;
+        color: silver;
 			}
+      #editor-textarea-custom
+      ,#tts-controls {
+        display: block;
+        border-left: 5px solid cyan;
+        margin-top: 10px;
+        margin-bottom: 15px;
+        padding-left: 10px;
+      }
 			#textareaEval {
-				width: calc(100% - 10px);
-				min-height: 80px;
-				margin-bottom: 5px;
-				border: 1px dotted gray;
-				margin-top: 10px;
-						background: black;
-						color: silver;
-			}
+        width: calc(100% - 25px);
+        min-height: 80px;
+        margin-bottom: 5px;
+        border: none;
+        margin-top: 0px;
+        background: #181818;
+        padding: 5px 10px;
+        color: silver;
+      }
 			header {
 				background:black;
 				padding: 5px 10px;
@@ -175,7 +185,7 @@
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
             <option value="DownloadFile()">Save to file</option>
-            <option value="SaveToLC('saved1')">Save to LC</option> 
+            <option value="SaveToLCNamed()">Save to LC</option> 
 						<option value="SaveToLC('saved1')">Save to LC 1</option>
 						<option value="SaveToLC('saved2')">Save to LC 2</option>
 						<option value="SaveToLC('saved3')">Save to LC 3</option>						
@@ -646,6 +656,16 @@
 
 			function SaveToLC(lcKeyName){
 				localStorage.setItem(lcKeyName, textareaMain.value);      
+			}
+
+      function SaveToLCNamed(){
+        var userInput = prompt("Save under name:");
+        if (userInput !== null && userInput !== "") {
+          //localStorage.setItem(userInput, textareaMain.value);
+          var key = 'saved_' + GetDateTime();
+          var value = JSON.stringify({"name": userInput, "content": textareaMain.value});
+          localStorage.setItem(key, value);
+        }				      
 			}
 
 			function OpenFromLC(lcKeyName){
