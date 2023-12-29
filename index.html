@@ -668,10 +668,15 @@
         }				      
 			}
 
-      function ListSavedLC() {
-        var x = localStorage.filter(function(item){
-          return item.key;
+      function ListLcRecords() {
+        const savedKeys = Object.keys(localStorage).filter(key => key.startsWith("saved_"));
+        const savedRecords = savedKeys.map(key => {
+            var record = JSON.parse(localStorage.getItem(key));
+            var name = record.name;
+            var content = record.content;
+            return name;
         });
+        return savedRecords;
       }
 
 			function OpenFromLC(lcKeyName){
