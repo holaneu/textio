@@ -173,23 +173,30 @@
 					<button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
 	
 					<select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-						<option value="">Open</option>
-            <option value="openFile()" >Load file</option>
-						<option value="OpenFromLC('saved1')" >Open LC 1</option>
-						<option value="OpenFromLC('saved2')" >Open LC 2</option>
-						<option value="OpenFromLC('saved3')" >Open LC 3</option>						
+						<option value="">Open </option>
+            <option value="openFile()" >from file</option>
+						<option value="OpenFromLC('saved1')" >from LC 1</option>
+						<option value="OpenFromLC('saved2')" >from LC 2</option>
+						<option value="OpenFromLC('saved3')" >from LC 3</option>						
 						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>
+
+          
+
 					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
 					
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
-            <option value="DownloadFile()">Save to file</option>
-            <option value="SaveToLCNamed()">Save to LC</option> 
-						<option value="SaveToLC('saved1')">Save to LC 1</option>
-						<option value="SaveToLC('saved2')">Save to LC 2</option>
-						<option value="SaveToLC('saved3')">Save to LC 3</option>						
-					</select>				
+            <option value="DownloadFile()">to file</option>
+            <option value="SaveToLCNamed()">to LC</option> 
+						<option value="SaveToLC('saved1')">to LC 1</option>
+						<option value="SaveToLC('saved2')">to LC 2</option>
+						<option value="SaveToLC('saved3')">to LC 3</option>						
+					</select>
+          
+          <select id="selectOpenFromLC" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();">
+						<option value="">Open from LC</option>						
+					</select>
 					
 					<br>
 					<span>Current step:<em id="currentStep">0</em></span>
@@ -267,7 +274,8 @@
 				<article class="card-back"></article>
 				<nav>
 					<button onclick="NextCard()">Next</button>
-					<button onclick="RandomCard()">Random</button>
+					<!--<button onclick="RandomCard()">Random</button>-->
+          <button onclick="">Speak</button>
 					<button onclick="TurnCard()">Turn</button>
 					<br><br>
 					<button onclick="CloseFlashCards()" class="btn-close">close</button>
@@ -542,15 +550,15 @@
 				return Math.floor(random * range);
 			}
 			
-			function CreateFlashCards() {
-				window.cardsAll = textareaMain.value.split("\n").map(function(item){
-					return item.split(/\s?\.{3}\s?|\s?=\s?/);
+			function CreateFlashCards() {        
+				window.cardsAll = RemoveEmptyLines(textareaMain.value).split("\n").map(function(item){
+					return item.split(/\s?\.{4}\s?|\s?=\s?|\s?\t\s?/);
 				});
 				window.cardsShuffled = ShuffleArray(cardsAll);
 				console.log('*** cardsShuffled', cardsShuffled);
 				flashcardsSection.className = "flashcards-visible";
 				window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
-				RandomCard();
+				NextCard();
 			}    
 			
 			function NextCard() {       
@@ -668,10 +676,15 @@
         }				      
 			}
 
-      function ListSavedLC() {
-        var x = localStorage.filter(function(item){
-          return item.key;
+      function ListLcRecords() {
+        const savedKeys = Object.keys(localStorage).filter(key => key.startsWith("saved_"));
+        const savedRecords = savedKeys.map(key => {
+            var record = JSON.parse(localStorage.getItem(key));
+            var name = record.name;
+            var content = record.content;
+            return name;
         });
+        return savedRecords;
       }
 
 			function OpenFromLC(lcKeyName){
@@ -828,6 +841,7 @@
 			window.speechSynthesis.cancel();
 			window.speechSynthesis.onvoiceschanged = generateVoiceOptions;
 			window.addEventListener('load', function(){
+        generateVoiceOptions();
 				applySelectedRate();
 				applySelectedPitch();
 			});
