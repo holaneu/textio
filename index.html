@@ -169,12 +169,13 @@
 				<nav>        
 					<button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
 	
-					<select id="navButtonsOpen" onChange="eval(this.value); this.selectedIndex = '0'; this.blur();" style="max-width:82px">
+					<select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Open </option>
             <option value="openFile()" >from file</option>
 						<option value="OpenFromLC('saved1')" >from LC 1</option>
 						<option value="OpenFromLC('saved2')" >from LC 2</option>
-						<option value="OpenFromLC('saved3')" >from LC 3</option>						
+						<option value="OpenFromLC('saved3')" >from LC 3</option>
+            <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
 						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>          
 
@@ -183,15 +184,16 @@
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
             <option value="DownloadFile()">to file</option>
-            <option value="SaveToLCNamed()">to LC</option> 
+            <option value="SaveToLcNamed()">to LC</option> 
 						<option value="SaveToLC('saved1')">to LC 1</option>
 						<option value="SaveToLC('saved2')">to LC 2</option>
 						<option value="SaveToLC('saved3')">to LC 3</option>						
 					</select>
           
-          <select id="selectOpenFromLC" onChange="this.selectedIndex = '0'; this.blur();">
-						<option value="">Open from LC</option>						
-					</select>
+          <!--<select id="selectOpenFromLC" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();">
+						<option value="">Open from LC</option>
+            <optgroup id="optgroupLcRecords" label="LC records"></optgroup>				
+					</select>-->
 					
 					<br>
 					<span>Current step:<em id="currentStep">0</em></span>
@@ -633,7 +635,7 @@
 			}
 
 			function SaveToLC(lcKeyName){
-				localStorage.setItem(lcKeyName, textareaMain.value);      
+				localStorage.setItem(lcKeyName, textareaMain.value);
 			}
 
       function OpenFromLC(lcKeyName){
@@ -645,39 +647,48 @@
 			}
 
       // testing of new version save and open LC:
-      function SaveToLCNamed(){
+      function SaveToLcNamed(){
         var userInput = prompt("Save under name:");
         if (userInput !== null && userInput !== "") {
-          var key = 'saved_' + GetDateTime();
+          var key = 'saved: ' + userInput.trim();
           var value = JSON.stringify({"name": userInput.trim(), "timestamp": GetDateTime(), "content": textareaMain.value});
           localStorage.setItem(key, value);
         }
-        PopulateLcRecordList();	      
+        PopulateLcRecords();	      
 			}
       
-      function ListLcSavings() {
+      function ListLcRecords() {
         const savedKeys = Object.keys(localStorage); 
-        const filteredKey = savedKeys.filter(key => key.startsWith("saved_"));
-        const savedRecords = savedKeys.map(key => {
+        const filteredKeys = savedKeys.filter(key => key.startsWith("saved"));
+        const savedRecords = filteredKeys.map(key => {
             var record = JSON.parse(localStorage.getItem(key));
             var name = record.name;
             var content = record.content;
             var timestamp = record.timestamp;
-            return {name: name, content: content, timestamp: timestamp};
+            return {lcKey: key, name: name, content: content, timestamp: timestamp};
         });
         return savedRecords;
       }
 
-      function PopulateLcRecordList() {
-        var records = ListLcSavings();        
+      function PopulateLcRecords() {
+        var records = ListLcRecords();
+        var optgroup = document.getElementById('optgroupLcRecords');
+        optgroup.innerHTML = ""; // Clear existing options
         records.forEach((item) => {
           const option = document.createElement("option");
-          option.value = item.key; 
+          option.value = "OpenLcRecord('"+ item.lcKey +"')"; 
           option.text = item.name;
-          option.setAttribute("onclick", "function(){textareaMain.value = item.content;}");
-          document.getElementById('selectOpenFromLC').appendChild(option);
+          //option.setAttribute("onclick", "OpenLcRecord(this.value)");
+          optgroup.appendChild(option);
         });
-      }			
+      }
+      
+      function OpenLcRecord(lcKey) {
+        var record = JSON.parse(localStorage.getItem(lcKey));
+        if (record.content) {
+          textareaMain.value = record.content;
+        }
+      }
 
       // TTS
 			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
@@ -719,13 +730,14 @@
       function ClearStorage() {
         var confirmation = confirm("Are you sure you want to clear the local storage?");
         if (confirmation) {
-            localStorage.clear();
+          localStorage.clear();
+          PopulateLcRecords(); 
         }
       }
       
       // page initialization
       window.addEventListener('load', function(){
-        PopulateLcRecordList();
+        PopulateLcRecords();
       });
       
 
