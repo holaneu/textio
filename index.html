@@ -672,11 +672,13 @@
 
       function PopulateLcRecords() {
         var records = ListLcRecords();
+        console.log(records);
         var optgroup = document.getElementById('optgroupLcRecords');
         optgroup.innerHTML = ""; // Clear existing options
         records.forEach((item) => {
+          console.log(item);
           const option = document.createElement("option");
-          option.value = "OpenLcRecord('"+ item.lcKey +"')"; 
+          option.setAttribute("value", "OpenLcRecord('"+ item.lcKey +"')"); 
           option.text = item.name;
           //option.setAttribute("onclick", "OpenLcRecord(this.value)");
           optgroup.appendChild(option);
@@ -695,13 +697,14 @@
 			const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
 
       function PopulateVoiceList() {
+        var selectVoiceChoice = document.getElementById('tts-voice-choice');
         var voices_all = speechSynthesis.getVoices();
         voices_supported = voices_all.filter(item => supportedLanguages.includes(item.lang));
         voices_supported.forEach((voice, index) => {
           const option = document.createElement("option");
-          option.value = voice.voiceURI; //index
+          option.setAttribute("value", voice.voiceURI);
           option.text = voice.lang +'; '+ voice.name;
-          document.getElementById('tts-voice-choice').appendChild(option);    
+          selectVoiceChoice.appendChild(option);    
         });
       }
 
