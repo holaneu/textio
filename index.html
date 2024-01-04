@@ -267,8 +267,13 @@
 				</naV>
 			</section>
 
-      <section id="section-app-settings" class="expandable-section" style="display: none;">    
-				<button id="button-clear-storage" onclick="ClearStorage()">Clear storage</button>
+      <section id="section-app-settings" class="expandable-section" style="display: none;">
+        <nav> 
+          <button id="button-clear-storage" onclick="ClearStorage()">Clear storage</button>
+          <br>
+          <button id="button-enable-log-alerts" onclick="localStorage.setItem('config_showLogAlerts', '1')">Enable log alerts</button>
+          <button id="button-disable-log-alerts" onclick="localStorage.setItem('config_showLogAlerts', '0')">Disable log alerts</button>
+        </nav>
 			</section>
 			
 			<section id="flashcards-section" style="display: none;">    
@@ -292,11 +297,12 @@
 			const	currentStepText = document.querySelector("#currentStep"); 
 			const	btnGoBack = document.querySelector("#goBack"); 
 			const	cardFront = document.querySelector(".card-front");
-			const	cardBack = document.querySelector(".card-back");    
+			const	cardBack = document.querySelector(".card-back");
+
+      var logAlert = [];
+      var historySteps = [];
       
-      textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;"	
-			
-			historySteps = [];
+      textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
 			function GetTextareaMainValue() {
 				var el = document.querySelector("#textareaMain");
@@ -478,11 +484,16 @@
 				return formattedDate;
 			}
 			
-			function DownloadFile() {       
+			function DownloadFile() {
+        var fileName = "textio_"+GetDateTime()+".txt";
+        var userInput = prompt("File name:");
+        if (userInput !== null && userInput !== "") {
+          fileName = 'textio - ' + userInput.trim();
+        }      
 				var hiddenElement = document.createElement('a');
 				hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
 				hiddenElement.target = '_blank';
-				hiddenElement.download = "textio_"+GetDateTime()+".txt";
+				hiddenElement.download = fileName;
 				hiddenElement.click();
 			}
 			
@@ -696,7 +707,7 @@
 			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
 			const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
 
-      function PopulateVoiceList() {
+      function PopulateVoiceList() {        
         var selectVoiceChoice = document.getElementById('tts-voice-choice');
         var voices_all = speechSynthesis.getVoices();
         voices_supported = voices_all.filter(item => supportedLanguages.includes(item.lang));
@@ -704,8 +715,12 @@
           const option = document.createElement("option");
           option.setAttribute("value", voice.voiceURI);
           option.text = voice.lang +'; '+ voice.name;
+          logAlert.push(option.text);
           selectVoiceChoice.appendChild(option);    
         });
+        if (localStorage.getItem('config_showLogAlerts') === '1') {
+          alert(logAlert.join(' \n'));
+        }
       }
 
 			function Speak(textToRead){
@@ -742,6 +757,7 @@
       window.addEventListener('load', function(){
         PopulateLcRecords();
       });
+      
       
 
 		</script>
