@@ -720,14 +720,15 @@
       }
 
       // TTS
-			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
-			const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
-      Log(supportedLanguages);
+			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API      
 
       function PopulateVoiceList() {        
         var selectVoiceChoice = document.getElementById('tts-voice-choice');
+        var supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
+        Log(supportedLanguages);
         var voices_all = speechSynthesis.getVoices();
         for (voice of voices_all) {
+          Log('voice lang:' + voice.lang);
           if (supportedLanguages.indexOf(voice.lang) !== -1) { //supportedLanguages.includes(voice.lang)
             Log('voice supported: ' + voice.lang + ' - ' + voice.name);
             const option = document.createElement("option");
