@@ -727,26 +727,18 @@
       function PopulateVoiceList() {        
         var selectVoiceChoice = document.getElementById('tts-voice-choice');
         var voices_all = speechSynthesis.getVoices();
-        Log('voices_all: \n' + voices_all);
         for (voice of voices_all) {
-          Log('voice: ' + voice.lang + '; ' + voice.name);
+          if (supportedLanguages.indexOf(voice.lang) !== -1) { //supportedLanguages.includes(voice.lang)
+            Log('voice supported: ' + voice.lang + ' - ' + voice.name);
+            const option = document.createElement("option");
+            option.setAttribute("value", voice.voiceURI);
+            option.text = voice.lang +'; '+ voice.name;
+            option.text = voice.lang +'; '+ voice.name;           
+            selectVoiceChoice.appendChild(option);
+          }
         }
-        voices_supported = Array.from(voices_all).filter(item => supportedLanguages.includes(item.lang));
-        Log('voices_supported: \n' + voices_supported);
-        /*voices_supported.forEach((voice, index) => {
-          const option = document.createElement("option");
-          option.setAttribute("value", voice.voiceURI);
-          option.text = voice.lang +'; '+ voice.name;
-          Log('voices_supported voice: \n' + option.text);
-          selectVoiceChoice.appendChild(option);    
-        });*/
-        for (voice of voices_supported) {
-          const option = document.createElement("option");
-          option.setAttribute("value", voice.voiceURI);
-          option.text = voice.lang +'; '+ voice.name;
-          Log('voices_supported voice: \n' + option.text);
-          selectVoiceChoice.appendChild(option); 
-        }
+        //voices_supported = Array.from(voices_all).filter(item => supportedLanguages.includes(item.lang));
+        
       }
 
 			function Speak(textToRead){
@@ -766,7 +758,10 @@
       }
 
       if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = PopulateVoiceList;
+        speechSynthesis.onvoiceschanged = function() {
+          Log('onvoiceschanged activated');
+          PopulateVoiceList();          
+        }
       }
 
       function ClearStorage() {
