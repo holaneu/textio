@@ -268,8 +268,8 @@
           <input type="checkbox" id="checkbox-auto-speak">
           <br>
           <br>
-					<button id="tts-play" onclick="Speak(textareaMain.value)">Speak <span>&#11208;</span></button>
-					<button id="tts-reset" onclick="speechSynthesis.cancel()">Stop <span>&#11200;</span></button>
+					<button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
+					<button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
           <br>
 				</naV>
 			</section>
@@ -286,12 +286,12 @@
 				<article class="card-front"></article>
 				<article class="card-back"></article>
 				<nav>
-					<button onclick="NextCard()">Next <span>&#129138;</span></button>          
-					<button onclick="TurnCard()">Turn <span>&#8634;</span></button>          
+					<button onclick="NextCard()">Next</button>          
+					<button onclick="TurnCard()">Turn</button>          
           <br><br>
-          <button onclick="Speak(currentCard[0])">Speak <span>&#11208;</span></button>
+          <button onclick="Speak(currentCard[0])">Speak</button>
           <br><br>
-					<button onclick="CloseFlashCards()" class="btn-close">close <span>&#11097;</span></button>
+					<button onclick="CloseFlashCards()" class="btn-close">close</button>
 				</nav>    
 			</section>
 
@@ -354,7 +354,6 @@
         var element = document.querySelector(selector);
         var triggeringElement = document.getElementById(triggeringElementId);
         if (element) {
-          console.log(document.getElementById(triggeringElementId).innerHTML);
           if (element.style.display === "none") {
             element.style.display = "block";
             if (triggeringElement) {
@@ -723,20 +722,31 @@
       // TTS
 			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
 			const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
+      Log(supportedLanguages);
 
       function PopulateVoiceList() {        
         var selectVoiceChoice = document.getElementById('tts-voice-choice');
         var voices_all = speechSynthesis.getVoices();
         Log('voices_all: \n' + voices_all);
-        voices_supported = voices_all.filter(item => supportedLanguages.includes(item.lang));
+        for (voice of voices_all) {
+          Log('voice: ' + voice.lang + '; ' + voice.name);
+        }
+        voices_supported = Array.from(voices_all).filter(item => supportedLanguages.includes(item.lang));
         Log('voices_supported: \n' + voices_supported);
-        voices_supported.forEach((voice, index) => {
+        /*voices_supported.forEach((voice, index) => {
           const option = document.createElement("option");
           option.setAttribute("value", voice.voiceURI);
           option.text = voice.lang +'; '+ voice.name;
           Log('voices_supported voice: \n' + option.text);
           selectVoiceChoice.appendChild(option);    
-        });
+        });*/
+        for (voice of voices_supported) {
+          const option = document.createElement("option");
+          option.setAttribute("value", voice.voiceURI);
+          option.text = voice.lang +'; '+ voice.name;
+          Log('voices_supported voice: \n' + option.text);
+          selectVoiceChoice.appendChild(option); 
+        }
       }
 
 			function Speak(textToRead){
@@ -755,8 +765,6 @@
         }
       }
 
-      PopulateVoiceList();
-
       if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = PopulateVoiceList;
       }
@@ -772,8 +780,8 @@
       // page initialization
       window.addEventListener('load', function(){
         PopulateLcRecords();
-      });
-      
+        //PopulateVoiceList();
+      });      
       
 
 		</script>
