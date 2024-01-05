@@ -63,13 +63,20 @@
 				color: #45edf5;
 				cursor: pointer;
 			}
+      button span {
+        font-size: 16px;
+        font-weight: bold;
+        margin-left: 5px;
+
+      }
 			button.orange {
 				color: rgb(255 209 41 / 1)
 			}
 			button:disabled {
 				color: silver;
 			}
-			#textareaMain {
+			#textareaMain,
+      #textarea-logs {
 				width: calc(100% - 25px);
         background: #181818;
         padding: 5px 10px;
@@ -228,15 +235,15 @@
 				
 				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button> <br>
         
-        <button id="btnToggleTtsSection" onclick="toggleVisibility('#tts-controls', this.id)">Show speech</button>
-        <button id="btnToggleCustomCodeSection" onclick="toggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
-        <button id="btnToggleSettingsSection" onclick="toggleVisibility('#section-app-settings', this.id)">Show app settings</button>
+        <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
+        <button id="btnToggleCustomCodeSection" onclick="ToggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
+        <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Show app settings</button>
 
 			</section>
 
 			<section id="editor-textarea-custom" class="expandable-section" style="display: none;">
 				<textarea id="textareaEval"></textarea>    
-				<button onclick="EvalCustomScript();">Execute custom script</button>
+				<button onclick="EvalCustomScript();">Execute custom script <span>&#11142;</span></button>
 			</section>
 
 			<section id="tts-controls" class="expandable-section" style="display: none;">
@@ -261,8 +268,8 @@
           <input type="checkbox" id="checkbox-auto-speak">
           <br>
           <br>
-					<button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
-					<button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
+					<button id="tts-play" onclick="Speak(textareaMain.value)">Speak <span>&#11208;</span></button>
+					<button id="tts-reset" onclick="speechSynthesis.cancel()">Stop <span>&#11200;</span></button>
           <br>
 				</naV>
 			</section>
@@ -271,8 +278,7 @@
         <nav> 
           <button id="button-clear-storage" onclick="ClearStorage()">Clear storage</button>
           <br>
-          <button id="button-enable-log-alerts" onclick="localStorage.setItem('config_showLogAlerts', '1')">Enable log alerts</button>
-          <button id="button-disable-log-alerts" onclick="localStorage.setItem('config_showLogAlerts', '0')">Disable log alerts</button>
+          <button id="button-enable-log-alerts" onclick="ToggleVisibility('#section-logs', this.id)">Show logs</button>
         </nav>
 			</section>
 			
@@ -280,12 +286,17 @@
 				<article class="card-front"></article>
 				<article class="card-back"></article>
 				<nav>
-					<button onclick="NextCard()">Next</button>
-          <button onclick="Speak(currentCard[0])">Speak</button>
-					<button onclick="TurnCard()">Turn</button>          
+					<button onclick="NextCard()">Next <span>&#129138;</span></button>          
+					<button onclick="TurnCard()">Turn <span>&#8634;</span></button>          
           <br><br>
-					<button onclick="CloseFlashCards()" class="btn-close">close</button>
+          <button onclick="Speak(currentCard[0])">Speak <span>&#11208;</span></button>
+          <br><br>
+					<button onclick="CloseFlashCards()" class="btn-close">close <span>&#11097;</span></button>
 				</nav>    
+			</section>
+
+      <section id="section-logs" style="display: none;">
+        <textarea id="textarea-logs"></textarea>
 			</section>
 			
 		</main>
@@ -298,23 +309,29 @@
 			const	btnGoBack = document.querySelector("#goBack"); 
 			const	cardFront = document.querySelector(".card-front");
 			const	cardBack = document.querySelector(".card-back");
+      const textareaLogs = document.getElementById('textarea-logs');
 
-      var logAlert = [];
+      var logs = [];
       var historySteps = [];
       
       textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
 			function GetTextareaMainValue() {
-				var el = document.querySelector("#textareaMain");
-				return el ? el.value : null;
+				return textareaMain ? textareaMain.value : null;
 			}
 
 			function UpdateTextareaMainValue(newText) {
-				var el = document.querySelector("#textareaMain");
-				if (el) {
-					el.value = newText;
+				if (textareaMain) {
+					textareaMain.value = newText;
 				}
 			}
+
+      function Log(message) {
+        if (message) {
+          logs.push(message);
+        }
+        textareaLogs.value = logs.join('\n\n');
+      }
 			
 			function HistoryAdd() {
 				historySteps.push(textareaMain.value);
@@ -333,7 +350,7 @@
 				} 
 			}
 
-      function toggleVisibility ( selector, triggeringElementId ) {
+      function ToggleVisibility ( selector, triggeringElementId ) {
         var element = document.querySelector(selector);
         var triggeringElement = document.getElementById(triggeringElementId);
         if (element) {
@@ -710,17 +727,16 @@
       function PopulateVoiceList() {        
         var selectVoiceChoice = document.getElementById('tts-voice-choice');
         var voices_all = speechSynthesis.getVoices();
+        Log('voices_all: \n' + voices_all);
         voices_supported = voices_all.filter(item => supportedLanguages.includes(item.lang));
+        Log('voices_supported: \n' + voices_supported);
         voices_supported.forEach((voice, index) => {
           const option = document.createElement("option");
           option.setAttribute("value", voice.voiceURI);
           option.text = voice.lang +'; '+ voice.name;
-          logAlert.push(option.text);
+          Log('voices_supported voice: \n' + option.text);
           selectVoiceChoice.appendChild(option);    
         });
-        if (localStorage.getItem('config_showLogAlerts') === '1') {
-          alert(logAlert.join(' \n'));
-        }
       }
 
 			function Speak(textToRead){
