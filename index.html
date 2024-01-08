@@ -739,19 +739,16 @@
             voices_all = synth.getVoices();
             if (voices_all.length) {
               clearInterval(IntervalGetVoices);
-
-              /*
-              voices_filtered = Array.from(voices_all).filter(v => supported_tts_languages.join(',').includes(v.lang) );
-              console.log('voices_filtered: ', voices_filtered);
-              */              
+              
+              voices_filtered = voices_all.filter(v => supported_tts_languages.includes(v.lang.replace('_','-')) );
+              console.log('voices_filtered: ', voices_filtered);                          
 
               selectTtsVoices.innerHTML = "";
 
-              for (var voice of voices_all) {
+              for (var voice of voices_filtered) {
                 var isLangSupported = 'no';
                 var supportedLangStr = supported_tts_languages.join(',');
-                Log(supportedLangStr);
-                if (supportedLangStr.indexOf(voice.lang) > -1) {
+                if (supportedLangStr.indexOf(voice.lang.replace('_','-')) > -1) {
                   isLangSupported = 'yes';
                 }
                 Log('voice lang: ' + voice.lang + ', isLangSupported: ' + isLangSupported);
