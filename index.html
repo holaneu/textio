@@ -739,10 +739,12 @@
           if (voices_all.length) {
             clearInterval(IntervalGetVoices);
 
-            Log(voices_all);            
+            voices_filtered = voices_all.filter(function(v){
+              return supported_tts_languages.join(',').includes(v.lang);
+            });
             
             selectTtsVoices.innerHTML = "";
-            for (var voice of voices_all) {
+            for (var voice of voices_filtered) {
               Log('voice lang:' + voice.lang);
               var option = document.createElement("option");
               option.value = voice.voiceURI;
@@ -751,7 +753,7 @@
             }
             selectTtsVoices.selectedIndex = '0';
           } else {
-            Log("voices are not available now");
+            Log("voices are not available yet");
           }
         }, 200);
       }
@@ -761,14 +763,18 @@
           alert("Your device does not support the SpeechSynthesis API");
         }
         else {
-          speechSynthesis.cancel();
-          let availableVoices = speechSynthesis.getVoices();
-          let utterance = new SpeechSynthesisUtterance();
-          utterance.text = textToRead;
-          utterance.voice = availableVoices.find(o => o.voiceURI === selectTtsVoices.value) || availableVoices[0];
-          utterance.pitch = document.getElementById('tts-pitch').value;
-          utterance.rate = document.getElementById('tts-rate').value;
-          speechSynthesis.speak(utterance);
+          if (textToRead === "") {
+            alert('No text to read!');
+          } else {
+            speechSynthesis.cancel();
+            let availableVoices = speechSynthesis.getVoices();
+            let utterance = new SpeechSynthesisUtterance();
+            utterance.text = textToRead;
+            utterance.voice = availableVoices.find(o => o.voiceURI === selectTtsVoices.value) || availableVoices[0];
+            utterance.pitch = document.getElementById('tts-pitch').value;
+            utterance.rate = document.getElementById('tts-rate').value;
+            speechSynthesis.speak(utterance);
+          }
         }
       }
 
@@ -780,14 +786,10 @@
         }
       }
       
-      // page initialization
-      window.addEventListener('load', function(){
+      // page initialization      
+      window.addEventListener('DOMContentLoaded', function() {
         PopulateLcRecords();
         VoiceList();
-      });
-      
-      window.addEventListener('DOMContentLoaded', function() {
-        //VoiceList();
 			});
       
 		</script>
