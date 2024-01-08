@@ -24,11 +24,9 @@
 				var sharedTitle = parsedUrl.searchParams.get('title');
 				var sharedText = parsedUrl.searchParams.get('text');
 				var sharedUrl = parsedUrl.searchParams.get('url');
-				console.log('Title shared: ', sharedTitle);
-				console.log('Text shared: ', sharedText);
-				console.log('URL shared: ', sharedUrl);
 				if(sharedText){
 					textareaMain.value = sharedText;
+          console.log('Text shared: ', sharedText);
 				}
 			});
 		</script>
@@ -179,9 +177,6 @@
 					<select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Open </option>
             <option value="openFile()" >from file</option>
-						<option value="OpenFromLC('saved1')" >from LC 1</option>
-						<option value="OpenFromLC('saved2')" >from LC 2</option>
-						<option value="OpenFromLC('saved3')" >from LC 3</option>
             <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
 						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>          
@@ -191,16 +186,8 @@
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
             <option value="DownloadFile()">to file</option>
-            <option value="SaveToLcNamed()">to LC</option> 
-						<option value="SaveToLC('saved1')">to LC 1</option>
-						<option value="SaveToLC('saved2')">to LC 2</option>
-						<option value="SaveToLC('saved3')">to LC 3</option>						
+            <option value="SaveToLcNamed()">to LC</option>					
 					</select>
-          
-          <!--<select id="selectOpenFromLC" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();">
-						<option value="">Open from LC</option>
-            <optgroup id="optgroupLcRecords" label="LC records"></optgroup>				
-					</select>-->
 					
 					<br>
 					<span>Current step:<em id="currentStep">0</em></span>
@@ -734,7 +721,6 @@
             const option = document.createElement("option");
             option.setAttribute("value", voice.voiceURI);
             option.text = voice.lang +'; '+ voice.name;
-            option.text = voice.lang +'; '+ voice.name;           
             selectVoiceChoice.appendChild(option);
           }
         }
@@ -779,7 +765,7 @@
         //PopulateVoiceList();
       });      
       
-
+      
 		</script>
 		
 	</body>
