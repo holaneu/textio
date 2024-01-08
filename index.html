@@ -236,7 +236,7 @@
 			<section id="tts-controls" class="expandable-section" style="display: none;">
 				<nav>
 					Voice: 
-          <select id="tts-voice-choice"></select></br>
+          <select id="tts-voices"></select></br>
 					Rate: 
 					<select id="tts-rate">
 						<option value="0.3">very slow</option>
@@ -297,6 +297,7 @@
 			const	cardFront = document.querySelector(".card-front");
 			const	cardBack = document.querySelector(".card-back");
       const textareaLogs = document.getElementById('textarea-logs');
+      const selectTtsVoices = document.getElementById('tts-voices');
 
       var logs = [];
       var historySteps = [];
@@ -710,23 +711,34 @@
       // TTS
 			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API      
 
-      function PopulateVoiceList() {        
-        var selectVoiceChoice = document.getElementById('tts-voice-choice');
+      function PopulateVoiceList() {
+        speechSynthesis.cancel();
         var supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
         Log(supportedLanguages);
         var voices_all = speechSynthesis.getVoices();
-        for (voice of voices_all) {
-          Log('voice lang:' + voice.lang);
-          if (supportedLanguages.indexOf(voice.lang) !== -1) { //supportedLanguages.includes(voice.lang)
-            Log('voice supported: ' + voice.lang + ' - ' + voice.name);
-            const option = document.createElement("option");
-            option.setAttribute("value", voice.voiceURI);
-            option.text = voice.lang +'; '+ voice.name;
-            selectVoiceChoice.appendChild(option);
-          }
-        }
         //voices_supported = Array.from(voices_all).filter(item => supportedLanguages.includes(item.lang));
-        
+        /*for (var voice of voices_all) {
+          Log('voice lang:' + voice.lang);
+          // if (supportedLanguages.includes(voice.lang)) {
+          if (supportedLanguages.indexOf(voice.lang) !== -1) { 
+            Log('voice supported: ' + voice.lang + ' - ' + voice.name);
+            var option = document.createElement("option");
+            option.value = voice.voiceURI;
+            option.text = voice.lang +'; '+ voice.name;
+            selectTtsVoices.appendChild(option);
+          }
+        }*/
+
+        // testing experiments
+        selectTtsVoices.innerHTML = "";
+        for (var lang of supportedLanguages) {
+          Log(lang);
+          var option = document.createElement("option");
+          option.value = lang;
+          option.text = lang;
+          selectTtsVoices.appendChild(option);
+        }
+        selectTtsVoices.selectedIndex = '0'
       }
 
 			function Speak(textToRead){
@@ -738,7 +750,7 @@
           let availableVoices = speechSynthesis.getVoices();
           let utterance = new SpeechSynthesisUtterance();
           utterance.text = textToRead;
-          utterance.voice = availableVoices.find(o => o.voiceURI === document.getElementById('tts-voice-choice').value) || availableVoices[0];
+          utterance.voice = availableVoices.find(o => o.voiceURI === selectTtsVoices.value) || availableVoices[0];
           utterance.pitch = document.getElementById('tts-pitch').value;
           utterance.rate = document.getElementById('tts-rate').value;
           speechSynthesis.speak(utterance);
@@ -763,8 +775,11 @@
       // page initialization
       window.addEventListener('load', function(){
         PopulateLcRecords();
-        //PopulateVoiceList();
-      });      
+      });
+      
+      window.addEventListener('DOMContentLoaded', function() {
+				PopulateVoiceList();
+			});
       
       
 		</script>
