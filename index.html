@@ -740,13 +740,21 @@
             if (voices_all.length) {
               clearInterval(IntervalGetVoices);
 
+              /*
               voices_filtered = Array.from(voices_all).filter(v => supported_tts_languages.join(',').includes(v.lang) );
-              console.log(voices_filtered);
-              
+              console.log('voices_filtered: ', voices_filtered);
+              */              
+
               selectTtsVoices.innerHTML = "";
 
-              for (var voice of voices_filtered) {
-                Log('voice lang:' + voice.lang);
+              for (var voice of voices_all) {
+                var isLangSupported = 'no';
+                var supportedLangStr = supported_tts_languages.join(',');
+                Log(supportedLangStr);
+                if (supportedLangStr.indexOf(voice.lang) > -1) {
+                  isLangSupported = 'yes';
+                }
+                Log('voice lang: ' + voice.lang + ', isLangSupported: ' + isLangSupported);
                 var option = document.createElement("option");
                 option.value = voice.voiceURI;
                 option.text = voice.lang +" - "+ voice.name;
