@@ -24,11 +24,9 @@
 				var sharedTitle = parsedUrl.searchParams.get('title');
 				var sharedText = parsedUrl.searchParams.get('text');
 				var sharedUrl = parsedUrl.searchParams.get('url');
-				console.log('Title shared: ', sharedTitle);
-				console.log('Text shared: ', sharedText);
-				console.log('URL shared: ', sharedUrl);
 				if(sharedText){
 					textareaMain.value = sharedText;
+          console.log('Text shared: ', sharedText);
 				}
 			});
 		</script>
@@ -178,29 +176,20 @@
 	
 					<select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Open </option>
-            <option value="openFile()" >from file</option>
-						<option value="OpenFromLC('saved1')" >from LC 1</option>
-						<option value="OpenFromLC('saved2')" >from LC 2</option>
-						<option value="OpenFromLC('saved3')" >from LC 3</option>
+            <option value="OpenFile()" >from file</option>
             <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
 						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>          
 
-					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
+					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
 					
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
             <option value="DownloadFile()">to file</option>
-            <option value="SaveToLcNamed()">to LC</option> 
-						<option value="SaveToLC('saved1')">to LC 1</option>
-						<option value="SaveToLC('saved2')">to LC 2</option>
-						<option value="SaveToLC('saved3')">to LC 3</option>						
+            <option value="SaveToLsNamed()">to LC</option>					
 					</select>
-          
-          <!--<select id="selectOpenFromLC" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();">
-						<option value="">Open from LC</option>
-            <optgroup id="optgroupLcRecords" label="LC records"></optgroup>				
-					</select>-->
+
+          <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Settings</button>
 					
 					<br>
 					<span>Current step:<em id="currentStep">0</em></span>
@@ -233,23 +222,15 @@
 					<option value="Transform(DecodeUri)">Decode URL</option>	      
 				</select>
 				
-				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button> <br>
-        
+				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
+        <br>        
         <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
-        <button id="btnToggleCustomCodeSection" onclick="ToggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
-        <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Show app settings</button>
-
-			</section>
-
-			<section id="editor-textarea-custom" class="expandable-section" style="display: none;">
-				<textarea id="textareaEval"></textarea>    
-				<button onclick="EvalCustomScript();">Execute custom script <span>&#11142;</span></button>
 			</section>
 
 			<section id="tts-controls" class="expandable-section" style="display: none;">
 				<nav>
 					Voice: 
-          <select id="tts-voice-choice"></select></br>
+          <select id="tts-voices"></select></br>
 					Rate: 
 					<select id="tts-rate">
 						<option value="0.3">very slow</option>
@@ -275,11 +256,21 @@
 			</section>
 
       <section id="section-app-settings" class="expandable-section" style="display: none;">
-        <nav> 
-          <button id="button-clear-storage" onclick="ClearStorage()">Clear storage</button>
+        <nav>
+          <button id="btnToggleCustomCodeSection" onclick="ToggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
           <br>
-          <button id="button-enable-log-alerts" onclick="ToggleVisibility('#section-logs', this.id)">Show logs</button>
+          <button id="button-enable-logs" onclick="ToggleVisibility('#section-logs', this.id)">Show logs</button>
+          <br>          
+          <button id="button-remove-ls-item" onclick="RemoveLsRecord()">Remove LS item</button>
+          <br>
+          <button id="button-clear-ls" onclick="ClearLS()">Clear LS</button>
+          <br>
         </nav>
+			</section>
+
+      <section id="editor-textarea-custom" class="expandable-section" style="display: none;">
+				<textarea id="textareaEval"></textarea>    
+				<button onclick="EvalCustomScript();">Execute custom script</button>
 			</section>
 			
 			<section id="flashcards-section" style="display: none;">    
@@ -310,9 +301,14 @@
 			const	cardFront = document.querySelector(".card-front");
 			const	cardBack = document.querySelector(".card-back");
       const textareaLogs = document.getElementById('textarea-logs');
+      const selectTtsVoices = document.getElementById('tts-voices');      
 
       var logs = [];
       var historySteps = [];
+      var synth = speechSynthesis;
+      var voices_all;
+      var voices_filtered;
+      var supported_tts_languages = ['cs-CZ', 'en-US', 'en-GB'];
       
       textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
@@ -500,19 +496,6 @@
 				return formattedDate;
 			}
 			
-			function DownloadFile() {
-        var fileName = "textio_"+GetDateTime()+".txt";
-        var userInput = prompt("File name:");
-        if (userInput !== null && userInput !== "") {
-          fileName = 'textio - ' + userInput.trim();
-        }      
-				var hiddenElement = document.createElement('a');
-				hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
-				hiddenElement.target = '_blank';
-				hiddenElement.download = fileName;
-				hiddenElement.click();
-			}
-			
 			function TTSedit(input) {
 				var b = input.toLowerCase().split("\n");
 				var c = [];
@@ -647,11 +630,12 @@
 				textareaMain.value = result;
 			}
 
-			function openFile() {
+			function OpenFile() {
 				HistoryAdd();
 				document.getElementById('inp').click();
 			}
-			function readFile(e) {
+
+			function ReadFile(e) {
 				var file = e.target.files[0];
 				if (!file) return;
 				var reader = new FileReader();
@@ -661,30 +645,30 @@
 				reader.readAsText(file);
 			}
 
-			function SaveToLC(lcKeyName){
-				localStorage.setItem(lcKeyName, textareaMain.value);
+      // Download file = Save file
+      function DownloadFile() {
+        var userInput = prompt("File name:");
+        if (userInput !== null && userInput !== "") {
+          fileName = 'textio - ' + userInput.trim();
+          var hiddenElement = document.createElement('a');
+          hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
+          hiddenElement.target = '_blank';
+          hiddenElement.download = fileName;
+          hiddenElement.click();
+        }				
 			}
 
-      function OpenFromLC(lcKeyName){
-        HistoryAdd();
-				var lcValue = localStorage.getItem(lcKeyName); //localStorage[lcKeyName]
-				if(lcValue && typeof lcValue === 'string' && lcValue.length > 0){
-					textareaMain.value = lcValue;
-				}
-			}
-
-      // testing of new version save and open LC:
-      function SaveToLcNamed(){
+      function SaveToLsNamed(){
         var userInput = prompt("Save under name:");
         if (userInput !== null && userInput !== "") {
           var key = 'saved: ' + userInput.trim();
           var value = JSON.stringify({"name": userInput.trim(), "timestamp": GetDateTime(), "content": textareaMain.value});
           localStorage.setItem(key, value);
-        }
-        PopulateLcRecords();	      
+          PopulateLsRecords();
+        }        	      
 			}
       
-      function ListLcRecords() {
+      function ListLsRecords() {
         const savedKeys = Object.keys(localStorage); 
         const filteredKeys = savedKeys.filter(key => key.startsWith("saved"));
         const savedRecords = filteredKeys.map(key => {
@@ -697,48 +681,75 @@
         return savedRecords;
       }
 
-      function PopulateLcRecords() {
-        var records = ListLcRecords();
+      function PopulateLsRecords() {
+        var records = ListLsRecords();
         console.log(records);
         var optgroup = document.getElementById('optgroupLcRecords');
         optgroup.innerHTML = ""; // Clear existing options
         records.forEach((item) => {
           console.log(item);
           const option = document.createElement("option");
-          option.setAttribute("value", "OpenLcRecord('"+ item.lcKey +"')"); 
+          option.value = "OpenLsRecord('"+ item.lcKey +"')"; 
           option.text = item.name;
-          //option.setAttribute("onclick", "OpenLcRecord(this.value)");
           optgroup.appendChild(option);
         });
       }
       
-      function OpenLcRecord(lcKey) {
+      function OpenLsRecord(lcKey) {
         var record = JSON.parse(localStorage.getItem(lcKey));
         if (record.content) {
+          HistoryAdd();
           textareaMain.value = record.content;
         }
       }
 
-      // TTS
-			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
-			const supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
-      Log(supportedLanguages);
+      function RemoveLsRecord(){
+        var userInput = prompt("Remove record named:");
+        if (userInput !== null && userInput !== "") {
+          var confirmation = confirm("Are you sure you want to remove "+ userInput +"?");
+          if (confirmation) {
+            var key = 'saved: ' + userInput.trim();
+            localStorage.removeItem(key);
+            PopulateLsRecords();
+          }          
+        }        	      
+			}
 
-      function PopulateVoiceList() {        
-        var selectVoiceChoice = document.getElementById('tts-voice-choice');
-        var voices_all = speechSynthesis.getVoices();
-        for (voice of voices_all) {
-          if (supportedLanguages.indexOf(voice.lang) !== -1) { //supportedLanguages.includes(voice.lang)
-            Log('voice supported: ' + voice.lang + ' - ' + voice.name);
-            const option = document.createElement("option");
-            option.setAttribute("value", voice.voiceURI);
-            option.text = voice.lang +'; '+ voice.name;
-            option.text = voice.lang +'; '+ voice.name;           
-            selectVoiceChoice.appendChild(option);
-          }
+      function ClearLS() {
+        var confirmation = confirm("Are you sure you want to clear the local storage?");
+        if (confirmation) {
+          localStorage.clear();
+          PopulateLsRecords(); 
         }
-        //voices_supported = Array.from(voices_all).filter(item => supportedLanguages.includes(item.lang));
-        
+      }
+
+      // TTS
+			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API      
+
+      function VoiceList () {
+        const IntervalGetVoices = setInterval(function() {
+          try {    
+            voices_all = synth.getVoices();
+            if (voices_all.length) {
+              clearInterval(IntervalGetVoices);
+              
+              voices_filtered = voices_all.filter(v => supported_tts_languages.includes(v.lang.replace('_','-')) );
+              selectTtsVoices.innerHTML = "";
+              for (var voice of voices_filtered) {                
+                Log('voice lang: ' + voice.lang );
+                var option = document.createElement("option");
+                option.value = voice.voiceURI;
+                option.text = voice.lang +" - "+ voice.name;
+                selectTtsVoices.appendChild(option);
+              }
+              selectTtsVoices.selectedIndex = '0';
+            } else {
+              Log("Voices are not available yet");
+            }
+          } catch (e) {
+            Log(e);
+          }
+        }, 200);
       }
 
 			function Speak(textToRead){
@@ -746,39 +757,28 @@
           alert("Your device does not support the SpeechSynthesis API");
         }
         else {
-          speechSynthesis.cancel();
-          let availableVoices = speechSynthesis.getVoices();
-          let utterance = new SpeechSynthesisUtterance();
-          utterance.text = textToRead;
-          utterance.voice = availableVoices.find(o => o.voiceURI === document.getElementById('tts-voice-choice').value) || availableVoices[0];
-          utterance.pitch = document.getElementById('tts-pitch').value;
-          utterance.rate = document.getElementById('tts-rate').value;
-          speechSynthesis.speak(utterance);
-        }
-      }
-
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = function() {
-          Log('onvoiceschanged activated');
-          PopulateVoiceList();          
-        }
-      }
-
-      function ClearStorage() {
-        var confirmation = confirm("Are you sure you want to clear the local storage?");
-        if (confirmation) {
-          localStorage.clear();
-          PopulateLcRecords(); 
+          if (textToRead === "") {
+            alert('No text to read!');
+          } else if (voices_filtered.length) {
+            speechSynthesis.cancel();
+            let availableVoices = voices_filtered; //speechSynthesis.getVoices();
+            let utterance = new SpeechSynthesisUtterance();
+            utterance.text = textToRead;
+            utterance.voice = availableVoices.find(o => o.voiceURI === selectTtsVoices.value) || availableVoices[0];
+            utterance.pitch = document.getElementById('tts-pitch').value;
+            utterance.rate = document.getElementById('tts-rate').value;
+            speechSynthesis.speak(utterance);
+          }
         }
       }
       
-      // page initialization
-      window.addEventListener('load', function(){
-        PopulateLcRecords();
-        //PopulateVoiceList();
-      });      
       
-
+      // page initialization      
+      window.addEventListener('DOMContentLoaded', function() {
+        PopulateLsRecords();
+        VoiceList();
+			});
+      
 		</script>
 		
 	</body>
