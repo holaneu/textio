@@ -739,11 +739,18 @@
           if (voices_all.length) {
             clearInterval(IntervalGetVoices);
 
-            voices_filtered = voices_all.filter(function(v){
-              return supported_tts_languages.join(',').includes(v.lang);
+            voices_filtered = Array.from(voices_all).filter(function(v){
+              try {
+                return supported_tts_languages.join(',').includes(v.lang);
+              } catch(e) {
+                Log(e);
+              }
+              
             });
+            console.log(voices_filtered);
             
             selectTtsVoices.innerHTML = "";
+
             for (var voice of voices_filtered) {
               Log('voice lang:' + voice.lang);
               var option = document.createElement("option");
@@ -751,6 +758,7 @@
               option.text = voice.lang +" - "+ voice.name;
               selectTtsVoices.appendChild(option);
             }
+
             selectTtsVoices.selectedIndex = '0';
           } else {
             Log("voices are not available yet");
