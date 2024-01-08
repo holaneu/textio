@@ -297,10 +297,14 @@
 			const	cardFront = document.querySelector(".card-front");
 			const	cardBack = document.querySelector(".card-back");
       const textareaLogs = document.getElementById('textarea-logs');
-      const selectTtsVoices = document.getElementById('tts-voices');
+      const selectTtsVoices = document.getElementById('tts-voices');      
 
       var logs = [];
       var historySteps = [];
+      var synth = speechSynthesis;
+      var voices_all;
+      var voices_filtered;
+      var supported_tts_languages = ['cs-CZ', 'en-US', 'en-GB'];
       
       textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
@@ -694,9 +698,8 @@
         records.forEach((item) => {
           console.log(item);
           const option = document.createElement("option");
-          option.setAttribute("value", "OpenLcRecord('"+ item.lcKey +"')"); 
+          option.value = "OpenLcRecord('"+ item.lcKey +"')"; 
           option.text = item.name;
-          //option.setAttribute("onclick", "OpenLcRecord(this.value)");
           optgroup.appendChild(option);
         });
       }
@@ -717,7 +720,7 @@
         Log(supportedLanguages);
         var voices_all = speechSynthesis.getVoices();
         //voices_supported = Array.from(voices_all).filter(item => supportedLanguages.includes(item.lang));
-        /*for (var voice of voices_all) {
+        for (var voice of voices_all) {
           Log('voice lang:' + voice.lang);
           // if (supportedLanguages.includes(voice.lang)) {
           if (supportedLanguages.indexOf(voice.lang) !== -1) { 
@@ -727,18 +730,30 @@
             option.text = voice.lang +'; '+ voice.name;
             selectTtsVoices.appendChild(option);
           }
-        }*/
+        }      
+      }
 
-        // testing experiments
-        selectTtsVoices.innerHTML = "";
-        for (var lang of supportedLanguages) {
-          Log(lang);
-          var option = document.createElement("option");
-          option.value = lang;
-          option.text = lang;
-          selectTtsVoices.appendChild(option);
-        }
-        selectTtsVoices.selectedIndex = '0'
+      function VoiceList () {
+        const IntervalGetVoices = setInterval(function() {        
+          voices_all = synth.getVoices();
+          if (voices_all.length) {
+            clearInterval(IntervalGetVoices);
+
+            Log(voices_all);            
+            
+            selectTtsVoices.innerHTML = "";
+            for (var voice of voices_all) {
+              Log('voice lang:' + voice.lang);
+              var option = document.createElement("option");
+              option.value = voice.lang;
+              option.text = voice.name;
+              selectTtsVoices.appendChild(option);
+            }
+            selectTtsVoices.selectedIndex = '0';
+          } else {
+            Log("voices are not available now");
+          }
+        }, 200);
       }
 
 			function Speak(textToRead){
@@ -756,13 +771,14 @@
           speechSynthesis.speak(utterance);
         }
       }
-
+      /*
       if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = function() {
           Log('onvoiceschanged activated');
           PopulateVoiceList();          
         }
       }
+      */
 
       function ClearStorage() {
         var confirmation = confirm("Are you sure you want to clear the local storage?");
@@ -778,9 +794,9 @@
       });
       
       window.addEventListener('DOMContentLoaded', function() {
-				PopulateVoiceList();
+				//PopulateVoiceList();
+        VoiceList();
 			});
-      
       
 		</script>
 		
