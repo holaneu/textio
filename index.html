@@ -714,7 +714,7 @@
       // TTS
 			// Sources: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API      
 
-      function PopulateVoiceList() {
+      /*function PopulateVoiceList() {
         speechSynthesis.cancel();
         var supportedLanguages = ['cs-CZ', 'en-US', 'en-GB'];
         Log(supportedLanguages);
@@ -731,7 +731,7 @@
             selectTtsVoices.appendChild(option);
           }
         }      
-      }
+      }*/
 
       function VoiceList () {
         const IntervalGetVoices = setInterval(function() {
@@ -741,26 +741,17 @@
               clearInterval(IntervalGetVoices);
               
               voices_filtered = voices_all.filter(v => supported_tts_languages.includes(v.lang.replace('_','-')) );
-              console.log('voices_filtered: ', voices_filtered);                          
-
               selectTtsVoices.innerHTML = "";
-
-              for (var voice of voices_filtered) {
-                var isLangSupported = 'no';
-                var supportedLangStr = supported_tts_languages.join(',');
-                if (supportedLangStr.indexOf(voice.lang.replace('_','-')) > -1) {
-                  isLangSupported = 'yes';
-                }
-                Log('voice lang: ' + voice.lang + ', isLangSupported: ' + isLangSupported);
+              for (var voice of voices_filtered) {                
+                Log('voice lang: ' + voice.lang );
                 var option = document.createElement("option");
                 option.value = voice.voiceURI;
                 option.text = voice.lang +" - "+ voice.name;
                 selectTtsVoices.appendChild(option);
               }
-
               selectTtsVoices.selectedIndex = '0';
             } else {
-              Log("voices are not available yet");
+              Log("Voices are not available yet");
             }
           } catch (e) {
             Log(e);
@@ -775,9 +766,9 @@
         else {
           if (textToRead === "") {
             alert('No text to read!');
-          } else {
+          } else if (voices_filtered.length) {
             speechSynthesis.cancel();
-            let availableVoices = speechSynthesis.getVoices();
+            let availableVoices = voices_filtered; //speechSynthesis.getVoices();
             let utterance = new SpeechSynthesisUtterance();
             utterance.text = textToRead;
             utterance.voice = availableVoices.find(o => o.voiceURI === selectTtsVoices.value) || availableVoices[0];
