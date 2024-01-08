@@ -181,7 +181,7 @@
 						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>          
 
-					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="readFile(event)" />
+					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
 					
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
@@ -487,19 +487,6 @@
 				return formattedDate;
 			}
 			
-			function DownloadFile() {
-        var fileName = "textio_"+GetDateTime()+".txt";
-        var userInput = prompt("File name:");
-        if (userInput !== null && userInput !== "") {
-          fileName = 'textio - ' + userInput.trim();
-        }      
-				var hiddenElement = document.createElement('a');
-				hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
-				hiddenElement.target = '_blank';
-				hiddenElement.download = fileName;
-				hiddenElement.click();
-			}
-			
 			function TTSedit(input) {
 				var b = input.toLowerCase().split("\n");
 				var c = [];
@@ -634,11 +621,11 @@
 				textareaMain.value = result;
 			}
 
-			function openFile() {
+			function OpenFile() {
 				HistoryAdd();
 				document.getElementById('inp').click();
 			}
-			function readFile(e) {
+			function ReadFile(e) {
 				var file = e.target.files[0];
 				if (!file) return;
 				var reader = new FileReader();
@@ -646,6 +633,20 @@
 					textareaMain.value = e.target.result;
 				}
 				reader.readAsText(file);
+			}
+
+      // Download file = Save file
+      function DownloadFile() {
+        //var fileName = "textio_"+GetDateTime()+".txt";
+        var userInput = prompt("File name:");
+        if (userInput !== null && userInput !== "") {
+          fileName = 'textio - ' + userInput.trim();
+          var hiddenElement = document.createElement('a');
+          hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
+          hiddenElement.target = '_blank';
+          hiddenElement.download = fileName;
+          hiddenElement.click();
+        }				
 			}
 
 			function SaveToLC(lcKeyName){
