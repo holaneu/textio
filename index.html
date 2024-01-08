@@ -734,34 +734,31 @@
       }
 
       function VoiceList () {
-        const IntervalGetVoices = setInterval(function() {        
-          voices_all = synth.getVoices();
-          if (voices_all.length) {
-            clearInterval(IntervalGetVoices);
+        const IntervalGetVoices = setInterval(function() {
+          try {    
+            voices_all = synth.getVoices();
+            if (voices_all.length) {
+              clearInterval(IntervalGetVoices);
 
-            voices_filtered = Array.from(voices_all).filter(function(v){
-              try {
-                return supported_tts_languages.join(',').includes(v.lang);
-              } catch(e) {
-                Log(e);
-              }
+              voices_filtered = Array.from(voices_all).filter(v => supported_tts_languages.join(',').includes(v.lang) );
+              console.log(voices_filtered);
               
-            });
-            console.log(voices_filtered);
-            
-            selectTtsVoices.innerHTML = "";
+              selectTtsVoices.innerHTML = "";
 
-            for (var voice of voices_filtered) {
-              Log('voice lang:' + voice.lang);
-              var option = document.createElement("option");
-              option.value = voice.voiceURI;
-              option.text = voice.lang +" - "+ voice.name;
-              selectTtsVoices.appendChild(option);
+              for (var voice of voices_filtered) {
+                Log('voice lang:' + voice.lang);
+                var option = document.createElement("option");
+                option.value = voice.voiceURI;
+                option.text = voice.lang +" - "+ voice.name;
+                selectTtsVoices.appendChild(option);
+              }
+
+              selectTtsVoices.selectedIndex = '0';
+            } else {
+              Log("voices are not available yet");
             }
-
-            selectTtsVoices.selectedIndex = '0';
-          } else {
-            Log("voices are not available yet");
+          } catch (e) {
+            Log(e);
           }
         }, 200);
       }
