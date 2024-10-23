@@ -12,24 +12,49 @@
     <link rel="icon" type="image/png" href="textio.png"> 
 
 		<script>
-			if('serviceWorker' in navigator) {
-				navigator.serviceWorker
-				.register('service–worker.js')
-				.then(function() { console.log("Service Worker Registered"); });
-			}
-
-			window.addEventListener('DOMContentLoaded', () => {
-				const parsedUrl = new URL(window.location);
-				// searchParams.get() will properly handle decoding the values.
-				var sharedTitle = parsedUrl.searchParams.get('title');
-				var sharedText = parsedUrl.searchParams.get('text');
-				var sharedUrl = parsedUrl.searchParams.get('url');
-				if(sharedText){
-					textareaMain.value = sharedText;
-          console.log('Text shared: ', sharedText);
-				}
-			});
-		</script>
+      if ('serviceWorker' in navigator) {
+          navigator.serviceWorker
+              .register('service-worker.js') // Correct the hyphen here
+              .then(function() {
+                  console.log("Service Worker Registered");
+              })
+              .catch(function(error) {
+                  console.error("Service Worker Registration Failed:", error); // Add error handling
+              });
+      }
+  
+      window.addEventListener('DOMContentLoaded', () => {
+          const parsedUrl = new URL(window.location);
+          
+          const sharedTitle = parsedUrl.searchParams.get('title');
+          const sharedText = parsedUrl.searchParams.get('text');
+          const sharedUrl = parsedUrl.searchParams.get('url');
+  
+          // Ensure `textareaMain` is properly assigned
+          //const textareaMain = document.getElementById('textareaMain');
+          if (textareaMain) {
+              let finalText = ''; // Accumulate shared content
+  
+              if (sharedText) {
+                  finalText += sharedText + "\n";
+                  console.log('sharedText:', sharedText);
+              }
+              if (sharedTitle) {
+                  finalText += sharedTitle + "\n";
+                  console.log('sharedTitle:', sharedTitle);
+              }
+              if (sharedUrl) {
+                  finalText += sharedUrl + "\n";
+                  console.log('sharedUrl:', sharedUrl);
+              }
+  
+              textareaMain.value = finalText; // Assign all at once
+          } else {
+              console.error('textareaMain element not found.');
+          }
+        });
+    </script>
+  
 
 		<style>
 			@-ms-viewport {
@@ -185,8 +210,10 @@
 					
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
-            <option value="DownloadFile()">to file</option>
-            <option value="SaveToLsNamed()">to LC</option>					
+            <!--<option value="">Save</option>-->
+            <option value="SaveToLsNamed()">Save as new</option>
+            <!--<option value="">Save to</option>-->
+            <option value="DownloadFile()">Download</option>				
 					</select>
 
           <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Settings</button>
