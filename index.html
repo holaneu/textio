@@ -210,8 +210,10 @@
 					
 					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
 						<option value="">Save</option>
-            <option value="DownloadFile()">to file</option>
-            <option value="SaveToLsNamed()">to LC</option>					
+            <!--<option value="">Save</option>-->
+            <option value="SaveToLsNamed()">Save as new</option>
+            <!--<option value="">Save to</option>-->
+            <option value="DownloadFile()">Download</option>				
 					</select>
 
           <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Settings</button>
