@@ -28,19 +28,22 @@
 
 -----
 
-
------
-
 ## Name of opend item display
 - when user opens item from storage, its name is visible abobe the main textare
 
 -----
 
+## Save function
+- if item is opened from the storage, user has possibility to save updates clicking "Save" button
+
+
+# DONE:
+
 ## New storage data structure
 - main key "textio_data" (textio is prefix set in app configs var)
 - each item has its id (radon 10 chars)
 
-# DONE:
+-----
 
 ## Rename tools dropdown to "Transform"
 
