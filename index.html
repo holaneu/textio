@@ -34,15 +34,17 @@
           //const textareaMain = document.getElementById('textareaMain');
           if (textareaMain) {
               let finalText = ''; // Accumulate shared content
+
+              if (sharedTitle) {
+                  finalText += sharedTitle + "\n";
+                  console.log('sharedTitle:', sharedTitle);
+              }
   
               if (sharedText) {
                   finalText += sharedText + "\n";
                   console.log('sharedText:', sharedText);
               }
-              if (sharedTitle) {
-                  finalText += sharedTitle + "\n";
-                  console.log('sharedTitle:', sharedTitle);
-              }
+              
               if (sharedUrl) {
                   finalText += sharedUrl + "\n";
                   console.log('sharedUrl:', sharedUrl);
