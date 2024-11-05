@@ -1,0 +1,128 @@
+@-ms-viewport {
+  width: device-width;
+}
+body {
+  text-align: left;
+  font-family: "OpenSans", Verdana, sans-serif;
+  margin:0;
+  padding:0;
+      box-sizing: border-box;
+      background: black;
+      color: gray;
+}
+h2 {
+  margin-bottom: 5px;
+  margin-top: 10px;
+  padding: 0;
+  font-size: 14px;
+  color:teal;
+}
+button, select {
+  margin-bottom: 7px;
+  margin-right: 3px;
+  padding: 7px 10px;
+  background: #292929;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #45edf5;
+  cursor: pointer;
+}
+button span {
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 5px;
+
+}
+button.orange {
+  color: rgb(255 209 41 / 1)
+}
+button:disabled {
+  color: silver;
+}
+#textareaMain,
+#textarea-logs {
+  width: calc(100% - 25px);
+  background: #181818;
+  padding: 5px 10px;
+  min-height: 250px;
+  margin-bottom: 10px;
+  border: none;
+  color: silver;
+}
+#textareaEval {
+  width: calc(100% - 25px);
+  min-height: 80px;
+  margin-bottom: 5px;
+  border: none;
+  margin-top: 0px;
+  background: #181818;
+  padding: 5px 10px;
+  color: silver;
+}
+header {
+  background:black;
+  padding: 5px 10px;
+  color:white;
+  text-align:center;
+  margin-bottom: 5px;
+}
+header a {
+  text-decoration: none;
+  color: #00BCD4;
+}
+main {
+  padding: 5px;
+}
+nav {
+  padding: 5px;
+  font-size: 12px;
+}
+header em {
+  font-style: italic;
+  font-size: 14px;
+}
+.expandable-section {
+  display: block;
+  border-left: 5px solid cyan;
+  margin-top: 15px;
+  margin-bottom: 20px;
+  padding-left: 10px;
+}
+#flashcards-section {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 70px 10px 30px 10px;
+  background: rgba(0,0,0);
+  box-sizing: border-box;
+  text-align: center;
+}
+#flashcards-section article {
+  color: white;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 20px;
+}
+#flashcards-section nav {
+  position: absolute;
+  width: calc(100% - 20px);
+  text-align: center;
+  bottom: 20px;
+  box-sizing: border-box;
+}
+#flashcards-section nav button {
+  padding: 12px 20px;
+  margin-left: 10px;
+  margin-right: 10px
+}
+
+#currentStep {
+  margin-right: 6px;
+}
+.btn-close {
+  color: gray;
+}
+#spoken-words {font-size: 80px; color: gray;}
