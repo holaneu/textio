@@ -85,10 +85,10 @@
 
 					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
 					
-					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-						<option value="">Save</option>
-            <!--<option value="">Save</option>-->
-            <option value="SaveToLsNamed()">Save as new</option>
+					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:110px">
+						<option value="">-Save</option>
+            <option value="SaveOpenedRecord()">Save (overwrite)</option>
+            <option value="SaveAsNewToLs()">Save as new</option>
             <!--<option value="">Save to</option>-->
             <option value="DownloadFile()">Download</option>				
 					</select>

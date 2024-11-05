@@ -17,6 +17,7 @@ var synth = speechSynthesis;
 var voices_all;
 var voices_filtered;
 var supported_tts_languages = ['cs-CZ', 'en-US', 'en-GB'];
+let openedLsRecord = null;
 
 textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
@@ -58,6 +59,7 @@ function LoadFile(fileHref) {
   //return xmlhttp.responseText;
   var result = xmlhttp.responseText;
   textareaMain.value = result;
+  openedLsRecord = null;
 }
 
 function OpenFile() {
@@ -71,6 +73,7 @@ function ReadFile(e) {
   var reader = new FileReader();
   reader.onload = function(e) {
     textareaMain.value = e.target.result;
+    openedLsRecord = null;
   }
   reader.readAsText(file);
 }
@@ -88,21 +91,41 @@ function DownloadFile() {
   }				
 }
 
-function SaveToLsNamed(){
+function SaveAsNewToLs(){
   var userInput = prompt("Name:");
   if (userInput !== null && userInput !== "") {
     const id = generateId();
     var key = `${DB_KEY_PREFIX}` + id;
-    var value = JSON.stringify({
+    var record = {
       "id": id,
       "name": userInput.trim(),        
       "content": textareaMain.value,
       "created": Date.now(),
       "timestamp": GetDateTime(),
-    });
+    };
+    var value = JSON.stringify(record);
     localStorage.setItem(key, value);
     PopulateLsRecords();
+    openedLsRecord = record;
   }        	      
+}
+
+function SaveOpenedRecord() {
+  if (openedLsRecord !== null && openedLsRecord.id) {
+    var confirmation = confirm("Are you sure you want to save and rewrite the item?");
+    if (confirmation) {
+      var key = `${DB_KEY_PREFIX}` + openedLsRecord.id;
+      var record = openedLsRecord;
+      record.content = textareaMain.value;      
+      var value = JSON.stringify(record);
+      localStorage.setItem(key, value);
+      //PopulateLsRecords();
+      openedLsRecord = record;
+    }          
+  
+  } else {
+    SaveAsNewToLs();
+  }
 }
 
 function ListLsRecords() {
@@ -145,19 +168,22 @@ function OpenLsRecord(id) {
   if (record && record.content) {
     HistoryAdd();
     textareaMain.value = record.content;
+    openedLsRecord = record;
   }
 }
 
 function RemoveLsRecord(){
-  var userInput = prompt("Remove record named:");
-  if (userInput !== null && userInput !== "") {
-    var confirmation = confirm("Are you sure you want to remove "+ userInput +"?");
+  if (openedLsRecord !== null && openedLsRecord.id) {
+    var confirmation = confirm("Are you sure you want to remove this?");
     if (confirmation) {
-      var key = 'saved: ' + userInput.trim();
+      var key = `${DB_KEY_PREFIX}` + openedLsRecord.id;
       localStorage.removeItem(key);
       PopulateLsRecords();
+      openedLsRecord = null;
+      textareaMain.value = "";
     }          
-  }        	      
+  
+  }  	      
 }
 
 function ClearLS() {
@@ -167,8 +193,8 @@ function ClearLS() {
     records.forEach(function(item){
       localStorage.removeItem(`${DB_KEY_PREFIX}` + item.id);
     });
-    //localStorage.clear();
     PopulateLsRecords(); 
+    openedLsRecord = null;
   }
 }
 
