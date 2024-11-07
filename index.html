@@ -76,17 +76,17 @@
 				<nav>        
 					<button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
 	
-					<select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:82px">
-						<option value="">Open </option>
-            <option value="OpenFile()" >from file</option>
+					<select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
+						<option value="">-Open-</option>
+            <option value="ClickHiddenFileInput()">From file</option>
             <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
 						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
 					</select>          
 
-					<input id="inp" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
+					<input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
 					
-					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:110px">
-						<option value="">-Save</option>
+					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
+						<option value="">-Save-</option>
             <option value="SaveOpenedRecord()">Save (overwrite)</option>
             <option value="SaveAsNewToLs()">Save as new</option>
             <!--<option value="">Save to</option>-->
@@ -97,6 +97,7 @@
 					
 					<br>
 					<span>Current step:<em id="currentStep">0</em></span>
+          <span>Document: <em id="currentDocName"></em></span>
 				</nav>
 			</section>			
 			

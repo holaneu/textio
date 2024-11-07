@@ -1,5 +1,15 @@
-const APP_PREFIX = "textio_";
-const DB_KEY_PREFIX = `${APP_PREFIX}data_`;
+const appConfig = {
+  APP_PREFIX: "textio_",
+  get DB_KEY_PREFIX() {
+    return this.APP_PREFIX + "data_";
+  }
+};
+
+const uiConfig = {
+  labels: {
+    not_saved_doc: "untitled document"
+  }
+};
 
 const	textareaMain = document.querySelector("#textareaMain");
 const textareaEval = document.querySelector("#textareaEval");
@@ -9,7 +19,8 @@ const	btnGoBack = document.querySelector("#goBack");
 const	cardFront = document.querySelector(".card-front");
 const	cardBack = document.querySelector(".card-back");
 const textareaLogs = document.getElementById('textarea-logs');
-const selectTtsVoices = document.getElementById('tts-voices');      
+const selectTtsVoices = document.getElementById('tts-voices');  
+const currentDocName = document.getElementById('currentDocName');    
 
 var logs = [];
 var historySteps = [];
@@ -17,7 +28,7 @@ var synth = speechSynthesis;
 var voices_all;
 var voices_filtered;
 var supported_tts_languages = ['cs-CZ', 'en-US', 'en-GB'];
-let openedLsRecord = null;
+let currentDoc = null;
 
 textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
@@ -31,6 +42,16 @@ function ShuffleArray(inputArray) {
     array[j] = temp;
   }
   return array;
+}
+
+function setCurrentDoc(doc) {
+  console.info(doc);
+  currentDoc = doc;
+  if (doc === null) {
+    currentDocName.innerText = uiConfig.labels.not_saved_doc;
+  } else if (doc && typeof doc === "object" && doc.name) {
+    currentDocName.innerText = doc.name;
+  }
 }
 
 function RandomIndex(range){
@@ -52,19 +73,17 @@ function Transform(callback) {
 }
 
 function LoadFile(fileHref) {
-  HistoryAdd();
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", fileHref, false);
   xmlhttp.send();
-  //return xmlhttp.responseText;
   var result = xmlhttp.responseText;
   textareaMain.value = result;
-  openedLsRecord = null;
+  setCurrentDoc(null);
+  HistoryReset();
 }
 
-function OpenFile() {
-  HistoryAdd();
-  document.getElementById('inp').click();
+function ClickHiddenFileInput() {  
+  document.getElementById('fileInputHidden').click();
 }
 
 function ReadFile(e) {
@@ -73,9 +92,19 @@ function ReadFile(e) {
   var reader = new FileReader();
   reader.onload = function(e) {
     textareaMain.value = e.target.result;
-    openedLsRecord = null;
+    setCurrentDoc(null);
+    HistoryReset();
   }
   reader.readAsText(file);
+}
+
+function OpenLsRecord(id) {
+  var record = JSON.parse(localStorage.getItem(appConfig.DB_KEY_PREFIX + id));
+  if (record && record.content) {    
+    textareaMain.value = record.content;
+    setCurrentDoc(record);
+    HistoryReset();
+  }
 }
 
 // Download file = Save file
@@ -95,7 +124,7 @@ function SaveAsNewToLs(){
   var userInput = prompt("Name:");
   if (userInput !== null && userInput !== "") {
     const id = generateId();
-    var key = `${DB_KEY_PREFIX}` + id;
+    var key = appConfig.DB_KEY_PREFIX + id;
     var record = {
       "id": id,
       "name": userInput.trim(),        
@@ -106,21 +135,21 @@ function SaveAsNewToLs(){
     var value = JSON.stringify(record);
     localStorage.setItem(key, value);
     PopulateLsRecords();
-    openedLsRecord = record;
+    setCurrentDoc(record);
   }        	      
 }
 
 function SaveOpenedRecord() {
-  if (openedLsRecord !== null && openedLsRecord.id) {
-    var confirmation = confirm("Are you sure you want to save and rewrite the item?");
+  if (currentDoc !== null && currentDoc.id) {
+    var confirmation = confirm(`Are you sure you want to save and rewrite the ${currentDoc.name}?`);
     if (confirmation) {
-      var key = `${DB_KEY_PREFIX}` + openedLsRecord.id;
-      var record = openedLsRecord;
+      var key = appConfig.DB_KEY_PREFIX + currentDoc.id;
+      var record = currentDoc;
       record.content = textareaMain.value;      
       var value = JSON.stringify(record);
       localStorage.setItem(key, value);
       //PopulateLsRecords();
-      openedLsRecord = record;
+      setCurrentDoc(record);
     }          
   
   } else {
@@ -130,7 +159,7 @@ function SaveOpenedRecord() {
 
 function ListLsRecords() {
   const savedKeys = Object.keys(localStorage); 
-  const filteredKeys = savedKeys.filter(key => key.startsWith(`${DB_KEY_PREFIX}`));
+  const filteredKeys = savedKeys.filter(key => key.startsWith(appConfig.DB_KEY_PREFIX));
   const savedRecords = filteredKeys.map(key => {
       var record = JSON.parse(localStorage.getItem(key));
       var id = record.id;
@@ -151,11 +180,11 @@ function ListLsRecords() {
 
 function PopulateLsRecords() {
   var records = ListLsRecords();
-  console.log(records);
+  //console.log(records);
   var optgroup = document.getElementById('optgroupLcRecords');
   optgroup.innerHTML = ""; // Clear existing options
   records.forEach((item) => {
-    console.log(item);
+    //console.log(item);
     const option = document.createElement("option");
     option.value = "OpenLsRecord('"+ item.id +"')"; 
     option.text = item.name;
@@ -163,26 +192,17 @@ function PopulateLsRecords() {
   });
 }
 
-function OpenLsRecord(id) {
-  var record = JSON.parse(localStorage.getItem(`${DB_KEY_PREFIX}` + id));
-  if (record && record.content) {
-    HistoryAdd();
-    textareaMain.value = record.content;
-    openedLsRecord = record;
-  }
-}
-
 function RemoveLsRecord(){
-  if (openedLsRecord !== null && openedLsRecord.id) {
-    var confirmation = confirm("Are you sure you want to remove this?");
+  if (currentDoc !== null && currentDoc.id) {
+    var confirmation = confirm(`Are you sure you want to remove ${currentDoc.name}?`);
     if (confirmation) {
-      var key = `${DB_KEY_PREFIX}` + openedLsRecord.id;
+      var key = appConfig.DB_KEY_PREFIX + currentDoc.id;
       localStorage.removeItem(key);
-      PopulateLsRecords();
-      openedLsRecord = null;
       textareaMain.value = "";
-    }          
-  
+      PopulateLsRecords();
+      setCurrentDoc(null);
+      HistoryReset();    
+    }  
   }  	      
 }
 
@@ -191,10 +211,10 @@ function ClearLS() {
   if (confirmation) {
     var records = ListLsRecords();
     records.forEach(function(item){
-      localStorage.removeItem(`${DB_KEY_PREFIX}` + item.id);
+      localStorage.removeItem(appConfig.DB_KEY_PREFIX + item.id);
     });
     PopulateLsRecords(); 
-    openedLsRecord = null;
+    setCurrentDoc(null);
   }
 }
 
@@ -203,7 +223,7 @@ function CreateFlashCards() {
     return item.split(/\s?\.{4}\s?|\s?=\s?|\s?\t\s?/);
   });
   window.cardsShuffled = ShuffleArray(cardsAll);
-  console.log('*** cardsShuffled', cardsShuffled);
+  //console.log('*** cardsShuffled', cardsShuffled);
   flashcardsSection.style.display = 'block';
   window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
   NextCard();
@@ -217,8 +237,8 @@ function NextCard() {
     cardIndex++;
   }
   window.currentCard = cardsShuffled[cardIndex]; //window.cardsAll[cardIndex];
-  console.log('*** cardIndex', cardIndex);
-  console.log('*** currentCard', currentCard);
+  //console.log('*** cardIndex', cardIndex);
+  //console.log('*** currentCard', currentCard);
   cardFront.innerHTML = currentCard[0]; 
   cardBack.innerHTML = "";
   window.currentCardBackLoop = 1;
@@ -357,6 +377,12 @@ function HistoryBack() {
       btnGoBack.disabled = true;
     }
   } 
+}
+
+function HistoryReset() {
+  historySteps = [];
+  currentStepText.innerHTML = historySteps.length;
+  btnGoBack.disabled = true;
 }
 
 function ToggleVisibility ( selector, triggeringElementId ) {
@@ -546,4 +572,5 @@ function DecodeUri(input) {
 window.addEventListener('DOMContentLoaded', function() {
   PopulateLsRecords();
   VoiceList();
+  currentDocName.innerText = uiConfig.labels.not_saved_doc;
 });
