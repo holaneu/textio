@@ -17,7 +17,7 @@ const	flashcardsSection = document.querySelector("#flashcards-section");
 const	currentStepText = document.querySelector("#currentStep"); 
 const	btnGoBack = document.querySelector("#goBack"); 
 const	cardFront = document.querySelector(".card-front");
-const	cardBack = document.querySelector(".card-back");
+const	cardBack = document.querySelector(".card-back > pre"); //document.querySelector(".card-back");
 const textareaLogs = document.getElementById('textarea-logs');
 const selectTtsVoices = document.getElementById('tts-voices');  
 const currentDocName = document.getElementById('currentDocName');    
@@ -218,16 +218,57 @@ function ClearLS() {
   }
 }
 
+function parseItemsFromXmlTag(inputText) {
+
+  function parseTagContent(tagName) {
+    // Adjust regex to make `fieldSeparator` optional
+    const tagMatch = inputText.match(new RegExp(`<${tagName}[^>]*?separator="([^"]+)"(?:[^>]*?fieldSeparator="([^"]+)")?[^>]*?>([\\s\\S]*?)<\\/${tagName}>`, "i"));
+    console.log(tagMatch);
+
+    if (tagMatch && tagMatch[3].trim() !== "") {
+      const separator = tagMatch[1];             // separator value
+      const fieldSeparator = tagMatch[2] || "";  // fieldSeparator value, or empty string if not provided
+      const content = tagMatch[3].trim();
+
+      // Split content by the main separator and process each item
+      return content
+        .split(separator)
+        .map(item => item.trim())
+        .filter(item => item !== "")
+        .map(item => fieldSeparator ? item.split(fieldSeparator).map(field => field.trim()) : [item]);  
+        // If fieldSeparator exists, split by it; otherwise, keep item as a single element array
+    }
+    return null;  // Return null if the tag has no content or is not found
+  }
+
+  return parseTagContent("items") || parseTagContent("item-group") || parseTagContent("data-list") || null;
+}
+
 function CreateFlashCards() {        
-  window.cardsAll = RemoveEmptyLines(textareaMain.value).replace(/\n$/, '').split("\n").map(function(item){
-    return item.split(/\s?\.{4}\s?|\s?=\s?|\s?\t\s?/);
-  });
+  window.cardsAll = RemoveEmptyLines(textareaMain.value)
+    .trim()
+    .split("\n")
+    .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ))
+    .filter(item => item[0] !== "");
   window.cardsShuffled = ShuffleArray(cardsAll);
-  //console.log('*** cardsShuffled', cardsShuffled);
   flashcardsSection.style.display = 'block';
   window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
   NextCard();
-}    
+} 
+
+function CreateFlashCardsFromItemGroup() {
+  const parsedItems = parseItemsFromXmlTag(textareaMain.value);
+  if (parsedItems) {
+    window.cardsAll = parsedItems; 
+    window.cardsShuffled = ShuffleArray(cardsAll);
+    flashcardsSection.style.display = 'block';
+    window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
+    NextCard();
+  } else {
+    alert(`No items found in the document ${currentDoc ? '"' + currentDoc.name + '"' : ''}`);
+  }
+  
+}
 
 function NextCard() {       
   if(cardIndex >= window.cardsShuffled.length-1){
@@ -237,10 +278,8 @@ function NextCard() {
     cardIndex++;
   }
   window.currentCard = cardsShuffled[cardIndex]; //window.cardsAll[cardIndex];
-  //console.log('*** cardIndex', cardIndex);
-  //console.log('*** currentCard', currentCard);
-  cardFront.innerHTML = currentCard[0]; 
-  cardBack.innerHTML = "";
+  cardFront.innerText = currentCard[0]; 
+  cardBack.innerText = "";
   window.currentCardBackLoop = 1;
   if (document.querySelector('#checkbox-auto-speak').checked) {
     Speak(currentCard[0]);
@@ -249,25 +288,22 @@ function NextCard() {
 
 function RandomCard() {
   window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
-  cardFront.innerHTML = currentCard[0]; 
-  cardBack.innerHTML = "";
+  cardFront.innerHTML = currentCard[0];   
+  cardBack.innerText = ""; 
   window.currentCardBackLoop = 1;
 }
 
 function TurnCard() {
   if(currentCard.length >= 2) {
-    window.currentCardBack = currentCard[window.currentCardBackLoop];
-    document.querySelector(".card-back").innerHTML = window.currentCardBack;
-    if(window.currentCardBackLoop < currentCard.length - 1)
-    {
+    window.currentCardBack = currentCard[window.currentCardBackLoop];    
+    cardBack.innerText = window.currentCardBack;
+    if(window.currentCardBackLoop < currentCard.length - 1) {
       window.currentCardBackLoop ++;
-    }
-    else 
-    {
+    } else {
       window.currentCardBackLoop = 1;
     }
   } else {
-    document.querySelector(".card-back").innerHTML = "-- no back side --";
+    cardBack.innerText = "-- no back side --";//document.querySelector(".card-back").innerHTML = "-- no back side --";
   }
 }
 

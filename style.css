@@ -118,6 +118,9 @@ header em {
   margin-left: 10px;
   margin-right: 10px
 }
+.card-front, .card-back {
+  white-space: pre-line;
+}
 
 #currentStep {
   margin-right: 6px;
