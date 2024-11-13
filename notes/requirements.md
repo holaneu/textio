@@ -31,14 +31,17 @@
   - ...
 - function to navigate between screens
 
------
+
+
+
+
+# DONE:
 
 ## Parse flash cards from XML tags items, item-group, data-list
 - clean flash card's content
   - empty rows on start and end
-  - replace \n by <br>
-
-# DONE:
+  
+-----
 
 ## Name of opend item display
 - when user opens item from storage, its name is visible abobe the main textare

@@ -218,43 +218,25 @@ function ClearLS() {
   }
 }
 
-/*
-function parseItemsFromXmlTag(inputText) {
-  // Define a helper function to extract content based on a specified tag and separator attribute
-  function parseTagContent(tagName) {
-    // Adjust regex to handle <tagName> with optional separator and flexible spacing
-    const tagMatch = inputText.match(new RegExp(`<${tagName}[^>]*?separator="([^"]+)"[^>]*?>([\\s\\S]*?)<\\/${tagName}>`, "i"));
-    console.log(tagMatch);
-    if (tagMatch && tagMatch[2].trim() !== "") {
-      const separator = tagMatch[1];
-      const content = tagMatch[2].trim();
-      return content.split(separator).filter(item => item && (item !== "" || item !== "\n")).map(item => [item.trim(), '']);
-    }
-    return null;  // Return null if the tag has no content or is not found
-  }
-
-  // Attempt to get content from <item-group>, then <data-list>, or default to null if neither is found
-  return parseTagContent("items") || parseTagContent("item-group") || parseTagContent("data-list") || null;
-}
-  */
-
 function parseItemsFromXmlTag(inputText) {
 
   function parseTagContent(tagName) {
-    // Find the tag and separator within the input text
-    const tagMatch = inputText.match(new RegExp(`<${tagName}[^>]*?separator="([^"]+)"[^>]*?>([\\s\\S]*?)<\\/${tagName}>`, "i"));
+    // Adjust regex to make `fieldSeparator` optional
+    const tagMatch = inputText.match(new RegExp(`<${tagName}[^>]*?separator="([^"]+)"(?:[^>]*?fieldSeparator="([^"]+)")?[^>]*?>([\\s\\S]*?)<\\/${tagName}>`, "i"));
     console.log(tagMatch);
 
-    if (tagMatch && tagMatch[2].trim() !== "") {
-      const separator = tagMatch[1];
-      const content = tagMatch[2].trim();
-      const fieldSeparator = "===";
+    if (tagMatch && tagMatch[3].trim() !== "") {
+      const separator = tagMatch[1];             // separator value
+      const fieldSeparator = tagMatch[2] || "";  // fieldSeparator value, or empty string if not provided
+      const content = tagMatch[3].trim();
 
-      // Split content by the separator and process each item
+      // Split content by the main separator and process each item
       return content
         .split(separator)
-        .map(item => item.trim().split(fieldSeparator) ) // Trim spaces and newlines from the start and end of each item
-        .filter(item => item[0] !== "") // Filter out items that are empty (only spaces/newlines)
+        .map(item => item.trim())
+        .filter(item => item !== "")
+        .map(item => fieldSeparator ? item.split(fieldSeparator).map(field => field.trim()) : [item]);  
+        // If fieldSeparator exists, split by it; otherwise, keep item as a single element array
     }
     return null;  // Return null if the tag has no content or is not found
   }
@@ -266,8 +248,8 @@ function CreateFlashCards() {
   window.cardsAll = RemoveEmptyLines(textareaMain.value)
     .trim()
     .split("\n")
-    //.map(item => item.split(/\s?\.{4}\s?|\s?=\s?|\s?\t\s?/).map(item => item.trim() ));
-    .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ));
+    .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ))
+    .filter(item => item[0] !== "");
   window.cardsShuffled = ShuffleArray(cardsAll);
   flashcardsSection.style.display = 'block';
   window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
@@ -275,11 +257,17 @@ function CreateFlashCards() {
 } 
 
 function CreateFlashCardsFromItemGroup() {
-  window.cardsAll = parseItemsFromXmlTag(textareaMain.value); 
-  window.cardsShuffled = ShuffleArray(cardsAll);
-  flashcardsSection.style.display = 'block';
-  window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
-  NextCard();
+  const parsedItems = parseItemsFromXmlTag(textareaMain.value);
+  if (parsedItems) {
+    window.cardsAll = parsedItems; 
+    window.cardsShuffled = ShuffleArray(cardsAll);
+    flashcardsSection.style.display = 'block';
+    window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
+    NextCard();
+  } else {
+    alert(`No items found in the document ${currentDoc ? '"' + currentDoc.name + '"' : ''}`);
+  }
+  
 }
 
 function NextCard() {       
@@ -309,12 +297,9 @@ function TurnCard() {
   if(currentCard.length >= 2) {
     window.currentCardBack = currentCard[window.currentCardBackLoop];    
     cardBack.innerText = window.currentCardBack;
-    if(window.currentCardBackLoop < currentCard.length - 1)
-    {
+    if(window.currentCardBackLoop < currentCard.length - 1) {
       window.currentCardBackLoop ++;
-    }
-    else 
-    {
+    } else {
       window.currentCardBackLoop = 1;
     }
   } else {
