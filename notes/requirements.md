@@ -31,6 +31,12 @@
   - ...
 - function to navigate between screens
 
+-----
+
+## Parse flash cards from XML tags items, item-group, data-list
+- clean flash card's content
+  - empty rows on start and end
+  - replace \n by <br>
 
 # DONE:
 
