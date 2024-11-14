@@ -141,7 +141,7 @@ function SaveAsNewToLs(){
 
 function SaveOpenedRecord() {
   if (currentDoc !== null && currentDoc.id) {
-    var confirmation = confirm(`Are you sure you want to save and rewrite the ${currentDoc.name}?`);
+    var confirmation = confirm(`Are you sure you want to save and rewrite the ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
     if (confirmation) {
       var key = appConfig.DB_KEY_PREFIX + currentDoc.id;
       var record = currentDoc;
@@ -194,7 +194,7 @@ function PopulateLsRecords() {
 
 function RemoveLsRecord(){
   if (currentDoc !== null && currentDoc.id) {
-    var confirmation = confirm(`Are you sure you want to remove ${currentDoc.name}?`);
+    var confirmation = confirm(`Are you sure you want to remove ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
     if (confirmation) {
       var key = appConfig.DB_KEY_PREFIX + currentDoc.id;
       localStorage.removeItem(key);
@@ -265,7 +265,7 @@ function CreateFlashCardsFromItemGroup() {
     window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
     NextCard();
   } else {
-    alert(`No items found in the document ${currentDoc ? '"' + currentDoc.name + '"' : ''}`);
+    alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
   }
   
 }
@@ -441,6 +441,11 @@ function ToggleVisibility ( selector, triggeringElementId ) {
 
 
 // Transformation functions
+
+function yamlMultiDocToVocabularyItems(input) {
+  return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
+}
+
 function ParseMarkdownLinks(input) {
   rows = input.replace(/\n\n/g,'\n').split('\n');
   links = [];
