@@ -31,7 +31,10 @@
   - ...
 - function to navigate between screens
 
+-----
 
+## Switch the primary card side
+- possible to change the primary card side (so the front card will be replaced by back card and vise versa)
 
 
 
