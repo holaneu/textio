@@ -20,7 +20,10 @@ const	cardFront = document.querySelector(".card-front");
 const	cardBack = document.querySelector(".card-back > pre"); //document.querySelector(".card-back");
 const textareaLogs = document.getElementById('textarea-logs');
 const selectTtsVoices = document.getElementById('tts-voices');  
-const currentDocName = document.getElementById('currentDocName');    
+const currentDocName = document.getElementById('currentDocName'); 
+
+const insertEmptyLine = document.getElementById('insertEmptyLine');
+const insertDate = document.getElementById('insertDate');
 
 var logs = [];
 var historySteps = [];
@@ -64,7 +67,7 @@ function generateId(length = 10) {
   return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
 }
 
-function Transform(callback) {
+function CallFunc(callback) {
   if(callback) {
     HistoryAdd();
     var result = callback(textareaMain.value);
@@ -437,6 +440,27 @@ function ToggleVisibility ( selector, triggeringElementId ) {
       }
     }
   }
+}
+
+document.getElementById('insertDate').addEventListener('click', () => {
+  insertAtCursor(textareaMain, new Date().toLocaleDateString());
+});
+
+document.getElementById('insertSeparator').addEventListener('click', () => {
+  insertAtCursor(textareaMain, '\n-----\n');
+});
+
+document.getElementById('insertFieldSeparator').addEventListener('click', () => {
+  insertAtCursor(textareaMain, '===');
+});
+
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  textarea.value = textarea.value.substring(0, start) + text + textarea.value.substring(end);
+  textarea.selectionStart = textarea.selectionEnd = start + text.length;
+  textarea.focus();
 }
 
 

@@ -106,32 +106,39 @@
 			</section>
 
 			<section id="editor-buttons">
-				<select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:105px">
-					<option value="">Transform</option>
-          <option value="Transform(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
-					<option value="Transform(LinesToList);">Rows to List</option>
-					<option value="Transform(ListToArray);">List to Array</option>
-					<option value="Transform(ListToLines);">List to Rows</option>
-					<option value="Transform(ListSort);">Sort list</option>
-					<option value="Transform(RemoveSpaces);">Remove spaces</option>
-					<option value="Transform(RemoveEmptyLines);">Remove empty rows</option>  		
-					<option value="Transform(RemoveLineBreaks);">Remove line breaks</option>
-					<option value="Transform(RemoveDiacritics);">Remove diacritics</option>
-					<option value="Transform(EncodeBase64)">Encode Base64</option>
-					<option value="Transform(DecodeBase64)">Decode Base64</option>
-					<option value="Transform(ConvertToSlug);">Convert to Slug</option>
-					<option value="Transform(ParseMarkdownLinks)">Parse markdown links</option>
-					<option value="Transform(IncreaseLineBreaks);">TTS: increase line breaks</option>
-					<option value="Transform(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
-					<option value="Transform(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
-					<option value="Transform(EncodeUri)">Encode URL</option>
-					<option value="Transform(DecodeUri)">Decode URL</option>	      
+				<select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
+					<option value="">-Transform-</option>
+          <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
+					<option value="CallFunc(LinesToList);">Rows to List</option>
+					<option value="CallFunc(ListToArray);">List to Array</option>
+					<option value="CallFunc(ListToLines);">List to Rows</option>
+					<option value="CallFunc(ListSort);">Sort list</option>
+					<option value="CallFunc(RemoveSpaces);">Remove spaces</option>
+					<option value="CallFunc(RemoveEmptyLines);">Remove empty rows</option>  		
+					<option value="CallFunc(RemoveLineBreaks);">Remove line breaks</option>
+					<option value="CallFunc(RemoveDiacritics);">Remove diacritics</option>
+					<option value="CallFunc(EncodeBase64)">Encode Base64</option>
+					<option value="CallFunc(DecodeBase64)">Decode Base64</option>
+					<option value="CallFunc(ConvertToSlug);">Convert to Slug</option>
+					<option value="CallFunc(ParseMarkdownLinks)">Parse markdown links</option>
+					<option value="CallFunc(IncreaseLineBreaks);">TTS: increase line breaks</option>
+					<option value="CallFunc(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
+					<option value="CallFunc(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
+					<option value="CallFunc(EncodeUri)">Encode URL</option>
+					<option value="CallFunc(DecodeUri)">Decode URL</option>	      
 				</select>
 				
 				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
-        <button onclick="CreateFlashCardsFromItemGroup()" class='orange'>Shuffle Item Group</button>
+        <button onclick="CreateFlashCardsFromItemGroup()" class='orange'>Shuffle Item Group</button>    
         
-        <br>        
+        <br>
+
+        <button id="insertDate">Insert date</button>
+        <button id="insertSeparator">Insert separator</button>
+        <button id="insertFieldSeparator">Insert field separator</button>
+
+        <br> 
+               
         <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
 			</section>
 
