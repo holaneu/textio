@@ -76,7 +76,7 @@
         <section>
           <nav>        
             <button id="historyBack" disabled>Step back</button>
-            <button id="reset">New</button>
+            <button id="resetEditor">New</button>
     
             <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
               <option value="">-Open-</option>
@@ -95,7 +95,7 @@
               <option value="DownloadFile()">Download</option>				
             </select>
 
-            <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Settings</button>
+            <button id="btnToggleSettingsSection" onclick="navigateToScreen('settings-screen')">Settings</button>
             
             <br>
             
@@ -131,7 +131,7 @@
             <option value="CallFunc(DecodeUri)">Decode URL</option>	      
           </select>
           
-          <button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
+          <button id="createFlashcards" class='orange'>Play flash cards</button>
           <button onclick="CreateFlashCardsFromItemGroup()" class='orange'>Shuffle Item Group</button>    
           
           <br>
@@ -173,49 +173,37 @@
           </naV>
         </section>
 
-        <section id="section-app-settings" class="expandable-section" style="display: none;">
-          <nav>
-            <button id="btnToggleCustomCodeSection" onclick="ToggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
-            <br>
-            <button id="button-enable-logs" onclick="ToggleVisibility('#section-logs', this.id)">Show logs</button>
-            <br>          
-            <button id="button-remove-ls-item" onclick="RemoveLsRecord()">Remove LS item</button>
-            <br>
-            <button id="button-clear-ls" onclick="ClearLS()">Clear LS</button>
-            <br>
-          </nav>
-        </section>
-
-        <section id="editor-textarea-custom" class="expandable-section" style="display: none;">
+        <section id="customCode" class="hidden">
           <textarea id="textareaEval"></textarea>    
           <button onclick="EvalCustomScript();">Execute custom script</button>
-        </section>
-        
-        <section id="flashcards-section" style="display: none;">    
-          <article class="card-front"></article>
-          <article class="card-back"><pre></pre></article>
-          <nav>
-            <button onclick="NextCard()">Next</button>          
-            <button onclick="TurnCard()">Turn</button>          
-            <br><br>
-            <button onclick="Speak(currentCard[0])">Speak</button>
-            <br><br>
-            <button onclick="CloseFlashCards()" class="btn-close">close</button>
-          </nav>    
-        </section>
+        </section>       
 
-        <section id="section-logs" style="display: none;">
+        <section id="logs" class="hidden">
           <textarea id="textarea-logs"></textarea>
         </section>
+      </div>
+
+      <div class="screen hidden" id="flashcards-screen">  
+        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>  
+        <article class="card-front"></article>
+        <article class="card-back"><pre></pre></article>
+        <nav>
+          <button onclick="NextCard()">Next</button>
+          <br>       
+          <button onclick="TurnCard()">Turn</button>          
+          <br>
+          <button onclick="Speak(currentCard[0])">Speak</button>
+          <br>
+        </nav>    
       </div>
 
       <div class="screen hidden" id="settings-screen">
         <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
         <h2 class="screen-title">Settings</h2>
 
-        <input type="checkbox" id="showCustomCode"> Show custom code
+        <input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label> 
         <br>
-        <input type="checkbox" id="showLogs"> Show logs
+        <input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label>
         <br>
         <button id="removeDocument">Remove document</button>
         <br>

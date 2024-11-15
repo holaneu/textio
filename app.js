@@ -45,7 +45,7 @@ function navigateToScreen(screenId) {
   document.getElementById(screenId).classList.remove('hidden');
 }
 
-document.getElementById('reset').addEventListener('click', () => {
+document.getElementById('resetEditor').addEventListener('click', () => {
   textareaMain.value = "";
   setCurrentDoc(null);
   HistoryReset();
@@ -55,6 +55,36 @@ document.getElementById('historyBack').addEventListener('click', () => {
   HistoryBack();
 });
 
+document.getElementById('removeDocument').addEventListener('click', () => {
+  RemoveDocument();
+});
+
+document.getElementById('clearLs').addEventListener('click', () => {
+  ClearLS();
+});
+
+document.getElementById('createFlashcards').addEventListener('click', () => {
+  CreateFlashCards();
+  navigateToScreen("flashcards-screen");
+});
+
+document.getElementById('showCustomCode').addEventListener('change', (event) => {
+  const customCodeSection = document.getElementById('customCode');
+  if (event.target.checked) {
+      customCodeSection.classList.remove('hidden'); 
+  } else {
+      customCodeSection.classList.add('hidden'); 
+  }
+});
+
+document.getElementById('showLogs').addEventListener('change', (event) => {
+  const customCodeSection = document.getElementById('logs');
+  if (event.target.checked) {
+      customCodeSection.classList.remove('hidden'); 
+  } else {
+      customCodeSection.classList.add('hidden'); 
+  }
+});
 
 function ShuffleArray(inputArray) {
   var array = inputArray;
@@ -215,7 +245,7 @@ function PopulateLsRecords() {
   });
 }
 
-function RemoveLsRecord(){
+function RemoveDocument(){
   if (currentDoc !== null && currentDoc.id) {
     var confirmation = confirm(`Are you sure you want to remove ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
     if (confirmation) {
@@ -274,7 +304,6 @@ function CreateFlashCards() {
     .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ))
     .filter(item => item[0] !== "");
   window.cardsShuffled = ShuffleArray(cardsAll);
-  flashcardsSection.style.display = 'block';
   window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
   NextCard();
 } 
