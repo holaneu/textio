@@ -15,7 +15,7 @@ const	textareaMain = document.querySelector("#textareaMain");
 const textareaEval = document.querySelector("#textareaEval");
 const	flashcardsSection = document.querySelector("#flashcards-section"); 
 const	currentStepText = document.querySelector("#currentStep"); 
-const	btnGoBack = document.querySelector("#goBack"); 
+const	btnHistoryBack = document.querySelector("#historyBack"); 
 const	cardFront = document.querySelector(".card-front");
 const	cardBack = document.querySelector(".card-back > pre"); //document.querySelector(".card-back");
 const textareaLogs = document.getElementById('textarea-logs');
@@ -36,6 +36,117 @@ let currentDoc = null;
 textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
 // Functions
+// Navigate between screens
+function navigateToScreen(screenId) {
+  // Hide all screens
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(screen => screen.classList.add('hidden'));
+  // Show the targeted screen
+  document.getElementById(screenId).classList.remove('hidden');
+}
+
+document.getElementById('insertDate').addEventListener('click', () => {
+  const currentDate = new Date();
+  const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+  insertAtCursor(textareaMain, formattedDate);
+});
+
+document.getElementById('insertSeparator').addEventListener('click', () => {
+  insertAtCursor(textareaMain, '\n-----\n');
+});
+
+document.getElementById('insertFieldSeparator').addEventListener('click', () => {
+  insertAtCursor(textareaMain, '===');
+});
+
+document.getElementById('resetEditor').addEventListener('click', () => {
+  textareaMain.value = "";
+  setCurrentDoc(null);
+  HistoryReset();
+});
+
+document.getElementById('historyBack').addEventListener('click', () => {
+  HistoryBack();
+});
+
+document.getElementById('removeDocument').addEventListener('click', () => {
+  RemoveDocument();
+});
+
+document.getElementById('clearLs').addEventListener('click', () => {
+  ClearLS();
+});
+
+document.getElementById('createFlashcards').addEventListener('click', () => {
+  CreateFlashCards();
+  navigateToScreen("flashcards-screen");
+});
+
+document.getElementById('showCustomCode').addEventListener('change', (event) => {
+  const customCodeSection = document.getElementById('customCode');
+  if (event.target.checked) {
+      customCodeSection.classList.remove('hidden'); 
+  } else {
+      customCodeSection.classList.add('hidden'); 
+  }
+});
+
+document.getElementById('showLogs').addEventListener('change', (event) => {
+  const customCodeSection = document.getElementById('logs');
+  if (event.target.checked) {
+      customCodeSection.classList.remove('hidden'); 
+  } else {
+      customCodeSection.classList.add('hidden'); 
+  }
+});
+
+// dropdown experiment 1: 
+document.querySelector('.dropdown-toggle').addEventListener('click', () => {
+  const dropdownMenu = document.querySelector('.dropdown-menu');
+  dropdownMenu.classList.toggle('hidden'); // Toggle the "hidden" class
+});
+
+// dropdown experiment 1: Close dropdown when clicking outside
+document.addEventListener('click', (event) => {
+  const dropdown = document.querySelector('.dropdown');
+  if (!dropdown.contains(event.target)) {
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    dropdownMenu.classList.add('hidden'); // Close dropdown
+  }
+});
+
+// dropdown experiment 2:
+document.getElementById('insertOptions').addEventListener('change', (event) => {
+  const selectedValue = event.target.value;
+
+  if (selectedValue === "insertDate") {
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${String(
+      currentDate.getMonth() + 1
+    ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+    insertAtCursor(textareaMain, formattedDate);
+  } else if (selectedValue === "insertSeparator") {
+    insertAtCursor(textareaMain, '\n-----\n');
+  } else if (selectedValue === "insertFieldSeparator") {
+    insertAtCursor(textareaMain, '===');
+  }
+  event.target.selectedIndex = 0;
+  event.target.blur();
+});
+
+/* save options 2 */
+document.getElementById('saveOptions').addEventListener('change', (event) => {
+  const selectedValue = event.target.value;
+  eval(selectedValue+"()");
+  event.target.selectedIndex = 0;
+  event.target.blur();
+});
+
+
+/*
+// proven functions
+*/
+
 function ShuffleArray(inputArray) {
   var array = inputArray;
   for (var i = array.length - 1; i > 0; i--) {
@@ -195,7 +306,7 @@ function PopulateLsRecords() {
   });
 }
 
-function RemoveLsRecord(){
+function RemoveDocument(){
   if (currentDoc !== null && currentDoc.id) {
     var confirmation = confirm(`Are you sure you want to remove ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
     if (confirmation) {
@@ -254,7 +365,6 @@ function CreateFlashCards() {
     .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ))
     .filter(item => item[0] !== "");
   window.cardsShuffled = ShuffleArray(cardsAll);
-  flashcardsSection.style.display = 'block';
   window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
   NextCard();
 } 
@@ -404,7 +514,7 @@ function Log(message) {
 function HistoryAdd() {
   historySteps.push(textareaMain.value);
   currentStepText.innerHTML = historySteps.length;
-  btnGoBack.disabled = false;
+  btnHistoryBack.disabled = false;
 }
 
 function HistoryBack() {
@@ -413,7 +523,7 @@ function HistoryBack() {
     historySteps.pop();
     currentStep.innerHTML = historySteps.length;
     if(historySteps.length == 0) {
-      btnGoBack.disabled = true;
+      btnHistoryBack.disabled = true;
     }
   } 
 }
@@ -421,7 +531,7 @@ function HistoryBack() {
 function HistoryReset() {
   historySteps = [];
   currentStepText.innerHTML = historySteps.length;
-  btnGoBack.disabled = true;
+  btnHistoryBack.disabled = true;
 }
 
 function ToggleVisibility ( selector, triggeringElementId ) {
@@ -441,18 +551,6 @@ function ToggleVisibility ( selector, triggeringElementId ) {
     }
   }
 }
-
-document.getElementById('insertDate').addEventListener('click', () => {
-  insertAtCursor(textareaMain, new Date().toLocaleDateString());
-});
-
-document.getElementById('insertSeparator').addEventListener('click', () => {
-  insertAtCursor(textareaMain, '\n-----\n');
-});
-
-document.getElementById('insertFieldSeparator').addEventListener('click', () => {
-  insertAtCursor(textareaMain, '===');
-});
 
 function insertAtCursor(textarea, text) {
   const start = textarea.selectionStart;
