@@ -83,7 +83,7 @@
               <option value="ClickHiddenFileInput()">From file</option>
               <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
               <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
-            </select>          
+            </select>           
 
             <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
             
@@ -95,7 +95,14 @@
               <option value="DownloadFile()">Download</option>				
             </select>
 
-            <button id="btnToggleSettingsSection" onclick="navigateToScreen('settings-screen')">Settings</button>
+            <select id="saveOptions" class="mobile-dropdown">
+              <option value="" disabled selected>Save</option>
+              <option value="SaveOpenedRecord">Save (overwrite)</option>
+              <option value="SaveAsNewToLs">Save as new</option>
+=             <option value="DownloadFile">Download</option>
+            </select>
+
+            <button id="btnSettings" onclick="navigateToScreen('settings-screen')">Settings</button>
             
             <br>
             
@@ -136,9 +143,28 @@
           
           <br>
 
+          <!-- Dropdown for Insert Actions -->
+          <div class="dropdown">
+            <button class="dropdown-toggle">Insert ▼</button>
+            <ul class="dropdown-menu hidden">
+              <li><button id="insertDate">Insert Date</button></li>
+              <li><button id="insertSeparator">Insert Separator</button></li>
+              <li><button id="insertFieldSeparator">Insert Field Separator</button></li>
+            </ul>
+          </div>
+
+          <select id="insertOptions" class="mobile-dropdown">
+            <option value="" disabled selected>Insert</option>
+            <option value="insertDate">Insert Date</option>
+            <option value="insertSeparator">Insert Separator</option>
+            <option value="insertFieldSeparator">Insert Field Separator</option>
+          </select>
+
+          <!--
           <button id="insertDate">Insert date</button>
           <button id="insertSeparator">Insert separator</button>
           <button id="insertFieldSeparator">Insert field separator</button>
+          -->
 
           <br> 
                 
