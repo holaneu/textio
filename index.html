@@ -72,139 +72,157 @@
 	<body>
 
 		<main>
-			<section>
-				<nav>        
-					<button id="goBack" onclick="HistoryBack();" disabled>Step back</button>
-	
-					<select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
-						<option value="">-Open-</option>
-            <option value="ClickHiddenFileInput()">From file</option>
-            <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
-						<!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
-					</select>          
+      <div class="screen" id="home-screen">
+        <section>
+          <nav>        
+            <button id="historyBack" disabled>Step back</button>
+            <button id="reset">New</button>
+    
+            <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
+              <option value="">-Open-</option>
+              <option value="ClickHiddenFileInput()">From file</option>
+              <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
+              <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
+            </select>          
 
-					<input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
-					
-					<select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
-						<option value="">-Save-</option>
-            <option value="SaveOpenedRecord()">Save (overwrite)</option>
-            <option value="SaveAsNewToLs()">Save as new</option>
-            <!--<option value="">Save to</option>-->
-            <option value="DownloadFile()">Download</option>				
-					</select>
+            <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
+            
+            <select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
+              <option value="">-Save-</option>
+              <option value="SaveOpenedRecord()">Save (overwrite)</option>
+              <option value="SaveAsNewToLs()">Save as new</option>
+              <!--<option value="">Save to</option>-->
+              <option value="DownloadFile()">Download</option>				
+            </select>
 
-          <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Settings</button>
-					
-					<br>
-					<span>Current step:<em id="currentStep">0</em></span>
-          <span>Document: <em id="currentDocName"></em></span>
-				</nav>
-			</section>			
-			
-			<section id="editor-textarea-main">
-				<textarea id="textareaMain"></textarea>
-			</section>
-
-			<section id="editor-buttons">
-				<select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
-					<option value="">-Transform-</option>
-          <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
-					<option value="CallFunc(LinesToList);">Rows to List</option>
-					<option value="CallFunc(ListToArray);">List to Array</option>
-					<option value="CallFunc(ListToLines);">List to Rows</option>
-					<option value="CallFunc(ListSort);">Sort list</option>
-					<option value="CallFunc(RemoveSpaces);">Remove spaces</option>
-					<option value="CallFunc(RemoveEmptyLines);">Remove empty rows</option>  		
-					<option value="CallFunc(RemoveLineBreaks);">Remove line breaks</option>
-					<option value="CallFunc(RemoveDiacritics);">Remove diacritics</option>
-					<option value="CallFunc(EncodeBase64)">Encode Base64</option>
-					<option value="CallFunc(DecodeBase64)">Decode Base64</option>
-					<option value="CallFunc(ConvertToSlug);">Convert to Slug</option>
-					<option value="CallFunc(ParseMarkdownLinks)">Parse markdown links</option>
-					<option value="CallFunc(IncreaseLineBreaks);">TTS: increase line breaks</option>
-					<option value="CallFunc(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
-					<option value="CallFunc(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
-					<option value="CallFunc(EncodeUri)">Encode URL</option>
-					<option value="CallFunc(DecodeUri)">Decode URL</option>	      
-				</select>
-				
-				<button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
-        <button onclick="CreateFlashCardsFromItemGroup()" class='orange'>Shuffle Item Group</button>    
+            <button id="btnToggleSettingsSection" onclick="ToggleVisibility('#section-app-settings', this.id)">Settings</button>
+            
+            <br>
+            
+            <span>Document: <em id="currentDocName"></em></span>
+            <span>Current step:<em id="currentStep">0</em></span>
+          </nav>
+        </section>			
         
+        <section id="editor-textarea-main">
+          <textarea id="textareaMain"></textarea>
+        </section>
+
+        <section id="editor-buttons">
+          <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
+            <option value="">-Transform-</option>
+            <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
+            <option value="CallFunc(LinesToList);">Rows to List</option>
+            <option value="CallFunc(ListToArray);">List to Array</option>
+            <option value="CallFunc(ListToLines);">List to Rows</option>
+            <option value="CallFunc(ListSort);">Sort list</option>
+            <option value="CallFunc(RemoveSpaces);">Remove spaces</option>
+            <option value="CallFunc(RemoveEmptyLines);">Remove empty rows</option>  		
+            <option value="CallFunc(RemoveLineBreaks);">Remove line breaks</option>
+            <option value="CallFunc(RemoveDiacritics);">Remove diacritics</option>
+            <option value="CallFunc(EncodeBase64)">Encode Base64</option>
+            <option value="CallFunc(DecodeBase64)">Decode Base64</option>
+            <option value="CallFunc(ConvertToSlug);">Convert to Slug</option>
+            <option value="CallFunc(ParseMarkdownLinks)">Parse markdown links</option>
+            <option value="CallFunc(IncreaseLineBreaks);">TTS: increase line breaks</option>
+            <option value="CallFunc(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
+            <option value="CallFunc(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
+            <option value="CallFunc(EncodeUri)">Encode URL</option>
+            <option value="CallFunc(DecodeUri)">Decode URL</option>	      
+          </select>
+          
+          <button onclick="CreateFlashCards()" class='orange'>Play flash cards</button>
+          <button onclick="CreateFlashCardsFromItemGroup()" class='orange'>Shuffle Item Group</button>    
+          
+          <br>
+
+          <button id="insertDate">Insert date</button>
+          <button id="insertSeparator">Insert separator</button>
+          <button id="insertFieldSeparator">Insert field separator</button>
+
+          <br> 
+                
+          <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
+        </section>
+
+        <section id="tts-controls" class="expandable-section" style="display: none;">
+          <nav>
+            Voice: 
+            <select id="tts-voices"></select></br>
+            Rate: 
+            <select id="tts-rate">
+              <option value="0.3">very slow</option>
+              <option value="0.6">slow</option>
+              <option value="1" selected>normal</option>
+              <option value="1.5">fast</option>
+              <option value="1.8">very fast</option>
+            </select>
+            Pitch:
+            <select id="tts-pitch">
+              <option value="0">low</option>
+              <option value="1" selected>normal</option>
+              <option value="2">high</option>
+            </select></br>
+            Flash cards auto-speak: 
+            <input type="checkbox" id="checkbox-auto-speak">
+            <br>
+            <br>
+            <button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
+            <button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
+            <br>
+          </naV>
+        </section>
+
+        <section id="section-app-settings" class="expandable-section" style="display: none;">
+          <nav>
+            <button id="btnToggleCustomCodeSection" onclick="ToggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
+            <br>
+            <button id="button-enable-logs" onclick="ToggleVisibility('#section-logs', this.id)">Show logs</button>
+            <br>          
+            <button id="button-remove-ls-item" onclick="RemoveLsRecord()">Remove LS item</button>
+            <br>
+            <button id="button-clear-ls" onclick="ClearLS()">Clear LS</button>
+            <br>
+          </nav>
+        </section>
+
+        <section id="editor-textarea-custom" class="expandable-section" style="display: none;">
+          <textarea id="textareaEval"></textarea>    
+          <button onclick="EvalCustomScript();">Execute custom script</button>
+        </section>
+        
+        <section id="flashcards-section" style="display: none;">    
+          <article class="card-front"></article>
+          <article class="card-back"><pre></pre></article>
+          <nav>
+            <button onclick="NextCard()">Next</button>          
+            <button onclick="TurnCard()">Turn</button>          
+            <br><br>
+            <button onclick="Speak(currentCard[0])">Speak</button>
+            <br><br>
+            <button onclick="CloseFlashCards()" class="btn-close">close</button>
+          </nav>    
+        </section>
+
+        <section id="section-logs" style="display: none;">
+          <textarea id="textarea-logs"></textarea>
+        </section>
+      </div>
+
+      <div class="screen hidden" id="settings-screen">
+        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
+        <h2 class="screen-title">Settings</h2>
+
+        <input type="checkbox" id="showCustomCode"> Show custom code
         <br>
+        <input type="checkbox" id="showLogs"> Show logs
+        <br>
+        <button id="removeDocument">Remove document</button>
+        <br>
+        <button id="clearLs">Clear whole localStorage</button>
+      </div>
 
-        <button id="insertDate">Insert date</button>
-        <button id="insertSeparator">Insert separator</button>
-        <button id="insertFieldSeparator">Insert field separator</button>
 
-        <br> 
-               
-        <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
-			</section>
-
-			<section id="tts-controls" class="expandable-section" style="display: none;">
-				<nav>
-					Voice: 
-          <select id="tts-voices"></select></br>
-					Rate: 
-					<select id="tts-rate">
-						<option value="0.3">very slow</option>
-						<option value="0.6">slow</option>
-						<option value="1" selected>normal</option>
-						<option value="1.5">fast</option>
-						<option value="1.8">very fast</option>
-					</select>
-					Pitch:
-					<select id="tts-pitch">
-						<option value="0">low</option>
-						<option value="1" selected>normal</option>
-						<option value="2">high</option>
-					</select></br>
-          Flash cards auto-speak: 
-          <input type="checkbox" id="checkbox-auto-speak">
-          <br>
-          <br>
-					<button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
-					<button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
-          <br>
-				</naV>
-			</section>
-
-      <section id="section-app-settings" class="expandable-section" style="display: none;">
-        <nav>
-          <button id="btnToggleCustomCodeSection" onclick="ToggleVisibility('#editor-textarea-custom', this.id)">Show custom code</button>
-          <br>
-          <button id="button-enable-logs" onclick="ToggleVisibility('#section-logs', this.id)">Show logs</button>
-          <br>          
-          <button id="button-remove-ls-item" onclick="RemoveLsRecord()">Remove LS item</button>
-          <br>
-          <button id="button-clear-ls" onclick="ClearLS()">Clear LS</button>
-          <br>
-        </nav>
-			</section>
-
-      <section id="editor-textarea-custom" class="expandable-section" style="display: none;">
-				<textarea id="textareaEval"></textarea>    
-				<button onclick="EvalCustomScript();">Execute custom script</button>
-			</section>
-			
-			<section id="flashcards-section" style="display: none;">    
-				<article class="card-front"></article>
-				<article class="card-back"><pre></pre></article>
-				<nav>
-					<button onclick="NextCard()">Next</button>          
-					<button onclick="TurnCard()">Turn</button>          
-          <br><br>
-          <button onclick="Speak(currentCard[0])">Speak</button>
-          <br><br>
-					<button onclick="CloseFlashCards()" class="btn-close">close</button>
-				</nav>    
-			</section>
-
-      <section id="section-logs" style="display: none;">
-        <textarea id="textarea-logs"></textarea>
-			</section>
-			
 		</main>
 
     <script src="app.js"></script>		

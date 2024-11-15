@@ -15,7 +15,7 @@ const	textareaMain = document.querySelector("#textareaMain");
 const textareaEval = document.querySelector("#textareaEval");
 const	flashcardsSection = document.querySelector("#flashcards-section"); 
 const	currentStepText = document.querySelector("#currentStep"); 
-const	btnGoBack = document.querySelector("#goBack"); 
+const	btnHistoryBack = document.querySelector("#historyBack"); 
 const	cardFront = document.querySelector(".card-front");
 const	cardBack = document.querySelector(".card-back > pre"); //document.querySelector(".card-back");
 const textareaLogs = document.getElementById('textarea-logs');
@@ -36,6 +36,26 @@ let currentDoc = null;
 textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
 
 // Functions
+// Navigate between screens
+function navigateToScreen(screenId) {
+  // Hide all screens
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(screen => screen.classList.add('hidden'));
+  // Show the targeted screen
+  document.getElementById(screenId).classList.remove('hidden');
+}
+
+document.getElementById('reset').addEventListener('click', () => {
+  textareaMain.value = "";
+  setCurrentDoc(null);
+  HistoryReset();
+});
+
+document.getElementById('historyBack').addEventListener('click', () => {
+  HistoryBack();
+});
+
+
 function ShuffleArray(inputArray) {
   var array = inputArray;
   for (var i = array.length - 1; i > 0; i--) {
@@ -404,7 +424,7 @@ function Log(message) {
 function HistoryAdd() {
   historySteps.push(textareaMain.value);
   currentStepText.innerHTML = historySteps.length;
-  btnGoBack.disabled = false;
+  btnHistoryBack.disabled = false;
 }
 
 function HistoryBack() {
@@ -413,7 +433,7 @@ function HistoryBack() {
     historySteps.pop();
     currentStep.innerHTML = historySteps.length;
     if(historySteps.length == 0) {
-      btnGoBack.disabled = true;
+      btnHistoryBack.disabled = true;
     }
   } 
 }
@@ -421,7 +441,7 @@ function HistoryBack() {
 function HistoryReset() {
   historySteps = [];
   currentStepText.innerHTML = historySteps.length;
-  btnGoBack.disabled = true;
+  btnHistoryBack.disabled = true;
 }
 
 function ToggleVisibility ( selector, triggeringElementId ) {
@@ -443,8 +463,11 @@ function ToggleVisibility ( selector, triggeringElementId ) {
 }
 
 document.getElementById('insertDate').addEventListener('click', () => {
-  insertAtCursor(textareaMain, new Date().toLocaleDateString());
+  const currentDate = new Date();
+  const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+  insertAtCursor(textareaMain, formattedDate);
 });
+
 
 document.getElementById('insertSeparator').addEventListener('click', () => {
   insertAtCursor(textareaMain, '\n-----\n');
