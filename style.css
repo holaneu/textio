@@ -138,93 +138,17 @@ header em {
 }
 #spoken-words {font-size: 80px; color: gray;}
 
-
-/* // dropdown experiment 1: */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-toggle {
-  padding: 10px 15px;
-  font-size: 16px;
-  background-color: #292929;
-  color: #45edf5;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.dropdown-toggle:focus {
-  outline: none;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  display: block;
-  min-width: 160px;
-  padding: 5px 0;
-  margin: 2px 0 0;
-  font-size: 16px;
-  background-color: #292929;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  list-style: none;
-}
-
-.dropdown-menu.hidden {
-  display: none;
-}
-
-.dropdown-menu li {
-  padding: 8px 15px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.dropdown-menu li button {
-  width: 100%;
-  background: none;
-  border: none;
-  color: #45edf5;
-  text-align: left;
-  cursor: pointer;
-}
-
-.dropdown-menu li button:hover {
-  background-color: #3a3a3a;
-}
-
-.dropdown-menu li button:focus {
-  outline: none;
-}
-
-@media (max-width: 600px) {
-  .dropdown-toggle {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-  .dropdown-menu {
-    font-size: 14px;
-  }
-}
-
-/* // dropdown experiment 2: */
 /* Mobile-Friendly Select Dropdown */
 .mobile-dropdown {
-  font-size: 16px;
+  /*font-size: 16px;
   padding: 10px;
   background-color: #292929;
   color: #45edf5;
-  /*border: 1px solid #45edf5;*/
-  border-radius: 5px;
+  cursor: pointer;
+  border-radius: 5px;*/
   appearance: none; /* Removes browser-specific default dropdown styling */
   -webkit-appearance: none; /* Safari and Chrome */
   -moz-appearance: none; /* Firefox */
-  cursor: pointer;
 }
 
 .mobile-dropdown:focus {
@@ -234,8 +158,10 @@ header em {
 
 @media (max-width: 600px) {
   .mobile-dropdown {
+    /*
     font-size: 14px;
     padding: 8px;
+    */
   }
 }
 

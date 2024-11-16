@@ -74,7 +74,9 @@
 		<main>
       <div class="screen" id="home-screen">
         <section>
-          <nav>        
+          <nav> 
+            <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
+            
             <button id="historyBack" disabled>Step back</button>
             <button id="resetEditor">New</button>
     
@@ -83,19 +85,9 @@
               <option value="ClickHiddenFileInput()">From file</option>
               <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
               <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
-            </select>           
-
-            <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
-            
-            <select id="navButtonsSave" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
-              <option value="">-Save-</option>
-              <option value="SaveOpenedRecord()">Save (overwrite)</option>
-              <option value="SaveAsNewToLs()">Save as new</option>
-              <!--<option value="">Save to</option>-->
-              <option value="DownloadFile()">Download</option>				
             </select>
 
-            <select id="saveOptions" class="mobile-dropdown">
+            <select id="saveOptions" class="mobile-dropdown" style="max-width: 55px;">
               <option value="" disabled selected>Save</option>
               <option value="SaveOpenedRecord">Save (overwrite)</option>
               <option value="SaveAsNewToLs">Save as new</option>
@@ -138,35 +130,19 @@
             <option value="CallFunc(DecodeUri)">Decode URL</option>	      
           </select>
           
-          <button id="createFlashcards" class='orange'>Play flash cards</button>
-          <button onclick="CreateFlashCardsFromItemGroup()" class='orange'>Shuffle Item Group</button>    
-          
-          <br>
-
-          <!-- Dropdown for Insert Actions -->
-          <div class="dropdown">
-            <button class="dropdown-toggle">Insert ▼</button>
-            <ul class="dropdown-menu hidden">
-              <li><button id="insertDate">Insert Date</button></li>
-              <li><button id="insertSeparator">Insert Separator</button></li>
-              <li><button id="insertFieldSeparator">Insert Field Separator</button></li>
-            </ul>
-          </div>
-
-          <select id="insertOptions" class="mobile-dropdown">
+          <select id="insertOptions" class="mobile-dropdown" style="max-width: 60px;">
             <option value="" disabled selected>Insert</option>
             <option value="insertDate">Insert Date</option>
             <option value="insertSeparator">Insert Separator</option>
             <option value="insertFieldSeparator">Insert Field Separator</option>
           </select>
 
-          <!--
-          <button id="insertDate">Insert date</button>
-          <button id="insertSeparator">Insert separator</button>
-          <button id="insertFieldSeparator">Insert field separator</button>
-          -->
-
           <br> 
+
+          <button id="createFlashcards" class='orange'>Play flash cards</button>
+          <button id="CreateFlashCardsFromItemGroup" class='orange'>Shuffle Item Group</button>    
+
+          <br>
                 
           <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
         </section>
