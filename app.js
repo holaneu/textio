@@ -45,20 +45,6 @@ function navigateToScreen(screenId) {
   document.getElementById(screenId).classList.remove('hidden');
 }
 
-document.getElementById('insertDate').addEventListener('click', () => {
-  const currentDate = new Date();
-  const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-  insertAtCursor(textareaMain, formattedDate);
-});
-
-document.getElementById('insertSeparator').addEventListener('click', () => {
-  insertAtCursor(textareaMain, '\n-----\n');
-});
-
-document.getElementById('insertFieldSeparator').addEventListener('click', () => {
-  insertAtCursor(textareaMain, '===');
-});
-
 document.getElementById('resetEditor').addEventListener('click', () => {
   textareaMain.value = "";
   setCurrentDoc(null);
@@ -82,6 +68,11 @@ document.getElementById('createFlashcards').addEventListener('click', () => {
   navigateToScreen("flashcards-screen");
 });
 
+document.getElementById('CreateFlashCardsFromItemGroup').addEventListener('click', () => {
+  CreateFlashCardsFromItemGroup();
+  navigateToScreen("flashcards-screen");
+});
+
 document.getElementById('showCustomCode').addEventListener('change', (event) => {
   const customCodeSection = document.getElementById('customCode');
   if (event.target.checked) {
@@ -100,20 +91,6 @@ document.getElementById('showLogs').addEventListener('change', (event) => {
   }
 });
 
-// dropdown experiment 1: 
-document.querySelector('.dropdown-toggle').addEventListener('click', () => {
-  const dropdownMenu = document.querySelector('.dropdown-menu');
-  dropdownMenu.classList.toggle('hidden'); // Toggle the "hidden" class
-});
-
-// dropdown experiment 1: Close dropdown when clicking outside
-document.addEventListener('click', (event) => {
-  const dropdown = document.querySelector('.dropdown');
-  if (!dropdown.contains(event.target)) {
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-    dropdownMenu.classList.add('hidden'); // Close dropdown
-  }
-});
 
 // dropdown experiment 2:
 document.getElementById('insertOptions').addEventListener('change', (event) => {
@@ -374,7 +351,6 @@ function CreateFlashCardsFromItemGroup() {
   if (parsedItems) {
     window.cardsAll = parsedItems; 
     window.cardsShuffled = ShuffleArray(cardsAll);
-    flashcardsSection.style.display = 'block';
     window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
     NextCard();
   } else {
