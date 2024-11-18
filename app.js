@@ -55,8 +55,8 @@ document.getElementById('historyBack').addEventListener('click', () => {
   HistoryBack();
 });
 
-document.getElementById('removeDocument').addEventListener('click', () => {
-  RemoveDocument();
+document.getElementById('removeDoc').addEventListener('click', () => {
+  RemoveDoc();
 });
 
 document.getElementById('clearLs').addEventListener('click', () => {
@@ -65,12 +65,10 @@ document.getElementById('clearLs').addEventListener('click', () => {
 
 document.getElementById('createFlashcards').addEventListener('click', () => {
   CreateFlashCards();
-  navigateToScreen("flashcards-screen");
 });
 
 document.getElementById('CreateFlashCardsFromItemGroup').addEventListener('click', () => {
   CreateFlashCardsFromItemGroup();
-  navigateToScreen("flashcards-screen");
 });
 
 document.getElementById('showCustomCode').addEventListener('change', (event) => {
@@ -91,8 +89,6 @@ document.getElementById('showLogs').addEventListener('change', (event) => {
   }
 });
 
-
-// dropdown experiment 2:
 document.getElementById('insertOptions').addEventListener('change', (event) => {
   const selectedValue = event.target.value;
 
@@ -111,7 +107,6 @@ document.getElementById('insertOptions').addEventListener('change', (event) => {
   event.target.blur();
 });
 
-/* save options 2 */
 document.getElementById('saveOptions').addEventListener('change', (event) => {
   const selectedValue = event.target.value;
   eval(selectedValue+"()");
@@ -123,6 +118,10 @@ document.getElementById('saveOptions').addEventListener('change', (event) => {
 /*
 // proven functions
 */
+
+function sanitizeInput(textarea) {
+  textarea.value = textarea.value.replace(/<script.*?>.*?<\/script>/gi, '').replace(/<.*?>/g, '');
+}
 
 function ShuffleArray(inputArray) {
   var array = inputArray;
@@ -211,7 +210,7 @@ function DownloadFile() {
   }				
 }
 
-function SaveAsNewToLs(){
+function SaveAsNewDoc(){
   var userInput = prompt("Name:");
   if (userInput !== null && userInput !== "") {
     const id = generateId();
@@ -230,7 +229,7 @@ function SaveAsNewToLs(){
   }        	      
 }
 
-function SaveOpenedRecord() {
+function OverwriteOpenedDocument() {
   if (currentDoc !== null && currentDoc.id) {
     var confirmation = confirm(`Are you sure you want to save and rewrite the ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
     if (confirmation) {
@@ -244,7 +243,7 @@ function SaveOpenedRecord() {
     }          
   
   } else {
-    SaveAsNewToLs();
+    SaveAsNewDoc();
   }
 }
 
@@ -283,7 +282,7 @@ function PopulateLsRecords() {
   });
 }
 
-function RemoveDocument(){
+function RemoveDoc(){
   if (currentDoc !== null && currentDoc.id) {
     var confirmation = confirm(`Are you sure you want to remove ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
     if (confirmation) {
@@ -343,6 +342,7 @@ function CreateFlashCards() {
     .filter(item => item[0] !== "");
   window.cardsShuffled = ShuffleArray(cardsAll);
   window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
+  navigateToScreen("flashcards-screen");
   NextCard();
 } 
 
@@ -352,6 +352,7 @@ function CreateFlashCardsFromItemGroup() {
     window.cardsAll = parsedItems; 
     window.cardsShuffled = ShuffleArray(cardsAll);
     window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
+    navigateToScreen("flashcards-screen");
     NextCard();
   } else {
     alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
