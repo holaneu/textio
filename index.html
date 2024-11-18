@@ -7,10 +7,14 @@
     <script>
       if (window.location.protocol === "file:") {
         // Local file system, set base to current directory
-        document.write('<base href="./">');
+        const baseElement = document.createElement('base');
+        baseElement.href = './';
+        document.head.appendChild(baseElement);
       } else {
         // Deployed, set base to /textio/
-        document.write('<base href="/textio/">');
+        const baseElement = document.createElement('base');
+        baseElement.href = '/textio/';
+        document.head.appendChild(baseElement);
       }
     </script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -82,15 +86,15 @@
     
             <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
               <option value="">-Open-</option>
-              <option value="ClickHiddenFileInput()">From file</option>
-              <optgroup id="optgroupLcRecords" label="from LC:"></optgroup>           						
+              <option value="ClickHiddenFileInput()">Open file</option>
+              <optgroup id="optgroupLcRecords" label="Open document (LS):"></optgroup>           						
               <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
             </select>
 
             <select id="saveOptions" class="mobile-dropdown" style="max-width: 55px;">
               <option value="" disabled selected>Save</option>
-              <option value="SaveOpenedRecord">Save (overwrite)</option>
-              <option value="SaveAsNewToLs">Save as new</option>
+              <option value="OverwriteOpenedDocument">Save (overwrite)</option>
+              <option value="SaveAsNewDoc">Save as new</option>
 =             <option value="DownloadFile">Download</option>
             </select>
 
@@ -104,7 +108,7 @@
         </section>			
         
         <section id="editor-textarea-main">
-          <textarea id="textareaMain"></textarea>
+          <textarea id="textareaMain" oninput="sanitizeInput(this)"></textarea>
         </section>
 
         <section id="editor-buttons">
@@ -207,7 +211,7 @@
         <br>
         <input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label>
         <br>
-        <button id="removeDocument">Remove document</button>
+        <button id="removeDoc">Remove document</button>
         <br>
         <button id="clearLs">Clear whole localStorage</button>
       </div>
