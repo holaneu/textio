@@ -18,6 +18,13 @@
 
 -----
 
+## Convert items to json
+- returns the covnertd json as text into textarea
+  - yaml - structured
+  - plaintext - just one field within the item object "content"
+
+-----
+
 ## Rename functions
 - get rid of LS in names as app storage functions should be universal (wrappers where the storage type might be changed in future)
 
@@ -33,8 +40,26 @@
 
 -----
 
+## exctract items from the items tag
+- exctract items from the items tag - just return the extracted text into textarea
+
+-----
+
 ## Switch the primary card side
 - possible to change the primary card side (so the front card will be replaced by back card and vise versa)
+
+-----
+
+## universal UI element dialog / model with overlay
+- used for some features like "replace text form"
+  - input 1: text to be replaced
+  - input 2 replacing text
+  - radio button to select between normal and regex mode
+
+-----
+
+## !! export / import !!!
+
 
 
 

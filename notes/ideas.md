@@ -1,16 +1,6 @@
 # IDEAS
 
-- also you can give, based on my code base, some recommendations what to change to better with modern screen-based vanilla js app aproach
-
------
-
-now i need to do some refactoring and updates
-- i need to use a screen approach 
-  - each screen will wrapped as <div class="screen" id="some-screen-id">...</div>
-  - so first i need to wrap the current page content into "home-screen" screen 
-
-//<div class="screen" id="home-screen"></div>
-
+- you can give me, based on my code base, some recommendations what to change to better align with modern screen-based vanilla js app aproach
 
 -----
 
