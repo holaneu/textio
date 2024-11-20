@@ -1,4 +1,5 @@
 # Textio
+
 Simple plain text modifier in HTML + JS. Just textarea + buttons with JS tranformation functions.
 Also create simple flash cards on one click, based on plain text from textarea.
 
