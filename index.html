@@ -76,6 +76,8 @@
 	<body>
 
 		<main>
+
+      <!-- Home Screen -->
       <div class="screen" id="home-screen">
         <section>
           <nav> 
@@ -93,7 +95,7 @@
 
             <select id="saveOptions" class="mobile-dropdown" style="max-width: 55px;">
               <option value="" disabled selected>Save</option>
-              <option value="OverwriteOpenedDocument">Save (overwrite)</option>
+              <option value="OverwriteOpenedDoc">Save (overwrite)</option>
               <option value="SaveAsNewDoc">Save as new</option>
 =             <option value="DownloadFile">Download</option>
             </select>
@@ -189,6 +191,7 @@
         </section>
       </div>
 
+      <!-- Flashcards Screen -->
       <div class="screen hidden" id="flashcards-screen">  
         <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>  
         <article class="card-front"></article>
@@ -203,17 +206,18 @@
         </nav>    
       </div>
 
+      <!-- Settings Screen -->
       <div class="screen hidden" id="settings-screen">
-        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
-        <h2 class="screen-title">Settings</h2>
-
-        <input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label> 
-        <br>
-        <input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label>
-        <br>
-        <button id="removeDoc">Remove document</button>
-        <br>
-        <button id="clearLs">Clear whole localStorage</button>
+        <div class="screen-container">
+          <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
+          <h2 class="screen-title">Settings</h2>
+          <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
+          <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
+          <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
+          <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
+          <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
+          <div class="row"><button class="btn-outline" id="clearLs">Clear whole localStorage</button></div>
+        </div>
       </div>
 
 
