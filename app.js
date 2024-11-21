@@ -84,17 +84,18 @@ document.getElementById('showLogs').addEventListener('change', (event) => {
 document.getElementById('insertOptions').addEventListener('change', (event) => {
   const selectedValue = event.target.value;
   
-  if (selectedValue === "insertDate") {
-    const currentDate = new Date();
-    const formattedDate = `${currentDate.getFullYear()}-${String(
-      currentDate.getMonth() + 1
-    ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-    insertAtCursor(textareaMain, formattedDate);
-  } else if (selectedValue === "insertSeparator") {
-    insertAtCursor(textareaMain, '\n-----\n');
-  } else if (selectedValue === "insertFieldSeparator") {
-    insertAtCursor(textareaMain, '===');
+  switch(selectedValue) {
+    case "insertDate":
+      insertAtCursor(textareaMain, GetDateTime("YYYY-MM-DD"));
+      break;
+    case "insertSeparator":
+      insertAtCursor(textareaMain, '\n-----\n');
+      break;
+    case "insertFieldSeparator":
+      insertAtCursor(textareaMain, '===');
+      break;
   }
+
   event.target.selectedIndex = 0;
   event.target.blur();
 });
@@ -478,17 +479,17 @@ function loadLocalData() {
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
     const second = String(date.getSeconds()).padStart(2, '0');
-    const formattedDate = `${year}${month}${day}_${hour}${minute}${second}`; // default format
+    let formattedDate;
 
     switch(outputFormat) {
       case "YYYY-MM-DD":
-        formattedDate = "";
+        formattedDate = `${year}-${month}-${day}`;
         break;
       case "YYYYMMDD":
-        formattedDate = "";
+        formattedDate = `${year}${month}${day}`;
         break;
-      case "":
-        formattedDate = "";
+      default:
+        formattedDate = `${year}${month}${day}_${hour}${minute}${second}`;;
         break
     }
 
