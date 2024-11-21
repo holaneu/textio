@@ -84,17 +84,18 @@ document.getElementById('showLogs').addEventListener('change', (event) => {
 document.getElementById('insertOptions').addEventListener('change', (event) => {
   const selectedValue = event.target.value;
   
-  if (selectedValue === "insertDate") {
-    const currentDate = new Date();
-    const formattedDate = `${currentDate.getFullYear()}-${String(
-      currentDate.getMonth() + 1
-    ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-    insertAtCursor(textareaMain, formattedDate);
-  } else if (selectedValue === "insertSeparator") {
-    insertAtCursor(textareaMain, '\n-----\n');
-  } else if (selectedValue === "insertFieldSeparator") {
-    insertAtCursor(textareaMain, '===');
+  switch(selectedValue) {
+    case "insertDate":
+      insertAtCursor(textareaMain, GetDateTime("YYYY-MM-DD"));
+      break;
+    case "insertSeparator":
+      insertAtCursor(textareaMain, '\n-----\n');
+      break;
+    case "insertFieldSeparator":
+      insertAtCursor(textareaMain, '===');
+      break;
   }
+
   event.target.selectedIndex = 0;
   event.target.blur();
 });
@@ -470,7 +471,7 @@ function loadLocalData() {
     }
   }
   
-  function GetDateTime(){
+  function GetDateTime(outputFormat){
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -478,7 +479,20 @@ function loadLocalData() {
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
     const second = String(date.getSeconds()).padStart(2, '0');
-    const formattedDate = `${year}${month}${day}_${hour}${minute}${second}`;
+    let formattedDate;
+
+    switch(outputFormat) {
+      case "YYYY-MM-DD":
+        formattedDate = `${year}-${month}-${day}`;
+        break;
+      case "YYYYMMDD":
+        formattedDate = `${year}${month}${day}`;
+        break;
+      default:
+        formattedDate = `${year}${month}${day}_${hour}${minute}${second}`;;
+        break
+    }
+
     return formattedDate;
   }
   
@@ -563,7 +577,7 @@ function loadLocalData() {
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'app_data.json';
+    link.download = 'textio_export.json';
     link.click();
     
     URL.revokeObjectURL(link.href);
@@ -641,6 +655,91 @@ function loadLocalData() {
     fileInput.click();
   }  
   
+  // Universal Modal Functions
+  function openModal(contentId) {
+    const modal = document.getElementById("universalModal");
+    const content = document.getElementById(contentId);
+    if (modal && content) {
+      modal.classList.remove("hidden");
+      content.classList.remove("hidden");
+    }
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("universalModal");    
+    if (modal) {
+      const allContent = modal.querySelectorAll(".modal-body > div");
+      modal.classList.add("hidden");
+      allContent.forEach(content => content.classList.add("hidden"));
+    }
+  }
+
+  function replaceText() {
+    HistoryAdd();
+    const oldText = document.getElementById("oldText").value;
+    const newText = document.getElementById("newText").value;
+    const textarea = document.getElementById("textareaMain");
+
+    if (!oldText) {
+      alert("Please fill the field");
+      return;
+    }
+
+    const replacedContent = textarea.value.replaceAll(oldText, newText);
+    textarea.value = replacedContent;
+    closeModal();
+  }
+
+  function clearInput(inputId) {
+    const inputField = document.getElementById(inputId);
+    if (inputField) {
+      inputField.value = '';
+      inputField.focus(); // Optional: Refocus the cleared field
+    }
+  }
+
+  /*REMOVE:
+  function openDialog(dialog) {
+    target = document.getElementById(dialog);
+    if(target){
+      target.show();
+      closeBtn = target.querySelector(".modal-close");
+      if(closeBtn){
+        closeBtn.addEventListener('click', () => target.close());
+      }
+    }
+  }
+    */
+
+  (() => {
+    window.openDialog = function (dialog) {
+      const target = document.getElementById(dialog);
+      if (!target) {
+        console.warn(`Dialog with ID "${dialog}" not found.`);
+        return;
+      }
+
+      const openButton = document.activeElement;
+      target.showModal();
+      target.addEventListener('close', () => {
+        openButton.focus();
+      });
+
+      const closeBtn = target.querySelector(".modal-close");
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => target.close(), { once: true });
+      } else {
+        console.warn('Close button not found in the dialog.');
+      }
+
+      target.addEventListener('click', (event) => {
+        if (event.target === target) {
+          target.close();
+        }
+      });
+    };
+  })();
+
   
   // Transformation functions
   
@@ -813,8 +912,22 @@ function loadLocalData() {
   }
   
   // page initialization      
-  window.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener('DOMContentLoaded', () => {
     populateData();
     VoiceList();
     currentDocName.innerText = uiConfigs.labels.not_saved_doc;
+
+    const clearButtons = document.querySelectorAll(".clear-input");    
+    clearButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const inputContainer = button.closest(".input-container");
+        const inputField = inputContainer && inputContainer.querySelector("input");
+        if (inputField) {
+          inputField.value = "";
+        }         
+      });
+    });
+
   });
+
+  
