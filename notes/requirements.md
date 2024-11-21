@@ -34,7 +34,9 @@
 ## Switch the primary card side
 - possible to change the primary card side (so the front card will be replaced by back card and vise versa)
 
-## universal UI element dialog / model with overlay
+## Replace form
+
+## universal UI element dialog / modal, with overlay
 - used for some features like "replace text form"
   - input 1: text to be replaced
   - input 2 replacing text

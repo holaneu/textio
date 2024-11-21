@@ -470,7 +470,7 @@ function loadLocalData() {
     }
   }
   
-  function GetDateTime(){
+  function GetDateTime(outputFormat){
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -478,7 +478,20 @@ function loadLocalData() {
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
     const second = String(date.getSeconds()).padStart(2, '0');
-    const formattedDate = `${year}${month}${day}_${hour}${minute}${second}`;
+    const formattedDate = `${year}${month}${day}_${hour}${minute}${second}`; // default format
+
+    switch(outputFormat) {
+      case "YYYY-MM-DD":
+        formattedDate = "";
+        break;
+      case "YYYYMMDD":
+        formattedDate = "";
+        break;
+      case "":
+        formattedDate = "";
+        break
+    }
+
     return formattedDate;
   }
   
@@ -563,7 +576,7 @@ function loadLocalData() {
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'app_data.json';
+    link.download = 'textio_export.json';
     link.click();
     
     URL.revokeObjectURL(link.href);
