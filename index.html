@@ -228,13 +228,21 @@
         <div class="modal-content">
           <button class="modal-close" onclick="closeModal()">×</button>
           <div class="modal-body">
+            
             <!-- Replace Feature Modal Content -->
             <div id="replaceFeature" class="hidden">
               <h3>Replace Text</h3>
-              <input type="text" id="oldText" placeholder="Text to be replaced" />
-              <input type="text" id="newText" placeholder="Replacing text" />
+              <div class="input-container">
+                <input type="text" id="oldText" placeholder="Text to be replaced" />
+                <button class="clear-input" onclick="clearInput('oldText')">×</button>
+              </div>
+              <div class="input-container">
+                <input type="text" id="newText" placeholder="Replacing text" />
+                <button class="clear-input" onclick="clearInput('newText')">×</button>
+              </div>
               <button onclick="replaceText()">Replace</button>
             </div>
+
           </div>
         </div>
       </div>

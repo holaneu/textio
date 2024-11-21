@@ -672,7 +672,6 @@ function loadLocalData() {
     allContent.forEach(content => content.classList.add("hidden"));
   }
 
-  // Replace Text Feature
   function replaceText() {
     HistoryAdd();
     const oldText = document.getElementById("oldText").value;
@@ -686,9 +685,17 @@ function loadLocalData() {
 
     const replacedContent = textarea.value.replaceAll(oldText, newText);
     textarea.value = replacedContent;
-
     closeModal();
   }
+
+  function clearInput(inputId) {
+    const inputField = document.getElementById(inputId);
+    if (inputField) {
+      inputField.value = '';
+      inputField.focus(); // Optional: Refocus the cleared field
+    }
+  }
+
 
   
   // Transformation functions

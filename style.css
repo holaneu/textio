@@ -221,6 +221,36 @@ header em {
   color: white;
 }
 
+/* Input Container for clear functionality */
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-container input {
+  flex: 1;
+  padding-right: 30px; /* Space for clear button */
+}
+
+.clear-input {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: gray;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-input:hover {
+  color: white;
+}
+
+
 
 @media (max-width: 600px) {
   .mobile-dropdown {
