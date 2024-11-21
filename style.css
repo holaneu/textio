@@ -250,6 +250,16 @@ header em {
   color: white;
 }
 
+dialog {
+  padding: 0;
+  border: none;
+  background: none;
+}
+.dialog-content {
+  padding: 20px;
+  background: #1a1a1a;
+  border-radius: 10px;
+}
 
 
 @media (max-width: 600px) {

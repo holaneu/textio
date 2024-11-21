@@ -656,7 +656,7 @@ function loadLocalData() {
   }  
   
   // Universal Modal Functions
-  function showModal(contentId) {
+  function openModal(contentId) {
     const modal = document.getElementById("universalModal");
     const content = document.getElementById(contentId);
     if (modal && content) {
@@ -666,10 +666,12 @@ function loadLocalData() {
   }
 
   function closeModal() {
-    const modal = document.getElementById("universalModal");
-    const allContent = modal.querySelectorAll(".modal-body > div");
-    if (modal) modal.classList.add("hidden");
-    allContent.forEach(content => content.classList.add("hidden"));
+    const modal = document.getElementById("universalModal");    
+    if (modal) {
+      const allContent = modal.querySelectorAll(".modal-body > div");
+      modal.classList.add("hidden");
+      allContent.forEach(content => content.classList.add("hidden"));
+    }
   }
 
   function replaceText() {
@@ -696,6 +698,47 @@ function loadLocalData() {
     }
   }
 
+  /*REMOVE:
+  function openDialog(dialog) {
+    target = document.getElementById(dialog);
+    if(target){
+      target.show();
+      closeBtn = target.querySelector(".modal-close");
+      if(closeBtn){
+        closeBtn.addEventListener('click', () => target.close());
+      }
+    }
+  }
+    */
+
+  (() => {
+    window.openDialog = function (dialog) {
+      const target = document.getElementById(dialog);
+      if (!target) {
+        console.warn(`Dialog with ID "${dialog}" not found.`);
+        return;
+      }
+
+      const openButton = document.activeElement;
+      target.showModal();
+      target.addEventListener('close', () => {
+        openButton.focus();
+      });
+
+      const closeBtn = target.querySelector(".modal-close");
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => target.close(), { once: true });
+      } else {
+        console.warn('Close button not found in the dialog.');
+      }
+
+      target.addEventListener('click', (event) => {
+        if (event.target === target) {
+          target.close();
+        }
+      });
+    };
+  })();
 
   
   // Transformation functions
@@ -869,8 +912,22 @@ function loadLocalData() {
   }
   
   // page initialization      
-  window.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener('DOMContentLoaded', () => {
     populateData();
     VoiceList();
     currentDocName.innerText = uiConfigs.labels.not_saved_doc;
+
+    const clearButtons = document.querySelectorAll(".clear-input");    
+    clearButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const inputContainer = button.closest(".input-container");
+        const inputField = inputContainer && inputContainer.querySelector("input");
+        if (inputField) {
+          inputField.value = "";
+        }         
+      });
+    });
+
   });
+
+  

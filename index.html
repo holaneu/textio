@@ -143,7 +143,7 @@
             <option value="insertFieldSeparator">Insert Field Separator</option>
           </select>
 
-          <button onclick="showModal('replaceFeature')">Replace text</button>
+          <button onclick="openModal('replaceFeature')">Replace text</button>
 
           <br> 
 
@@ -182,6 +182,8 @@
             <br>
           </naV>
         </section>
+
+        <button onclick="openDialog('testDialog')">Open test dialog</button>
 
         <section id="customCode" class="hidden">
           <textarea id="textareaEval"></textarea>    
@@ -222,31 +224,42 @@
         </div>
       </div>
 
-      <!-- Universal Modal -->
+      <!-- Modals -->
       <div id="universalModal" class="modal hidden">
         <div class="modal-overlay" onclick="closeModal()"></div>
         <div class="modal-content">
           <button class="modal-close" onclick="closeModal()">×</button>
           <div class="modal-body">
-            
+
             <!-- Replace Feature Modal Content -->
             <div id="replaceFeature" class="hidden">
               <h3>Replace Text</h3>
               <div class="input-container">
                 <input type="text" id="oldText" placeholder="Text to be replaced" />
-                <button class="clear-input" onclick="clearInput('oldText')">×</button>
+                <span></span>
+                <button class="clear-input">×</button>
               </div>
               <div class="input-container">
                 <input type="text" id="newText" placeholder="Replacing text" />
-                <button class="clear-input" onclick="clearInput('newText')">×</button>
+                <button class="clear-input">×</button>
               </div>
               <button onclick="replaceText()">Replace</button>
             </div>
+
+            <!-- Other modal features here -->           
 
           </div>
         </div>
       </div>
 
+      <!-- Dialogs -->
+      <dialog id="testDialog">
+        <div class="dialog-content">
+          <button class="modal-close">×</button>
+          <p>This is a dialog.</p>
+        </div>
+      </dialog>     
+      
 
 		</main>
 
