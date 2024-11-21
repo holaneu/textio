@@ -655,6 +655,41 @@ function loadLocalData() {
     fileInput.click();
   }  
   
+  // Universal Modal Functions
+  function showModal(contentId) {
+    const modal = document.getElementById("universalModal");
+    const content = document.getElementById(contentId);
+    if (modal && content) {
+      modal.classList.remove("hidden");
+      content.classList.remove("hidden");
+    }
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("universalModal");
+    const allContent = modal.querySelectorAll(".modal-body > div");
+    if (modal) modal.classList.add("hidden");
+    allContent.forEach(content => content.classList.add("hidden"));
+  }
+
+  // Replace Text Feature
+  function replaceText() {
+    HistoryAdd();
+    const oldText = document.getElementById("oldText").value;
+    const newText = document.getElementById("newText").value;
+    const textarea = document.getElementById("textareaMain");
+
+    if (!oldText) {
+      alert("Please fill the field");
+      return;
+    }
+
+    const replacedContent = textarea.value.replaceAll(oldText, newText);
+    textarea.value = replacedContent;
+
+    closeModal();
+  }
+
   
   // Transformation functions
   

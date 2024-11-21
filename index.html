@@ -143,6 +143,8 @@
             <option value="insertFieldSeparator">Insert Field Separator</option>
           </select>
 
+          <button onclick="showModal('replaceFeature')">Replace text</button>
+
           <br> 
 
           <button id="createFlashcards" class='orange'>Play flash cards</button>
@@ -217,6 +219,23 @@
           <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
           <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
           <div class="row"><button class="btn-outline" id="clearLs">Clear whole localStorage</button></div>
+        </div>
+      </div>
+
+      <!-- Universal Modal -->
+      <div id="universalModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+          <button class="modal-close" onclick="closeModal()">×</button>
+          <div class="modal-body">
+            <!-- Replace Feature Modal Content -->
+            <div id="replaceFeature" class="hidden">
+              <h3>Replace Text</h3>
+              <input type="text" id="oldText" placeholder="Text to be replaced" />
+              <input type="text" id="newText" placeholder="Replacing text" />
+              <button onclick="replaceText()">Replace</button>
+            </div>
+          </div>
         </div>
       </div>
 
