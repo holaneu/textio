@@ -281,6 +281,9 @@ function loadLocalData() {
   
   function populateData() {
     var records = loadLocalData();
+    records.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
     var optgroup = document.getElementById('optgroupLcRecords');
     optgroup.innerHTML = "";
     records.forEach((item) => {
