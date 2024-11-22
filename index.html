@@ -1,270 +1,286 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Textio</title>
-    <meta name="version" content="1.25">
-    <!--<base href="/textio/">-->
-    <script>
-      if (window.location.protocol === "file:") {
-        // Local file system, set base to current directory
-        const baseElement = document.createElement('base');
-        baseElement.href = './';
-        document.head.appendChild(baseElement);
-      } else {
-        // Deployed, set base to /textio/
-        const baseElement = document.createElement('base');
-        baseElement.href = '/textio/';
-        document.head.appendChild(baseElement);
-      }
-    </script>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="manifest" href="manifest.json">
-  	<meta name="viewport" content="width=device-width, initial-scale=1">
-  	<meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#000000">
-    <link rel="icon" type="image/png" href="assets/favicons/textio.png"> 
-    <link rel="stylesheet" href="style.css">
-
-		<script>
-      if ('serviceWorker' in navigator) {
-          navigator.serviceWorker
-              .register('service-worker.js') // Correct the hyphen here
-              .then(function() {
-                  console.log("Service Worker Registered");
-              })
-              .catch(function(error) {
-                  console.error("Service Worker Registration Failed:", error); // Add error handling
-              });
-      }
+<head>
+  <title>Textio</title>
+  <meta name="version" content="1.25">
+  <!--<base href="/textio/">-->
+  <script>
+    if (window.location.protocol === "file:") {
+      // Local file system, set base to current directory
+      const baseElement = document.createElement('base');
+      baseElement.href = './';
+      document.head.appendChild(baseElement);
+    } else {
+      // Deployed, set base to /textio/
+      const baseElement = document.createElement('base');
+      baseElement.href = '/textio/';
+      document.head.appendChild(baseElement);
+    }
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" type="image/png" href="assets/favicons/textio.png"> 
+  <link rel="stylesheet" href="style.css">
   
-      window.addEventListener('DOMContentLoaded', () => {
-          const parsedUrl = new URL(window.location);
-          
-          const sharedTitle = parsedUrl.searchParams.get('title');
-          const sharedText = parsedUrl.searchParams.get('text');
-          const sharedUrl = parsedUrl.searchParams.get('url');
-  
-          // Ensure `textareaMain` is properly assigned
-          //const textareaMain = document.getElementById('textareaMain');
-          if (textareaMain) {
-              let finalText = ''; // Accumulate shared content
-
-              if (sharedTitle) {
-                  finalText += sharedTitle + "\n";
-                  console.log('sharedTitle:', sharedTitle);
-              }
-  
-              if (sharedText) {
-                  finalText += sharedText + "\n";
-                  console.log('sharedText:', sharedText);
-              }
-              
-              if (sharedUrl) {
-                  finalText += sharedUrl + "\n";
-                  console.log('sharedUrl:', sharedUrl);
-              }
-  
-              textareaMain.value = finalText; // Assign all at once
-          } else {
-              console.error('textareaMain element not found.');
-          }
-        });
-    </script>  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+      .register('service-worker.js') // Correct the hyphen here
+      .then(function() {
+        console.log("Service Worker Registered");
+      })
+      .catch(function(error) {
+        console.error("Service Worker Registration Failed:", error); // Add error handling
+      });
+    }
     
-	</head>
-
-	<body>
-
-		<main>
-
-      <!-- Home Screen -->
-      <div class="screen" id="home-screen">
-        <section>
-          <nav> 
-            <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
-            
-            <button id="historyBack" disabled>Step back</button>
-            <button id="resetEditor">New</button>
-    
-            <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
-              <option value="">-Open-</option>
-              <option value="ClickHiddenFileInput()">Open file</option>
-              <optgroup id="optgroupLcRecords" label="Open document (LS):"></optgroup>           						
-              <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
-            </select>
-
-            <select id="saveOptions" class="mobile-dropdown" style="max-width: 55px;">
-              <option value="" disabled selected>Save</option>
-              <option value="OverwriteOpenedDoc">Save (overwrite)</option>
-              <option value="SaveAsNewDoc">Save as new</option>
-=             <option value="DownloadFile">Download</option>
-            </select>
-
-            <button id="btnSettings" onclick="navigateToScreen('settings-screen')">Settings</button>
-            
-            <br>
-            
-            <span>Document: <em id="currentDocName"></em></span>
-            <span>Current step:<em id="currentStep">0</em></span>
-          </nav>
-        </section>			
-        
-        <section id="editor-textarea-main">
-          <textarea id="textareaMain"></textarea>
-        </section>
-
-        <section id="editor-buttons">
-          <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
-            <option value="">-Transform-</option>
-            <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
-            <option value="CallFunc(LinesToList);">Rows to List</option>
-            <option value="CallFunc(ListToArray);">List to Array</option>
-            <option value="CallFunc(ListToLines);">List to Rows</option>
-            <option value="CallFunc(ListSort);">Sort list</option>
-            <option value="CallFunc(RemoveSpaces);">Remove spaces</option>
-            <option value="CallFunc(RemoveEmptyLines);">Remove empty rows</option>  		
-            <option value="CallFunc(RemoveLineBreaks);">Remove line breaks</option>
-            <option value="CallFunc(RemoveDiacritics);">Remove diacritics</option>
-            <option value="CallFunc(EncodeBase64)">Encode Base64</option>
-            <option value="CallFunc(DecodeBase64)">Decode Base64</option>
-            <option value="CallFunc(ConvertToSlug);">Convert to Slug</option>
-            <option value="CallFunc(ParseMarkdownLinks)">Parse markdown links</option>
-            <option value="CallFunc(IncreaseLineBreaks);">TTS: increase line breaks</option>
-            <option value="CallFunc(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
-            <option value="CallFunc(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
-            <option value="CallFunc(EncodeUri)">Encode URL</option>
-            <option value="CallFunc(DecodeUri)">Decode URL</option>	      
-          </select>
-          
-          <select id="insertOptions" class="mobile-dropdown" style="max-width: 60px;">
-            <option value="" disabled selected>Insert</option>
-            <option value="insertDate">Insert Date</option>
-            <option value="insertSeparator">Insert Separator</option>
-            <option value="insertFieldSeparator">Insert Field Separator</option>
-          </select>
-
-          <button onclick="openModal('replaceFeature')">Replace text</button>
-
-          <br> 
-
-          <button id="createFlashcards" class='orange'>Play flash cards</button>
-          <button id="CreateFlashCardsFromItemGroup" class='orange'>Shuffle Item Group</button>    
-
-          <br>
-                
-          <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
-        </section>
-
-        <section id="tts-controls" class="expandable-section" style="display: none;">
-          <nav>
-            Voice: 
-            <select id="tts-voices"></select></br>
-            Rate: 
-            <select id="tts-rate">
-              <option value="0.3">very slow</option>
-              <option value="0.6">slow</option>
-              <option value="1" selected>normal</option>
-              <option value="1.5">fast</option>
-              <option value="1.8">very fast</option>
-            </select>
-            Pitch:
-            <select id="tts-pitch">
-              <option value="0">low</option>
-              <option value="1" selected>normal</option>
-              <option value="2">high</option>
-            </select></br>
-            Flash cards auto-speak: 
-            <input type="checkbox" id="checkbox-auto-speak">
-            <br>
-            <br>
-            <button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
-            <button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
-            <br>
-          </naV>
-        </section>
-
-        <button onclick="openDialog('testDialog')">Open test dialog</button>
-
-        <section id="customCode" class="hidden">
-          <textarea id="textareaEval"></textarea>    
-          <button onclick="EvalCustomScript();">Execute custom script</button>
-        </section>       
-
-        <section id="logs" class="hidden">
-          <textarea id="textarea-logs"></textarea>
-        </section>
-      </div>
-
-      <!-- Flashcards Screen -->
-      <div class="screen hidden" id="flashcards-screen">  
-        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>  
-        <article class="card-front"></article>
-        <article class="card-back"><pre></pre></article>
-        <nav>
-          <button onclick="NextCard()">Next</button>
-          <br>       
-          <button onclick="TurnCard()">Turn</button>          
-          <br>
-          <button onclick="Speak(currentCard[0])">Speak</button>
-          <br>
-        </nav>    
-      </div>
-
-      <!-- Settings Screen -->
-      <div class="screen hidden" id="settings-screen">
-        <div class="screen-container">
-          <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
-          <h2 class="screen-title">Settings</h2>
-          <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
-          <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
-          <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
-          <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
-          <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
-          <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
-        </div>
-      </div>
-
-      <!-- Modals -->
-      <div id="universalModal" class="modal hidden">
-        <div class="modal-overlay" onclick="closeModal()"></div>
-        <div class="modal-content">
-          <button class="modal-close" onclick="closeModal()">×</button>
-          <div class="modal-body">
-
-            <!-- Replace Feature Modal Content -->
-            <div id="replaceFeature" class="hidden">
-              <h3>Replace Text</h3>
-              <div class="input-container">
-                <input type="text" id="oldText" placeholder="Text to be replaced" />
-                <span></span>
-                <button class="clear-input">×</button>
-              </div>
-              <div class="input-container">
-                <input type="text" id="newText" placeholder="Replacing text" />
-                <button class="clear-input">×</button>
-              </div>
-              <button onclick="replaceText()">Replace</button>
-            </div>
-
-            <!-- Other modal features here -->           
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Dialogs -->
-      <dialog id="testDialog">
-        <div class="dialog-content">
-          <button class="modal-close">×</button>
-          <p>This is a dialog.</p>
-        </div>
-      </dialog>     
+    window.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
       
+      // Fetch the main textarea element
+      const textareaMain = document.getElementById('textareaMain');
+      if (!textareaMain) {
+        console.error('textareaMain element not found.');
+        return;
+      }
+      
+      // Handle shared content (title, text, and URL)
+      const sharedTitle = urlParams.get('title');
+      const sharedText = urlParams.get('text');
+      const sharedUrl = urlParams.get('url');
+      let finalText = ''; // Accumulate shared content
+      
+      if (sharedTitle) {
+        finalText += `${sharedTitle}\n`;
+        console.log('sharedTitle:', sharedTitle);
+      }
+      if (sharedText) {
+        finalText += `${sharedText}\n`;
+        console.log('sharedText:', sharedText);
+      }
+      if (sharedUrl) {
+        finalText += `${sharedUrl}\n`;
+        console.log('sharedUrl:', sharedUrl);
+      }
+      
+      // Set shared content in textareaMain if present
+      if (finalText) {
+        textareaMain.value = finalText;
+      }
+      
+      // Handle file opening (via fileHandler parameter)
+      if (urlParams.has('fileHandler')) {
+        try {
+          // Fetch the file content sent via the file handler
+          const response = await fetch(window.location.href);
+          const fileContent = await response.text();
+          
+          // Append or overwrite the content in the main textarea
+          textareaMain.value = fileContent;
+        } catch (error) {
+          console.error('Failed to read file content:', error);
+        }
+      }
+    });    
+  </script>  
+  
+</head>
 
-		</main>
-
-    <script src="app.js"></script>		
-		
-	</body>
+<body>
+  
+  <main>
+    
+    <!-- Home Screen -->
+    <div class="screen" id="home-screen">
+      <section>
+        <nav> 
+          <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
+          
+          <button id="historyBack" disabled>Step back</button>
+          <button id="resetEditor">New</button>
+          
+          <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
+            <option value="">-Open-</option>
+            <option value="ClickHiddenFileInput()">Open file</option>
+            <optgroup id="optgroupLcRecords" label="Open document (LS):"></optgroup>           						
+            <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
+          </select>
+          
+          <select id="saveOptions" class="mobile-dropdown" style="max-width: 55px;">
+            <option value="" disabled selected>Save</option>
+            <option value="OverwriteOpenedDoc">Save (overwrite)</option>
+            <option value="SaveAsNewDoc">Save as new</option>
+            =             <option value="DownloadFile">Download</option>
+          </select>
+          
+          <button id="btnSettings" onclick="navigateToScreen('settings-screen')">Settings</button>
+          
+          <br>
+          
+          <span>Document: <em id="currentDocName"></em></span>
+          <span>Current step:<em id="currentStep">0</em></span>
+        </nav>
+      </section>			
+      
+      <section id="editor-textarea-main">
+        <textarea id="textareaMain"></textarea>
+      </section>
+      
+      <section id="editor-buttons">
+        <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
+          <option value="">-Transform-</option>
+          <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
+          <option value="CallFunc(LinesToList);">Rows to List</option>
+          <option value="CallFunc(ListToArray);">List to Array</option>
+          <option value="CallFunc(ListToLines);">List to Rows</option>
+          <option value="CallFunc(ListSort);">Sort list</option>
+          <option value="CallFunc(RemoveSpaces);">Remove spaces</option>
+          <option value="CallFunc(RemoveEmptyLines);">Remove empty rows</option>  		
+          <option value="CallFunc(RemoveLineBreaks);">Remove line breaks</option>
+          <option value="CallFunc(RemoveDiacritics);">Remove diacritics</option>
+          <option value="CallFunc(EncodeBase64)">Encode Base64</option>
+          <option value="CallFunc(DecodeBase64)">Decode Base64</option>
+          <option value="CallFunc(ConvertToSlug);">Convert to Slug</option>
+          <option value="CallFunc(ParseMarkdownLinks)">Parse markdown links</option>
+          <option value="CallFunc(IncreaseLineBreaks);">TTS: increase line breaks</option>
+          <option value="CallFunc(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
+          <option value="CallFunc(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
+          <option value="CallFunc(EncodeUri)">Encode URL</option>
+          <option value="CallFunc(DecodeUri)">Decode URL</option>	      
+        </select>
+        
+        <select id="insertOptions" class="mobile-dropdown" style="max-width: 60px;">
+          <option value="" disabled selected>Insert</option>
+          <option value="insertDate">Insert Date</option>
+          <option value="insertSeparator">Insert Separator</option>
+          <option value="insertFieldSeparator">Insert Field Separator</option>
+        </select>
+        
+        <button onclick="openModal('replaceFeature')">Replace text</button>
+        
+        <br> 
+        
+        <button id="createFlashcards" class='orange'>Play flash cards</button>
+        <button id="CreateFlashCardsFromItemGroup" class='orange'>Shuffle Item Group</button>    
+        
+        <br>
+        
+        <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
+      </section>
+      
+      <section id="tts-controls" class="expandable-section" style="display: none;">
+        <nav>
+          Voice: 
+          <select id="tts-voices"></select></br>
+          Rate: 
+          <select id="tts-rate">
+            <option value="0.3">very slow</option>
+            <option value="0.6">slow</option>
+            <option value="1" selected>normal</option>
+            <option value="1.5">fast</option>
+            <option value="1.8">very fast</option>
+          </select>
+          Pitch:
+          <select id="tts-pitch">
+            <option value="0">low</option>
+            <option value="1" selected>normal</option>
+            <option value="2">high</option>
+          </select></br>
+          Flash cards auto-speak: 
+          <input type="checkbox" id="checkbox-auto-speak">
+          <br>
+          <br>
+          <button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
+          <button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
+          <br>
+        </naV>
+      </section>
+      
+      <button onclick="openDialog('testDialog')">Open test dialog</button>
+      
+      <section id="customCode" class="hidden">
+        <textarea id="textareaEval"></textarea>    
+        <button onclick="EvalCustomScript();">Execute custom script</button>
+      </section>       
+      
+      <section id="logs" class="hidden">
+        <textarea id="textarea-logs"></textarea>
+      </section>
+    </div>
+    
+    <!-- Flashcards Screen -->
+    <div class="screen hidden" id="flashcards-screen">  
+      <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>  
+      <article class="card-front"></article>
+      <article class="card-back"><pre></pre></article>
+      <nav>
+        <button onclick="NextCard()">Next</button>
+        <br>       
+        <button onclick="TurnCard()">Turn</button>          
+        <br>
+        <button onclick="Speak(currentCard[0])">Speak</button>
+        <br>
+      </nav>    
+    </div>
+    
+    <!-- Settings Screen -->
+    <div class="screen hidden" id="settings-screen">
+      <div class="screen-container">
+        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
+        <h2 class="screen-title">Settings</h2>
+        <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
+        <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
+        <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
+        <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
+        <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
+        <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
+      </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="universalModal" class="modal hidden">
+      <div class="modal-overlay" onclick="closeModal()"></div>
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-body">
+          
+          <!-- Replace Feature Modal Content -->
+          <div id="replaceFeature" class="hidden">
+            <h3>Replace Text</h3>
+            <div class="input-container">
+              <input type="text" id="oldText" placeholder="Text to be replaced" />
+              <span></span>
+              <button class="clear-input">×</button>
+            </div>
+            <div class="input-container">
+              <input type="text" id="newText" placeholder="Replacing text" />
+              <button class="clear-input">×</button>
+            </div>
+            <button onclick="replaceText()">Replace</button>
+          </div>
+          
+          <!-- Other modal features here -->           
+          
+        </div>
+      </div>
+    </div>
+    
+    <!-- Dialogs -->
+    <dialog id="testDialog">
+      <div class="dialog-content">
+        <button class="modal-close">×</button>
+        <p>This is a dialog.</p>
+      </div>
+    </dialog>     
+    
+    
+  </main>
+  
+  <script src="app.js"></script>		
+  
+</body>
 
 </html>

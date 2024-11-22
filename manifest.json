@@ -1,24 +1,34 @@
 {
-    "short_name": "Textio",
-    "name": "Textio",
-    "icons": [      
-        {
-        "src": "textio.png",
-        "type": "image/png",
-        "sizes": "256x256"
-        }
-    ],
-    "start_url": "/textio/",
-    "background_color": "#000000",
-    "display": "standalone",
-    "theme_color": "#000000",
-    "description": "Textio",
-    "share_target": {
-        "action": "/textio/",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
+  "short_name": "Textio",
+  "name": "Textio",
+  "icons": [      
+  {
+    "src": "textio.png",
+    "type": "image/png",
+    "sizes": "256x256"
+  }
+],
+"start_url": "/textio/",
+"background_color": "#000000",
+"display": "standalone",
+"theme_color": "#000000",
+"description": "Textio",
+"share_target": {
+  "action": "/textio/",
+  "params": {
+    "title": "title",
+    "text": "text",
+    "url": "url"
+  }
+},
+"file_handlers": [
+  {
+    "action": "/textio/",
+    "accept": {
+      "text/plain": [".txt"],
+      "text/markdown": [".md"],
+      "application/x-yaml": [".yaml", ".yml"]
     }
+  }
+]
 }

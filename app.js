@@ -573,7 +573,7 @@ function loadLocalData() {
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'textio_export.json';
+    link.download = 'textio_export_'+ GetDateTime('YYYYMMDD') +'.json';
     link.click();
     
     URL.revokeObjectURL(link.href);
