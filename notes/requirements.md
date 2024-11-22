@@ -34,19 +34,21 @@
 ## Switch the primary card side
 - possible to change the primary card side (so the front card will be replaced by back card and vise versa)
 
+
+
+
+
+# DONE:
+
 ## Remove sanitize feature
 
-## Replace form
+## "Replace text" form
 
 ## universal UI element dialog / modal, with overlay
 - used for some features like "replace text form"
   - input 1: text to be replaced
   - input 2 replacing text
   - radio button to select between normal and regex mode
-
-
-
-# DONE:
 
 ## !! export / import
 - in a settings screen

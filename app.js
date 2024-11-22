@@ -17,7 +17,7 @@ const	flashcardsSection = document.querySelector("#flashcards-section");
 const	currentStepText = document.querySelector("#currentStep"); 
 const	btnHistoryBack = document.querySelector("#historyBack"); 
 const	cardFront = document.querySelector(".card-front");
-const	cardBack = document.querySelector(".card-back > pre"); //document.querySelector(".card-back");
+const	cardBack = document.querySelector(".card-back"); //document.querySelector(".card-back");
 const textareaLogs = document.getElementById('textarea-logs');
 const selectTtsVoices = document.getElementById('tts-voices');  
 const currentDocName = document.getElementById('currentDocName'); 
@@ -49,10 +49,6 @@ document.getElementById('historyBack').addEventListener('click', () => {
 
 document.getElementById('removeDoc').addEventListener('click', () => {
   RemoveDoc();
-});
-
-document.getElementById('clearLs').addEventListener('click', () => {
-  ClearLS();
 });
 
 document.getElementById('createFlashcards').addEventListener('click', () => {
@@ -285,6 +281,9 @@ function loadLocalData() {
   
   function populateData() {
     var records = loadLocalData();
+    records.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
     var optgroup = document.getElementById('optgroupLcRecords');
     optgroup.innerHTML = "";
     records.forEach((item) => {
@@ -309,8 +308,8 @@ function loadLocalData() {
     }  	      
   }
   
-  function ClearLS() {
-    var confirmation = confirm("Are you sure you want to clear the local storage?");
+  function RemoveAppData() {
+    var confirmation = confirm('Are you realy sure you want to remove all "textio_data_" items from local storage?');
     if (confirmation) {
       var records = loadLocalData();
       records.forEach(function(item){
@@ -332,13 +331,20 @@ function loadLocalData() {
         const separator = tagMatch[1];             // separator value
         const fieldSeparator = tagMatch[2] || "";  // fieldSeparator value, or empty string if not provided
         const content = tagMatch[3].trim();
+        let fieldSeparatorMapped = fieldSeparator;
+
+        switch(true) {
+          case /newline|new line/.test(fieldSeparator):
+            fieldSeparatorMapped = "\n";
+            break;
+        }
         
         // Split content by the main separator and process each item
         return content
         .split(separator)
         .map(item => item.trim())
         .filter(item => item !== "")
-        .map(item => fieldSeparator ? item.split(fieldSeparator).map(field => field.trim()) : [item]);  
+        .map(item => fieldSeparatorMapped ? item.split(fieldSeparatorMapped).map(field => field.trim().replace(/\w{2}: /g,'')) : [item]);  
         // If fieldSeparator exists, split by it; otherwise, keep item as a single element array
       }
       return null;  // Return null if the tag has no content or is not found
@@ -577,7 +583,7 @@ function loadLocalData() {
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'textio_export.json';
+    link.download = 'textio_export_'+ GetDateTime('YYYYMMDD') +'.json';
     link.click();
     
     URL.revokeObjectURL(link.href);
@@ -744,7 +750,13 @@ function loadLocalData() {
   // Transformation functions
   
   function yamlMultiDocToVocabularyItems(input) {
-    return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
+    return input.split('\n-----\n')
+      .map((i) => {return i.trim()
+        .split('\n')
+        .map((i) => {return i.replace(/^\w{2}:\s/g,'')})
+        .join('\n===\n')
+      }).join('\n-----\n');
+    //return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
     //return input.trim().split('-----').map((i) => {i.replace(/\w{2}: /g,'').replace(/\n/g,'\n+++\n')}).join('-----');
   }
   
