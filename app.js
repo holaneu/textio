@@ -51,10 +51,6 @@ document.getElementById('removeDoc').addEventListener('click', () => {
   RemoveDoc();
 });
 
-document.getElementById('clearLs').addEventListener('click', () => {
-  ClearLS();
-});
-
 document.getElementById('createFlashcards').addEventListener('click', () => {
   CreateFlashCards();
 });
@@ -309,8 +305,8 @@ function loadLocalData() {
     }  	      
   }
   
-  function ClearLS() {
-    var confirmation = confirm("Are you sure you want to clear the local storage?");
+  function RemoveAppData() {
+    var confirmation = confirm('Are you realy sure you want to remove all "textio_data_" items from local storage?');
     if (confirmation) {
       var records = loadLocalData();
       records.forEach(function(item){
@@ -744,7 +740,13 @@ function loadLocalData() {
   // Transformation functions
   
   function yamlMultiDocToVocabularyItems(input) {
-    return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
+    return input.split('\n-----\n')
+      .map((i) => {return i.trim()
+        .split('\n')
+        .map((i) => {return i.replace(/^\w{2}:\s/g,'')})
+        .join('\n===\n')
+      }).join('\n-----\n');
+    //return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
     //return input.trim().split('-----').map((i) => {i.replace(/\w{2}: /g,'').replace(/\n/g,'\n+++\n')}).join('-----');
   }
   

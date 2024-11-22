@@ -36,17 +36,18 @@
 
 ## Remove sanitize feature
 
-## Replace form
+
+
+
+# DONE:
+
+## "Replace text" form
 
 ## universal UI element dialog / modal, with overlay
 - used for some features like "replace text form"
   - input 1: text to be replaced
   - input 2 replacing text
   - radio button to select between normal and regex mode
-
-
-
-# DONE:
 
 ## !! export / import
 - in a settings screen

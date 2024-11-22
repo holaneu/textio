@@ -110,7 +110,7 @@
         </section>			
         
         <section id="editor-textarea-main">
-          <textarea id="textareaMain" oninput="sanitizeInput(this)"></textarea>
+          <textarea id="textareaMain"></textarea>
         </section>
 
         <section id="editor-buttons">
@@ -220,7 +220,7 @@
           <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
           <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
           <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
-          <div class="row"><button class="btn-outline" id="clearLs">Clear whole localStorage</button></div>
+          <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
         </div>
       </div>
 
