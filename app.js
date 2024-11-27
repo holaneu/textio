@@ -22,9 +22,6 @@ const textareaLogs = document.getElementById('textarea-logs');
 const selectTtsVoices = document.getElementById('tts-voices');  
 const currentDocName = document.getElementById('currentDocName'); 
 
-const insertEmptyLine = document.getElementById('insertEmptyLine');
-const insertDate = document.getElementById('insertDate');
-
 var logs = [];
 var historySteps = [];
 var synth = speechSynthesis;
@@ -89,6 +86,9 @@ document.getElementById('insertOptions').addEventListener('change', (event) => {
       break;
     case "insertFieldSeparator":
       insertAtCursor(textareaMain, '===');
+      break;
+    case "insertRandomId":
+      insertAtCursor(textareaMain, generateId());
       break;
   }
 
