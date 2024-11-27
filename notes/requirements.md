@@ -20,14 +20,6 @@
 ## Rename functions
 - get rid of LS in names as app storage functions should be universal (wrappers where the storage type might be changed in future)
 
-## New screens logic and its navigation
-- screens
-  - home
-  - settings
-  - flashcards
-  - ...
-- function to navigate between screens
-
 ## exctract items from the items tag
 - exctract items from the items tag - just return the extracted text into textarea
 
@@ -35,10 +27,15 @@
 - possible to change the primary card side (so the front card will be replaced by back card and vise versa)
 
 
-
-
-
 # DONE:
+
+## New screens logic and its navigation
+- screens
+  - home
+  - settings
+  - flashcards
+  - ...
+- function to navigate between screens
 
 ## Remove sanitize feature
 

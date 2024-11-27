@@ -107,13 +107,13 @@ header em {
   box-sizing: border-box;
   text-align: center;
 }
-#flashcards-screen article {
+#flashcards-screen .flashcards-content {
   color: white;
   padding-top: 20px;
   padding-bottom: 20px;
   font-size: 20px;
 }
-#flashcards-screen nav {
+#flashcards-screen .flashcards-controls {
   position: absolute;
   width: calc(100% - 20px);
   text-align: center;
