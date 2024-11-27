@@ -214,16 +214,18 @@
     <!-- Flashcards Screen -->
     <div class="screen hidden" id="flashcards-screen">  
       <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>  
-      <article class="card-front"></article>
-      <article class="card-back"></article>
-      <nav>
-        <button onclick="NextCard()">Next</button>
+      <div class="flashcards-content">
+        <div class="card-front"></div>
+        <div class="card-back"></div>
+      </div>
+      <div class="flashcards-controls">
+        <button onclick="moveCard('previous')">Previous</button><button onclick="moveCard('next')">Next</button>
         <br>       
         <button onclick="TurnCard()">Turn</button>          
         <br>
-        <button onclick="Speak(currentCard[0])">Speak</button>
+        <button onclick="Speak(currentCard[0])">Read aloud</button>
         <br>
-      </nav>    
+      </div>    
     </div>
     
     <!-- Settings Screen -->

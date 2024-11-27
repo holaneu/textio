@@ -360,9 +360,9 @@ function loadLocalData() {
     .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ))
     .filter(item => item[0] !== "");
     window.cardsShuffled = ShuffleArray(cardsAll);
-    window.cardIndex = -1; // -1 is value for starting position, then NextCart function will iterate it to 0
+    window.cardIndex = -1; // -1 is value for starting position, then NextCard function will iterate it to 0
     navigateToScreen("flashcards-screen");
-    NextCard();
+    moveCard("next");
   } 
   
   function CreateFlashCardsFromItemGroup() {
@@ -372,28 +372,34 @@ function loadLocalData() {
       window.cardsShuffled = ShuffleArray(cardsAll);
       window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
       navigateToScreen("flashcards-screen");
-      NextCard();
+      moveCard("next");
     } else {
       alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
     }
     
   }
-  
-  function NextCard() {       
-    if(cardIndex >= window.cardsShuffled.length-1){
-      // jump from last cart to first
-      cardIndex = 0;
+
+  function moveCard(direction) {
+    if (direction === "next") {
+        cardIndex = (cardIndex >= window.cardsShuffled.length - 1) ? 0 : cardIndex + 1;
+    } else if (direction === "previous") {
+        cardIndex = (cardIndex <= 0) ? window.cardsShuffled.length - 1 : cardIndex - 1;
     } else {
-      cardIndex++;
+        console.error(`Invalid direction: ${direction}. Use "next" or "previous".`);
+        return;
     }
-    window.currentCard = cardsShuffled[cardIndex]; //window.cardsAll[cardIndex];
-    cardFront.innerText = currentCard[0]; 
+
+    window.currentCard = cardsShuffled[cardIndex]; // Update the current card
+    cardFront.innerText = currentCard[0];
     cardBack.innerText = "";
-    window.currentCardBackLoop = 1;
+    window.currentCardBackLoop = 1; // Reset back-side loop
+
     if (document.querySelector('#checkbox-auto-speak').checked) {
-      Speak(currentCard[0]);
+        Speak(currentCard[0]);
     }
   }
+
+
   
   function RandomCard() {
     window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
