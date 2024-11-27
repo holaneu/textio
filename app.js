@@ -328,23 +328,32 @@ function loadLocalData() {
       console.log(tagMatch);
       
       if (tagMatch && tagMatch[3].trim() !== "") {
-        const separator = tagMatch[1];             // separator value
-        const fieldSeparator = tagMatch[2] || "";  // fieldSeparator value, or empty string if not provided
-        const content = tagMatch[3].trim();
-        let fieldSeparatorMapped = fieldSeparator;
-
-        switch(true) {
-          case /newline|new line/.test(fieldSeparator):
-            fieldSeparatorMapped = "\n";
-            break;
+        function mapSeparator(input) {
+          if (!input) {
+            return null;
+          } 
+          let output = input;
+          switch(true) {
+            case /newline|new line/.test(input):
+              output = "\n";
+              break;
+            case /empty row|empty-row|empty line|empty-line/.test(input):
+              output = "\n\n";
+              break;
+          }
+          return output;
         }
+
+        const separator = mapSeparator(tagMatch[1]);             // separator value
+        const fieldSeparator = mapSeparator(tagMatch[2]) || "";  // fieldSeparator value, or empty string if not provided
+        const content = tagMatch[3].trim();        
         
         // Split content by the main separator and process each item
         return content
         .split(separator)
         .map(item => item.trim())
         .filter(item => item !== "")
-        .map(item => fieldSeparatorMapped ? item.split(fieldSeparatorMapped).map(field => field.trim().replace(/\w{2}: /g,'')) : [item]);  
+        .map(item => fieldSeparator ? item.split(fieldSeparator).map(field => field.trim().replace(/\w{2}: /g,'')) : [item]);  
         // If fieldSeparator exists, split by it; otherwise, keep item as a single element array
       }
       return null;  // Return null if the tag has no content or is not found
@@ -374,12 +383,14 @@ function loadLocalData() {
       navigateToScreen("flashcards-screen");
       moveCard("next");
     } else {
-      alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
-    }
-    
+      //alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
+      CreateFlashCards();
+    }    
   }
 
   function moveCard(direction) {
+    StopSpeaking();
+
     if (direction === "next") {
         cardIndex = (cardIndex >= window.cardsShuffled.length - 1) ? 0 : cardIndex + 1;
     } else if (direction === "previous") {
@@ -398,8 +409,6 @@ function loadLocalData() {
         Speak(currentCard[0]);
     }
   }
-
-
   
   function RandomCard() {
     window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
@@ -420,11 +429,6 @@ function loadLocalData() {
     } else {
       cardBack.innerText = "-- no back side --";//document.querySelector(".card-back").innerHTML = "-- no back side --";
     }
-  }
-  
-  function CloseFlashCards() {
-    flashcardsSection.style.display = 'none';
-    StopSpeaking();
   }
   
   // TTS - source: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API      
