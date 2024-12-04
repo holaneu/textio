@@ -48,6 +48,7 @@ document.getElementById('removeDoc').addEventListener('click', () => {
   RemoveDoc();
 });
 
+/*
 document.getElementById('createFlashcards').addEventListener('click', () => {
   CreateFlashCards();
 });
@@ -55,6 +56,7 @@ document.getElementById('createFlashcards').addEventListener('click', () => {
 document.getElementById('CreateFlashCardsFromItemGroup').addEventListener('click', () => {
   CreateFlashCardsFromItemGroup();
 });
+*/
 
 document.getElementById('showCustomCode').addEventListener('change', (event) => {
   const customCodeSection = document.getElementById('customCode');
@@ -156,7 +158,14 @@ function CallFunc(callback) {
   if(callback) {
     HistoryAdd();
     var result = callback(textareaMain.value);
-    textareaMain.value = result;
+    // Check the type of result and format it accordingly
+    if (typeof result === "object") {
+      // If result is an object or array, stringify it with formatting for readability
+      textareaMain.value = JSON.stringify(result, null, 2); // 2 spaces for indentation
+    } else {
+      // If result is not an object, directly assign it
+      textareaMain.value = result;
+    }
   }      
 }
 
@@ -360,6 +369,44 @@ function loadLocalData() {
     }
     
     return parseTagContent("items") || parseTagContent("item-group") || parseTagContent("data-list") || null;
+  }
+
+  function parseAllTagsFromXml(inputData) {
+    // Helper function to parse attributes from a tag string
+    function parseAttributes(tagString) {
+      const attributes = {};
+      const attrRegex = /(\w+)="([^"]*)"/g;
+      let match;
+      while ((match = attrRegex.exec(tagString)) !== null) {
+        attributes[match[1]] = match[2];
+      }
+      return attributes;
+    }
+  
+    // Helper function to parse a single tag and its content
+    function parseTag(tagMatch) {
+      const tagName = tagMatch[1]; // The tag name
+      const attributesString = tagMatch[2]; // The attributes part of the tag
+      const content = tagMatch[3].trim(); // The inner content
+  
+      return {
+        tag_name: tagName,
+        tag_attributes: parseAttributes(attributesString || ""),
+        inner_content: content
+      };
+    }
+  
+    // Enhanced regex for matching tags and their content
+    const tagRegex = /<([\w-]+)([^>]*)>([\s\S]*?)<\/\1>/g;
+    const result = [];
+    let match;
+  
+    // Use a loop to ensure all tags are matched and processed
+    while ((match = tagRegex.exec(inputData)) !== null) {
+      result.push(parseTag(match));
+    }
+  
+    return result.length > 0 ? result : null; // Return null if no tags were found
   }
   
   function CreateFlashCards() {        
@@ -758,6 +805,10 @@ function loadLocalData() {
 
   
   // Transformation functions
+
+  function populateParseAllTagsFromXml(inputData){
+    textareaMain.value = parseAllTagsFromXml(inputData);
+  }
   
   function yamlMultiDocToVocabularyItems(input) {
     return input.split('\n-----\n')
@@ -840,14 +891,14 @@ function loadLocalData() {
     return result;
   }
   
-  function ConvertToSlug(input) {
-    var text = input;
-    var result = '';
-    for (var i=0;i<text.length;i++) {
-      if (char_map[text[i]])
-        result += char_map[text[i]];
+  function ConvertToSlug(inputData) {
+    if (!inputData) return;
+    let result = '';
+    for (let i=0;i<inputData.length;i++) {
+      if (char_map[inputData[i]])
+        result += char_map[inputData[i]];
       else
-      result += text[i];
+        result += inputData[i];
     }
     return result.toLowerCase().replace(/[^\w |\n]+/g,'').replace(/ +|\n+/g,'-');
   }

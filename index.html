@@ -133,6 +133,7 @@
         <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
           <option value="">-Transform-</option>
           <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
+          <option value="CallFunc(parseAllTagsFromXml);">Parse All Tags From Xml</option>          
           <option value="CallFunc(LinesToList);">Rows to List</option>
           <option value="CallFunc(ListToArray);">List to Array</option>
           <option value="CallFunc(ListToLines);">List to Rows</option>
@@ -164,8 +165,8 @@
         
         <br> 
         
-        <button id="createFlashcards" class='orange'>Play flash cards</button>
-        <button id="CreateFlashCardsFromItemGroup" class='orange'>Shuffle Item Group</button>    
+        <button id="createFlashcards" class='orange' onclick="CreateFlashCards()">Play flash cards</button>
+        <button id="CreateFlashCardsFromItemGroup" class='orange' onclick="CreateFlashCardsFromItemGroup()">Shuffle Item Group</button>    
         
         <br>
         
@@ -242,6 +243,21 @@
         <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
       </div>
     </div>
+
+    <!-- Items Processing Screen -->
+    <div class="screen hidden" id="items-processing-screen">
+      <div class="screen-container">
+        <div class="back-btn" onclick="navigateToScreen('home-screen')"></div>
+        <h2 class="screen-title">Items data processing</h2>
+        <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
+        <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
+        <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
+        <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
+        <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
+        <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
+      </div>
+    </div>
+
     
     <!-- Modals -->
     <div id="universalModal" class="modal hidden">
