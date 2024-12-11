@@ -167,7 +167,8 @@
         
         <button id="createFlashcards" class='orange' onclick="CreateFlashCards()">Play flash cards</button>
         <button id="CreateFlashCardsFromItemGroup" class='orange' onclick="CreateFlashCardsFromItemGroup()">Shuffle Item Group</button>    
-        
+        <button id="processDocData" onclick="processDocumentData()">Process doc data</button>
+
         <br>
         
         <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
@@ -258,6 +259,19 @@
       </div>
     </div>
 
+    <!-- Tag Detail Screen -->
+    <div class="screen hidden" id="tag-detail-screen">
+      <div class="screen-container">
+        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
+        <div class="screen-title"></div>
+        <div id="tagDetailContent">
+          <div id="tagName"></div>
+          <div id="tagAttributes"></div>
+          <div id="tagInnerContent"></div>
+        </div>
+      </div>
+    </div>
+
     
     <!-- Modals -->
     <div id="universalModal" class="modal hidden">
@@ -279,6 +293,12 @@
               <button class="clear-input">×</button>
             </div>
             <button onclick="replaceText()">Replace</button>
+          </div>
+
+          <!-- Tag Selection Modal Content -->
+          <div id="tagSelectionModal" class="hidden">
+              <h3>Select XML Tag</h3>
+              <div class="card-list" id="tagCards"></div>
           </div>
           
           <!-- Other modal features here -->           

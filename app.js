@@ -759,49 +759,66 @@ function loadLocalData() {
       inputField.value = '';
       inputField.focus(); // Optional: Refocus the cleared field
     }
-  }
+  }  
 
-  /*REMOVE:
-  function openDialog(dialog) {
-    target = document.getElementById(dialog);
-    if(target){
-      target.show();
-      closeBtn = target.querySelector(".modal-close");
-      if(closeBtn){
-        closeBtn.addEventListener('click', () => target.close());
-      }
+  function processDocumentData() {
+    const content = textareaMain.value;
+    const parsedTags = parseAllTagsFromXml(content);
+    
+    if (!parsedTags || parsedTags.length === 0) {
+      alert('No XML tags found in the doc.');
+      return;
+    }
+    
+    if (parsedTags.length === 1) {
+      showTagDetail(parsedTags[0]);
+    } else {
+      showTagSelectionModal(parsedTags);
     }
   }
-    */
 
-  (() => {
-    window.openDialog = function (dialog) {
-      const target = document.getElementById(dialog);
-      if (!target) {
-        console.warn(`Dialog with ID "${dialog}" not found.`);
-        return;
-      }
+  function showTagSelectionModal(tags) {
+    const cardsContainer = document.getElementById('tagCards');
+    
+    cardsContainer.innerHTML = '';
 
-      const openButton = document.activeElement;
-      target.showModal();
-      target.addEventListener('close', () => {
-        openButton.focus();
-      });
+    function renderTagItemCard(tag){
+      return `
+        <div class="card-item">
+          <div class="card-content">
+            <p>
+              ${tag.tag_name}</br>
+            ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
+            </p>
+          </div>
+        </div>
+      `;
+    }
+    
+    tags.forEach((tag, index) => {
+      const card = document.createElement('div');
+      //card.className = 'card-item';
+      card.innerHTML = renderTagItemCard(tag);
+      card.onclick = () => {
+        closeModal();
+        showTagDetail(tag);
+      };
+      cardsContainer.appendChild(card);
+    });
 
-      const closeBtn = target.querySelector(".modal-close");
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => target.close(), { once: true });
-      } else {
-        console.warn('Close button not found in the dialog.');
-      }
+    openModal('tagSelectionModal');
+  }
 
-      target.addEventListener('click', (event) => {
-        if (event.target === target) {
-          target.close();
-        }
-      });
-    };
-  })();
+  function showTagDetail(tag) {
+    document.querySelector('#tag-detail-screen .screen-title').textContent = `${tag.tag_name}`;
+    document.getElementById('tagName').textContent = `Tag: ${tag.tag_name}`;
+    document.getElementById('tagAttributes').innerHTML = `Attributes:<br>${Object.entries(tag.tag_attributes)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('<br>')}`;
+    document.getElementById('tagInnerContent').textContent = `Obsah:\n${tag.inner_content}`;
+    
+    navigateToScreen('tag-detail-screen');
+  }
 
   
   // Transformation functions
