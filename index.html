@@ -113,7 +113,7 @@
             <option value="" disabled selected>Save</option>
             <option value="OverwriteOpenedDoc">Save (overwrite)</option>
             <option value="SaveAsNewDoc">Save as new</option>
-            =             <option value="DownloadFile">Download</option>
+            <option value="DownloadFile">Download</option>
           </select>
           
           <button id="btnSettings" onclick="navigateToScreen('settings-screen')">Settings</button>
@@ -252,19 +252,6 @@
         <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
         <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
         <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
-      </div>
-    </div>
-
-    <!-- Tag Detail Screen -->
-    <div class="screen hidden" id="tag-detail-screen">
-      <div class="screen-container">
-        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
-        <div class="screen-title"></div>
-        <div id="tagDetailContent">
-          <div id="tagName"></div>
-          <div id="tagAttributes"></div>
-          <div id="tagInnerContent"></div>
-        </div>
       </div>
     </div>
 

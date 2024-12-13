@@ -48,16 +48,6 @@ document.getElementById('removeDoc').addEventListener('click', () => {
   RemoveDoc();
 });
 
-/*
-document.getElementById('createFlashcards').addEventListener('click', () => {
-  CreateFlashCards();
-});
-
-document.getElementById('CreateFlashCardsFromItemGroup').addEventListener('click', () => {
-  CreateFlashCardsFromItemGroup();
-});
-*/
-
 document.getElementById('showCustomCode').addEventListener('change', (event) => {
   const customCodeSection = document.getElementById('customCode');
   if (event.target.checked) {
@@ -331,6 +321,9 @@ function loadLocalData() {
 
   function docToFlashCards() {
     const content = getEditorContent();
+    if (!content.trim()) {
+      return;
+    }
     const parsedTags = parseAllXmlTagsFromDoc(content);
     
     if (!parsedTags || parsedTags.length === 0) {
@@ -350,7 +343,6 @@ function loadLocalData() {
     cardsContainer.innerHTML = '';    
     tags.forEach((tag, index) => {
       const card = document.createElement('div');
-      //card.className = 'card-item';
       card.innerHTML =  `
           <div class="card-item">
             <div class="card-content">
@@ -365,18 +357,6 @@ function loadLocalData() {
       cardsContainer.appendChild(card);
     });
     openModal('tagSelectionModal');
-  }
-
-  // REMOVE REPLACE BY openAsFlashCards
-  function showTagDetail(tag) {
-    document.querySelector('#tag-detail-screen .screen-title').textContent = `${tag.tag_name}`;
-    document.getElementById('tagName').textContent = `Tag name: ${tag.tag_name}`;
-    document.getElementById('tagAttributes').innerHTML = `Attributes:<br>${Object.entries(tag.tag_attributes)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('<br>')}`;
-    document.getElementById('tagInnerContent').textContent = `Content:\n${tag.inner_content}`;
-    
-    navigateToScreen('tag-detail-screen');
   }
 
   function parseAllXmlTagsFromDoc(inputData) {
@@ -466,11 +446,7 @@ function loadLocalData() {
     window.cardIndex = -1; // -1 is value for starting position, then NextCard function will iterate it to 0
     navigateToScreen("flashcards-screen");
     navigateCards("next");
-  }  
-
-  
-
-  
+  }   
 
   function navigateCards(direction) {
     StopSpeaking();
@@ -811,7 +787,7 @@ function loadLocalData() {
     return input.split('\n-----\n')
       .map((i) => {return i.trim()
         .split('\n')
-        .map((i) => {return i.replace(/^\w{2}:\s/g,'')})
+        .map((i) => {return i.replace(/^(cs|en):\s/g,'')})
         .join('\n===\n')
       }).join('\n-----\n');
     //return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
