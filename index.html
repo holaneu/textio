@@ -164,10 +164,8 @@
         <button onclick="openModal('replaceFeature')">Replace text</button>
         
         <br> 
-        
-        <button id="createFlashcards" class='orange' onclick="CreateFlashCards()">Play flash cards</button>
-        <button id="CreateFlashCardsFromItemGroup" class='orange' onclick="CreateFlashCardsFromItemGroup()">Shuffle Item Group</button>    
-        <button id="processDocData" onclick="docToFlashCards()">Doc to flash cards</button>
+           
+        <button id="processDocData" class='orange'onclick="docToFlashCards()">Doc to flash cards</button>
 
         <br>
         
@@ -296,7 +294,7 @@
           <!-- Tag Selection Modal Content -->
           <div id="tagSelectionModal" class="hidden">
               <h3>Select XML Tag</h3>
-              <div class="card-list" id="tagCards"></div>
+              <div class="card-list" id="parsedTagCards"></div>
           </div>
           
           <!-- Other modal features here -->           

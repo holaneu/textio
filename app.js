@@ -331,51 +331,43 @@ function loadLocalData() {
 
   function docToFlashCards() {
     const content = getEditorContent();
-    const parsedTags = parseAllTagsFromXml(content);
+    const parsedTags = parseAllXmlTagsFromDoc(content);
     
     if (!parsedTags || parsedTags.length === 0) {
-      //CreateFlashCards();
-      showTagDetail({tag_name: "items", tag_attributes: {separator: "newline"}, inner_content: content});
+      openAsFlashCards({tag_name: "items", tag_attributes: {separator: "newline"}, inner_content: content});
       return;
     }
     
     if (parsedTags.length === 1) {
-      showTagDetail(parsedTags[0]);
+      openAsFlashCards(parsedTags[0]);
     } else {
-      showTagSelectionModal(parsedTags);
+      showXmlTagSelectionModal(parsedTags);
     }
   }
 
-  function showTagSelectionModal(tags) {
-    const cardsContainer = document.getElementById('tagCards');
-    
-    cardsContainer.innerHTML = '';
-
-    function renderTagItemCard(tag){
-      return `
-        <div class="card-item">
-          <div class="card-content">
-            ${tag.tag_name}</br>
-            ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
-          </div>
-        </div>
-      `;
-    }
-    
+  function showXmlTagSelectionModal(tags) {
+    const cardsContainer = document.getElementById('parsedTagCards');    
+    cardsContainer.innerHTML = '';    
     tags.forEach((tag, index) => {
       const card = document.createElement('div');
       //card.className = 'card-item';
-      card.innerHTML = renderTagItemCard(tag);
+      card.innerHTML =  `
+          <div class="card-item">
+            <div class="card-content">
+              ${tag.tag_name}</br>
+              ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
+            </div>
+          </div>`;
       card.onclick = () => {
         closeModal();
-        showTagDetail(tag);
+        openAsFlashCards(tag);
       };
       cardsContainer.appendChild(card);
     });
-
     openModal('tagSelectionModal');
   }
 
+  // REMOVE REPLACE BY openAsFlashCards
   function showTagDetail(tag) {
     document.querySelector('#tag-detail-screen .screen-title').textContent = `${tag.tag_name}`;
     document.getElementById('tagName').textContent = `Tag name: ${tag.tag_name}`;
@@ -386,50 +378,8 @@ function loadLocalData() {
     
     navigateToScreen('tag-detail-screen');
   }
-  
-  function parseItemsFromXmlTag(inputText) {
-    
-    function parseTagContent(tagName) {
-      // Adjust regex to make `fieldSeparator` optional
-      const tagMatch = inputText.match(new RegExp(`<${tagName}[^>]*?separator="([^"]+)"(?:[^>]*?fieldSeparator="([^"]+)")?[^>]*?>([\\s\\S]*?)<\\/${tagName}>`, "i"));
-      console.log(tagMatch);
-      
-      if (tagMatch && tagMatch[3].trim() !== "") {
-        function mapSeparator(input) {
-          if (!input) {
-            return null;
-          } 
-          let output = input;
-          switch(true) {
-            case /newline|new line/.test(input):
-              output = "\n";
-              break;
-            case /empty row|empty-row|empty line|empty-line/.test(input):
-              output = "\n\n";
-              break;
-          }
-          return output;
-        }
 
-        const separator = mapSeparator(tagMatch[1]);             // separator value
-        const fieldSeparator = mapSeparator(tagMatch[2]) || "";  // fieldSeparator value, or empty string if not provided
-        const content = tagMatch[3].trim();        
-        
-        // Split content by the main separator and process each item
-        return content
-        .split(separator)
-        .map(item => item.trim())
-        .filter(item => item !== "")
-        .map(item => fieldSeparator ? item.split(fieldSeparator).map(field => field.trim().replace(/\w{2}: /g,'')) : [item]);  
-        // If fieldSeparator exists, split by it; otherwise, keep item as a single element array
-      }
-      return null;  // Return null if the tag has no content or is not found
-    }
-    
-    return parseTagContent("items") || parseTagContent("item-group") || parseTagContent("data-list") || null;
-  }
-
-  function parseAllTagsFromXml(inputData) {
+  function parseAllXmlTagsFromDoc(inputData) {
     // Helper function to parse attributes from a tag string
     function parseAttributes(tagString) {
       const attributes = {};
@@ -466,40 +416,61 @@ function loadLocalData() {
   
     return result.length > 0 ? result : null; // Return null if no tags were found
   }
-  
-  // REMOVE
-  function CreateFlashCards() {        
-    window.cardsAll = RemoveEmptyLines(textareaMain.value)
-    .trim()
-    .split("\n")
-    .map(item => item.split(/\.{4}|=|\t/).map(item => item.trim() ))
-    .filter(item => item[0] !== "");
+
+  function parseItemsFromSingleTagData(inputData) {
+    /**
+     * input (object)
+     * output (array)
+     */
+    if (!inputData) {
+      return;
+    }
+
+    if (inputData.tag_attributes && inputData.tag_attributes.separator) {
+
+      function mapSeparator(input) {
+        if (!input) {
+          return null;
+        } 
+        let output = input;
+        switch(true) {
+          case /newline|new line/.test(input):
+            output = "\n";
+            break;
+          case /empty row|empty-row|empty line|empty-line/.test(input):
+            output = "\n\n";
+            break;
+        }
+        return output;
+      }
+
+      const separator = mapSeparator(inputData.tag_attributes.separator);
+      const defaultFieldSeparator = /\.{4}|=|\t/;
+      const fieldSeparator = inputData.tag_attributes.fieldSeparator ? 
+        mapSeparator(inputData.tag_attributes.fieldSeparator) : 
+        defaultFieldSeparator;
+      const content = inputData.inner_content.trim();        
+      
+      // Split content by the main separator and process each item
+      return content
+        .split(separator)
+        .map(item => item.trim())
+        .filter(item => item !== "")
+        .map(item => item.split(fieldSeparator).map(field => field.trim().replace(/\w{2}: /g,'')));
+    }
+  }
+
+  function openAsFlashCards(inputData) {        
+    window.cardsAll = parseItemsFromSingleTagData(inputData);
     window.cardsShuffled = ShuffleArray(cardsAll);
     window.cardIndex = -1; // -1 is value for starting position, then NextCard function will iterate it to 0
     navigateToScreen("flashcards-screen");
     navigateCards("next");
-  } 
+  }  
+
   
-  function CreateFlashCardsFromItemGroup() {
-    const parsedItems = parseItemsFromXmlTag(textareaMain.value);
-    if (parsedItems) {
-      window.cardsAll = parsedItems; 
-      window.cardsShuffled = ShuffleArray(cardsAll);
-      window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
-      navigateToScreen("flashcards-screen");
-      navigateCards("next");
-    } else {
-      //alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
-      CreateFlashCards();
-    }    
-  }
 
-  function openAsFlashCards(inputData) {
-    /**
-     * inputData (array of objects)     * 
-     */
-
-  }
+  
 
   function navigateCards(direction) {
     StopSpeaking();
@@ -833,7 +804,7 @@ function loadLocalData() {
   // Transformation functions
 
   function populateParseAllTagsFromXml(inputData){
-    textareaMain.value = parseAllTagsFromXml(inputData);
+    textareaMain.value = parseAllXmlTagsFromDoc(inputData);
   }
   
   function yamlMultiDocToVocabularyItems(input) {
