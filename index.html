@@ -167,7 +167,7 @@
         
         <button id="createFlashcards" class='orange' onclick="CreateFlashCards()">Play flash cards</button>
         <button id="CreateFlashCardsFromItemGroup" class='orange' onclick="CreateFlashCardsFromItemGroup()">Shuffle Item Group</button>    
-        <button id="processDocData" onclick="processDocumentData()">Process doc data</button>
+        <button id="processDocData" onclick="docToFlashCards()">Doc to flash cards</button>
 
         <br>
         
@@ -201,9 +201,7 @@
           <br>
         </naV>
       </section>
-      
-      <button onclick="openDialog('testDialog')">Open test dialog</button>
-      
+            
       <section id="customCode" class="hidden">
         <textarea id="textareaEval"></textarea>    
         <button onclick="EvalCustomScript();">Execute custom script</button>
@@ -222,7 +220,7 @@
         <div class="card-back"></div>
       </div>
       <div class="flashcards-controls">
-        <button onclick="moveCard('previous')">Previous</button><button onclick="moveCard('next')">Next</button>
+        <button onclick="navigateCards('previous')">Previous</button><button onclick="navigateCards('next')">Next</button>
         <br>       
         <button onclick="TurnCard()">Turn</button>          
         <br>

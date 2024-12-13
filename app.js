@@ -328,6 +328,64 @@ function loadLocalData() {
       setCurrentDoc(null);
     }
   }
+
+  function docToFlashCards() {
+    const content = getEditorContent();
+    const parsedTags = parseAllTagsFromXml(content);
+    
+    if (!parsedTags || parsedTags.length === 0) {
+      //CreateFlashCards();
+      showTagDetail({tag_name: "items", tag_attributes: {separator: "newline"}, inner_content: content});
+      return;
+    }
+    
+    if (parsedTags.length === 1) {
+      showTagDetail(parsedTags[0]);
+    } else {
+      showTagSelectionModal(parsedTags);
+    }
+  }
+
+  function showTagSelectionModal(tags) {
+    const cardsContainer = document.getElementById('tagCards');
+    
+    cardsContainer.innerHTML = '';
+
+    function renderTagItemCard(tag){
+      return `
+        <div class="card-item">
+          <div class="card-content">
+            ${tag.tag_name}</br>
+            ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
+          </div>
+        </div>
+      `;
+    }
+    
+    tags.forEach((tag, index) => {
+      const card = document.createElement('div');
+      //card.className = 'card-item';
+      card.innerHTML = renderTagItemCard(tag);
+      card.onclick = () => {
+        closeModal();
+        showTagDetail(tag);
+      };
+      cardsContainer.appendChild(card);
+    });
+
+    openModal('tagSelectionModal');
+  }
+
+  function showTagDetail(tag) {
+    document.querySelector('#tag-detail-screen .screen-title').textContent = `${tag.tag_name}`;
+    document.getElementById('tagName').textContent = `Tag name: ${tag.tag_name}`;
+    document.getElementById('tagAttributes').innerHTML = `Attributes:<br>${Object.entries(tag.tag_attributes)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('<br>')}`;
+    document.getElementById('tagInnerContent').textContent = `Content:\n${tag.inner_content}`;
+    
+    navigateToScreen('tag-detail-screen');
+  }
   
   function parseItemsFromXmlTag(inputText) {
     
@@ -409,6 +467,7 @@ function loadLocalData() {
     return result.length > 0 ? result : null; // Return null if no tags were found
   }
   
+  // REMOVE
   function CreateFlashCards() {        
     window.cardsAll = RemoveEmptyLines(textareaMain.value)
     .trim()
@@ -418,7 +477,7 @@ function loadLocalData() {
     window.cardsShuffled = ShuffleArray(cardsAll);
     window.cardIndex = -1; // -1 is value for starting position, then NextCard function will iterate it to 0
     navigateToScreen("flashcards-screen");
-    moveCard("next");
+    navigateCards("next");
   } 
   
   function CreateFlashCardsFromItemGroup() {
@@ -428,14 +487,21 @@ function loadLocalData() {
       window.cardsShuffled = ShuffleArray(cardsAll);
       window.cardIndex = -1;  // Start at -1, NextCard will increment to 0
       navigateToScreen("flashcards-screen");
-      moveCard("next");
+      navigateCards("next");
     } else {
       //alert(`No items found in the document ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}`);
       CreateFlashCards();
     }    
   }
 
-  function moveCard(direction) {
+  function openAsFlashCards(inputData) {
+    /**
+     * inputData (array of objects)     * 
+     */
+
+  }
+
+  function navigateCards(direction) {
     StopSpeaking();
 
     if (direction === "next") {
@@ -761,64 +827,7 @@ function loadLocalData() {
     }
   }  
 
-  function processDocumentData() {
-    const content = textareaMain.value;
-    const parsedTags = parseAllTagsFromXml(content);
-    
-    if (!parsedTags || parsedTags.length === 0) {
-      alert('No XML tags found in the doc.');
-      return;
-    }
-    
-    if (parsedTags.length === 1) {
-      showTagDetail(parsedTags[0]);
-    } else {
-      showTagSelectionModal(parsedTags);
-    }
-  }
-
-  function showTagSelectionModal(tags) {
-    const cardsContainer = document.getElementById('tagCards');
-    
-    cardsContainer.innerHTML = '';
-
-    function renderTagItemCard(tag){
-      return `
-        <div class="card-item">
-          <div class="card-content">
-            <p>
-              ${tag.tag_name}</br>
-            ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
-            </p>
-          </div>
-        </div>
-      `;
-    }
-    
-    tags.forEach((tag, index) => {
-      const card = document.createElement('div');
-      //card.className = 'card-item';
-      card.innerHTML = renderTagItemCard(tag);
-      card.onclick = () => {
-        closeModal();
-        showTagDetail(tag);
-      };
-      cardsContainer.appendChild(card);
-    });
-
-    openModal('tagSelectionModal');
-  }
-
-  function showTagDetail(tag) {
-    document.querySelector('#tag-detail-screen .screen-title').textContent = `${tag.tag_name}`;
-    document.getElementById('tagName').textContent = `Tag: ${tag.tag_name}`;
-    document.getElementById('tagAttributes').innerHTML = `Attributes:<br>${Object.entries(tag.tag_attributes)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('<br>')}`;
-    document.getElementById('tagInnerContent').textContent = `Obsah:\n${tag.inner_content}`;
-    
-    navigateToScreen('tag-detail-screen');
-  }
+  
 
   
   // Transformation functions
