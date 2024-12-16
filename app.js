@@ -607,7 +607,7 @@ const flashcardsManager = {
         .split(separator)
         .map(item => item.trim())
         .filter(item => item !== "")
-        .map(item => item.split(fieldSeparator).map(field => field.trim().replace(/\w{2}: /g,'')));
+        .map(item => item.split(fieldSeparator).map(field => field.trim().replace(/^(en|cs): /g,'')));
     }
   },
 
