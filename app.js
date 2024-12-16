@@ -834,7 +834,7 @@ const evalManager = {
         elements.editor.main.value = result;
       }
     } catch (error) {
-      elements.editor.logs.value = `Error: ${error.message}`;
+      elements.editor.logs.value += `\n\nError: ${error.message}`;
       console.error('Script execution error:', error);
     }
   }
