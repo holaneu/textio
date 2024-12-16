@@ -1,3 +1,4 @@
+// Configuration
 const appConfigs = {
   app_prefix: "textio_",
   get db_key_prefix() {
@@ -11,655 +12,231 @@ const uiConfigs = {
   }
 };
 
-const	textareaMain = document.querySelector("#textareaMain");
-const textareaEval = document.querySelector("#textareaEval");
-const	flashcardsSection = document.querySelector("#flashcards-section"); 
-const	currentStepText = document.querySelector("#currentStep"); 
-const	btnHistoryBack = document.querySelector("#historyBack"); 
-const	cardFront = document.querySelector(".card-front");
-const	cardBack = document.querySelector(".card-back"); //document.querySelector(".card-back");
-const textareaLogs = document.getElementById('textarea-logs');
-const selectTtsVoices = document.getElementById('tts-voices');  
-const currentDocName = document.getElementById('currentDocName'); 
-
-var logs = [];
-var historySteps = [];
-var synth = speechSynthesis;
-var voices_all;
-var voices_filtered;
-var supported_tts_languages = ['cs-CZ', 'en-US', 'en-GB'];
-let currentDoc = null;
-
-textareaEval.value = "t = textareaMain;\ntv = t.value;\nr = tv.replace(/,/g,'|');\nt.value = r;";			
-
-// Functions
-
-document.getElementById('resetEditor').addEventListener('click', () => {
-  textareaMain.value = "";
-  setCurrentDoc(null);
-  HistoryReset();
-});
-
-document.getElementById('historyBack').addEventListener('click', () => {
-  HistoryBack();
-});
-
-document.getElementById('removeDoc').addEventListener('click', () => {
-  RemoveDoc();
-});
-
-document.getElementById('showCustomCode').addEventListener('change', (event) => {
-  const customCodeSection = document.getElementById('customCode');
-  if (event.target.checked) {
-    customCodeSection.classList.remove('hidden'); 
-  } else {
-    customCodeSection.classList.add('hidden'); 
+// DOM Elements
+const elements = {
+  editor: {
+    main: document.querySelector('#textareaMain'),
+    eval: document.querySelector('#textareaEval'),
+    logs: document.getElementById('textarea-logs'),
+    currentDocName: document.getElementById('currentDocName')
+  },
+  flashcards: {
+    section: document.querySelector('#flashcards-section'),
+    cardFront: document.querySelector('.card-front'),
+    cardBack: document.querySelector('.card-back')
+  },
+  history: {
+    currentStep: document.querySelector('#currentStep'),
+    backButton: document.querySelector('#historyBack')
+  },
+  tts: {
+    voicesSelect: document.getElementById('tts-voices')
   }
-});
+};
 
-document.getElementById('showLogs').addEventListener('change', (event) => {
-  const customCodeSection = document.getElementById('logs');
-  if (event.target.checked) {
-    customCodeSection.classList.remove('hidden'); 
-  } else {
-    customCodeSection.classList.add('hidden'); 
-  }
-});
+// UI Manager
+const uiManager = {
+  navigateToScreen(screenId) {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => screen.classList.add('hidden'));
+    document.getElementById(screenId).classList.remove('hidden');
+  },
 
-document.getElementById('insertOptions').addEventListener('change', (event) => {
-  const selectedValue = event.target.value;
-  
-  switch(selectedValue) {
-    case "insertDate":
-      insertAtCursor(textareaMain, GetDateTime("YYYY-MM-DD"));
-      break;
-    case "insertSeparator":
-      insertAtCursor(textareaMain, '\n-----\n');
-      break;
-    case "insertFieldSeparator":
-      insertAtCursor(textareaMain, '===');
-      break;
-    case "insertRandomId":
-      insertAtCursor(textareaMain, generateId());
-      break;
-  }
-
-  event.target.selectedIndex = 0;
-  event.target.blur();
-});
-
-document.getElementById('saveOptions').addEventListener('change', (event) => {
-  const selectedValue = event.target.value;
-  eval(selectedValue+"()");
-  event.target.selectedIndex = 0;
-  event.target.blur();
-});
-
-
-/*
-// proven functions
-*/
-
-// Navigate between screens
-function navigateToScreen(screenId) {
-  // Hide all screens
-  const screens = document.querySelectorAll('.screen');
-  screens.forEach(screen => screen.classList.add('hidden'));
-  // Show the targeted screen
-  document.getElementById(screenId).classList.remove('hidden');
-}
-
-function sanitizeInput(textarea) {
-  textarea.value = textarea.value.replace(/<script.*?>.*?<\/script>/gi, '').replace(/<.*?>/g, '');
-}
-
-function ShuffleArray(inputArray) {
-  var array = inputArray;
-  for (var i = array.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-  }
-  return array;
-}
-
-function setCurrentDoc(doc) {
-  console.info(doc);
-  currentDoc = doc;
-  if (doc === null) {
-    currentDocName.innerText = uiConfigs.labels.not_saved_doc;
-  } else if (doc && typeof doc === "object" && doc.name) {
-    currentDocName.innerText = doc.name;
-  }
-}
-
-function RandomIndex(range){
-  var random = Math.random();
-  return Math.floor(random * range);
-}
-
-function generateId(length = 10) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-}
-
-function CallFunc(callback) {
-  if(callback) {
-    HistoryAdd();
-    var result = callback(textareaMain.value);
-    // Check the type of result and format it accordingly
-    if (typeof result === "object") {
-      // If result is an object or array, stringify it with formatting for readability
-      textareaMain.value = JSON.stringify(result, null, 2); // 2 spaces for indentation
-    } else {
-      // If result is not an object, directly assign it
-      textareaMain.value = result;
+  toggleVisibility(selector, triggeringElementId) {
+    const element = document.querySelector(selector);
+    const triggeringElement = document.getElementById(triggeringElementId);
+    
+    if (element) {
+      const isHidden = element.style.display === "none";
+      element.style.display = isHidden ? "block" : "none";
+      if (triggeringElement) {
+        triggeringElement.innerHTML = triggeringElement.innerHTML.replace(
+          isHidden ? 'Show' : 'Hide',
+          isHidden ? 'Hide' : 'Show'
+        );
+      }
     }
-  }      
-}
+  },
 
-function LoadFile(fileHref) {
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", fileHref, false);
-  xmlhttp.send();
-  var result = xmlhttp.responseText;
-  textareaMain.value = result;
-  setCurrentDoc(null);
-  HistoryReset();
-}
-
-function ClickHiddenFileInput() {  
-  document.getElementById('fileInputHidden').click();
-}
-
-function ReadFile(e) {
-  var file = e.target.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    textareaMain.value = e.target.result;
-    setCurrentDoc(null);
-    HistoryReset();
-  }
-  reader.readAsText(file);
-}
-
-function OpenDoc(id) {
-  var record = JSON.parse(localStorage.getItem(appConfigs.db_key_prefix + id));
-  if (record && record.content) {    
-    textareaMain.value = record.content;
-    setCurrentDoc(record);
-    HistoryReset();
-  }
-}
-
-// Download file = Save file
-function DownloadFile() {
-  var userInput = prompt("File name:");
-  if (userInput !== null && userInput !== "") {
-    fileName = 'textio - ' + userInput.trim();
-    var hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(textareaMain.value);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = fileName;
-    hiddenElement.click();
-  }				
-}
-
-function SaveAsNewDoc() {
-  const userInput = prompt("Name:");
-  if (userInput !== null && userInput.trim() !== "") {
-    const id = generateId();
-    const key = appConfigs.db_key_prefix + id;
-    const currentTime = Date.now(); // Current timestamp
-    const record = {
-      id: id,
-      name: userInput.trim(),
-      content: textareaMain.value,
-      created: currentTime,
-      modified: currentTime, // Include modified timestamp
-      timestamp: GetDateTime()
-    };
-    const value = JSON.stringify(record);
-    localStorage.setItem(key, value);
-    populateData();
-    setCurrentDoc(record);
-  }
-}
-
-function OverwriteOpenedDoc() {
-  if (currentDoc !== null && currentDoc.id) {
-    const confirmation = confirm(
-      `Are you sure you want to save and rewrite the ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`
-    );
-    if (confirmation) {
-      const key = appConfigs.db_key_prefix + currentDoc.id;
-      const currentTime = Date.now(); // Current timestamp
-      const record = {
-        ...currentDoc, // Preserve existing properties
-        content: textareaMain.value,
-        modified: currentTime // Update the modified timestamp
-      };
-      const value = JSON.stringify(record);
-      localStorage.setItem(key, value);
-      setCurrentDoc(record);
+  openModal(contentId) {
+    const modal = document.getElementById("universalModal");
+    const content = document.getElementById(contentId);
+    if (modal && content) {
+      modal.classList.remove("hidden");
+      content.classList.remove("hidden");
     }
-  } else {
-    SaveAsNewDoc(); // Fallback to creating a new document if no current doc exists
-  }
-}
+  },
 
+  closeModal() {
+    const modal = document.getElementById("universalModal");    
+    if (modal) {
+      const allContent = modal.querySelectorAll(".modal-body > div");
+      modal.classList.add("hidden");
+      allContent.forEach(content => content.classList.add("hidden"));
+    }
+  }
+};
 
-function loadLocalData() {
-  const savedKeys = Object.keys(localStorage); 
-  const filteredKeys = savedKeys.filter(key => key.startsWith(appConfigs.db_key_prefix));
-  const savedRecords = filteredKeys.map(key => {
-    var record = JSON.parse(localStorage.getItem(key));
-    var id = record.id;
-    var name = record.name;
-    var content = record.content;
-    var created = record.created;
-    var timestamp = record.timestamp;
-    return {
-      id: id, 
-      name: name, 
-      content: content, 
-      lcKey: key, 
-      created: created,
-      timestamp: timestamp};
-    });
-    return savedRecords;
-  }
-  
-  // Load user profile from local storage
-  function loadUserProfile() {
-    const profile = localStorage.getItem(appConfigs.userProfileStorageKey);
-    return profile ? JSON.parse(profile) : null;
-  }
-  
-  function populateData() {
-    var records = loadLocalData();
-    records.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
-    var optgroup = document.getElementById('optgroupLcRecords');
+// Document Manager
+const docManager = {
+  currentDoc: null,
+
+  setCurrentDoc(doc) {
+    this.currentDoc = doc;
+    elements.editor.currentDocName.innerText = doc ? doc.name : uiConfigs.labels.not_saved_doc;
+  },
+
+  loadLocalData() {
+    return Object.keys(localStorage)
+      .filter(key => key.startsWith(appConfigs.db_key_prefix))
+      .map(key => {
+        const record = JSON.parse(localStorage.getItem(key));
+        return {
+          id: record.id,
+          name: record.name,
+          content: record.content,
+          lcKey: key,
+          created: record.created,
+          timestamp: record.timestamp
+        };
+      });
+  },
+
+  populateDocList() {
+    const records = this.loadLocalData();
+    records.sort((a, b) => a.name.localeCompare(b.name));
+    
+    const optgroup = document.getElementById('optgroupLcRecords');
     optgroup.innerHTML = "";
     records.forEach((item) => {
       const option = document.createElement("option");
-      option.value = "OpenDoc('"+ item.id +"')"; 
+      option.value = `docManager.openDoc('${item.id}')`; 
       option.text = item.name;
       optgroup.appendChild(option);
     });
-  }
-  
-  function RemoveDoc(){
-    if (currentDoc !== null && currentDoc.id) {
-      var confirmation = confirm(`Are you sure you want to remove ${(currentDoc && currentDoc.name) ? '"' + currentDoc.name + '"' : ''}?`);
-      if (confirmation) {
-        var key = appConfigs.db_key_prefix + currentDoc.id;
-        localStorage.removeItem(key);
-        textareaMain.value = "";
-        populateData();
-        setCurrentDoc(null);
-        HistoryReset();    
-      }  
-    }  	      
-  }
-  
-  function RemoveAppData() {
-    var confirmation = confirm('Are you realy sure you want to remove all "textio_data_" items from local storage?');
+  },
+
+  openDoc(id) {
+    const record = JSON.parse(localStorage.getItem(appConfigs.db_key_prefix + id));
+    if (record?.content) {
+      elements.editor.main.value = record.content;
+      this.setCurrentDoc(record);
+      historyManager.reset();
+    }
+  },
+
+  saveAsNew() {
+    const name = prompt("Name:");
+    if (!name?.trim()) return;
+
+    const id = utils.generateId();
+    const currentTime = Date.now();
+    const record = {
+      id,
+      name: name.trim(),
+      content: elements.editor.main.value,
+      created: currentTime,
+      modified: currentTime,
+      timestamp: utils.getDateTime()
+    };
+
+    try {
+      localStorage.setItem(
+        appConfigs.db_key_prefix + id, 
+        JSON.stringify(record)
+      );
+      this.populateDocList();
+      this.setCurrentDoc(record);
+    } catch (error) {
+      console.error('Error saving document:', error);
+      alert('Failed to save document');
+    }
+  },
+
+  overwriteOpened() {
+    if (!this.currentDoc?.id) {
+      this.saveAsNew();
+      return;
+    }
+
+    const confirmation = confirm(
+      `Are you sure you want to save and rewrite "${this.currentDoc.name || ''}"?`
+    );
+    
+    if (!confirmation) return;
+
+    try {
+      const key = appConfigs.db_key_prefix + this.currentDoc.id;
+      const record = {
+        ...this.currentDoc,
+        content: elements.editor.main.value,
+        modified: Date.now()
+      };
+      localStorage.setItem(key, JSON.stringify(record));
+      this.setCurrentDoc(record);
+    } catch (error) {
+      console.error('Error overwriting document:', error);
+      alert('Failed to save document');
+    }
+  },
+
+  downloadFile() {
+    const name = prompt("File name:");
+    if (!name?.trim()) return;
+
+    const fileName = 'textio - ' + name.trim();
+    const hiddenElement = document.createElement('a');
+    hiddenElement.href = 'data:text/plain;charset=utf-8,' + encodeURI(elements.editor.main.value);
+    hiddenElement.target = '_blank';
+    hiddenElement.download = fileName;
+    hiddenElement.click();
+  },
+
+  removeDoc() {
+    if (!this.currentDoc?.id) return;
+    
+    const confirmation = confirm(
+      `Are you sure you want to remove ${this.currentDoc.name ? `"${this.currentDoc.name}"` : ''}?`
+    );
+    
     if (confirmation) {
-      var records = loadLocalData();
-      records.forEach(function(item){
+      const key = appConfigs.db_key_prefix + this.currentDoc.id;
+      localStorage.removeItem(key);
+      elements.editor.main.value = "";
+      this.populateDocList();
+      this.setCurrentDoc(null);
+      historyManager.reset();
+    }
+  },
+
+  removeAllDocs() {
+    const confirmation = confirm('Are you really sure you want to remove all "textio_data_" items from local storage?');
+    if (confirmation) {
+      const records = this.loadLocalData();
+      records.forEach(item => {
         localStorage.removeItem(appConfigs.db_key_prefix + item.id);
       });
-      populateData(); 
-      setCurrentDoc(null);
+      this.populateDocList();
+      this.setCurrentDoc(null);
     }
-  }
+  },
 
-  function docToFlashCards() {
-    const content = getEditorContent();
-    if (!content.trim()) {
-      return;
-    }
-    const parsedTags = parseAllXmlTagsFromDoc(content);
-    
-    if (!parsedTags || parsedTags.length === 0) {
-      openAsFlashCards({tag_name: "items", tag_attributes: {separator: "newline"}, inner_content: content});
-      return;
-    }
-    
-    if (parsedTags.length === 1) {
-      openAsFlashCards(parsedTags[0]);
-    } else {
-      showXmlTagSelectionModal(parsedTags);
-    }
-  }
-
-  function showXmlTagSelectionModal(tags) {
-    const cardsContainer = document.getElementById('parsedTagCards');    
-    cardsContainer.innerHTML = '';    
-    tags.forEach((tag, index) => {
-      const card = document.createElement('div');
-      card.innerHTML =  `
-          <div class="card-item">
-            <div class="card-content">
-              ${tag.tag_name}</br>
-              ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
-            </div>
-          </div>`;
-      card.onclick = () => {
-        closeModal();
-        openAsFlashCards(tag);
-      };
-      cardsContainer.appendChild(card);
-    });
-    openModal('tagSelectionModal');
-  }
-
-  function parseAllXmlTagsFromDoc(inputData) {
-    // Helper function to parse attributes from a tag string
-    function parseAttributes(tagString) {
-      const attributes = {};
-      const attrRegex = /(\w+)="([^"]*)"/g;
-      let match;
-      while ((match = attrRegex.exec(tagString)) !== null) {
-        attributes[match[1]] = match[2];
-      }
-      return attributes;
-    }
-  
-    // Helper function to parse a single tag and its content
-    function parseTag(tagMatch) {
-      const tagName = tagMatch[1]; // The tag name
-      const attributesString = tagMatch[2]; // The attributes part of the tag
-      const content = tagMatch[3].trim(); // The inner content
-  
-      return {
-        tag_name: tagName,
-        tag_attributes: parseAttributes(attributesString || ""),
-        inner_content: content
-      };
-    }
-  
-    // Enhanced regex for matching tags and their content
-    const tagRegex = /<([\w-]+)([^>]*)>([\s\S]*?)<\/\1>/g;
-    const result = [];
-    let match;
-  
-    // Use a loop to ensure all tags are matched and processed
-    while ((match = tagRegex.exec(inputData)) !== null) {
-      result.push(parseTag(match));
-    }
-  
-    return result.length > 0 ? result : null; // Return null if no tags were found
-  }
-
-  function parseItemsFromSingleTagData(inputData) {
-    /**
-     * input (object)
-     * output (array)
-     */
-    if (!inputData) {
-      return;
-    }
-
-    if (inputData.tag_attributes && inputData.tag_attributes.separator) {
-
-      function mapSeparator(input) {
-        if (!input) {
-          return null;
-        } 
-        let output = input;
-        switch(true) {
-          case /newline|new line/.test(input):
-            output = "\n";
-            break;
-          case /empty row|empty-row|empty line|empty-line/.test(input):
-            output = "\n\n";
-            break;
-        }
-        return output;
-      }
-
-      const separator = mapSeparator(inputData.tag_attributes.separator);
-      const defaultFieldSeparator = /\.{4}|=|\t/;
-      const fieldSeparator = inputData.tag_attributes.fieldSeparator ? 
-        mapSeparator(inputData.tag_attributes.fieldSeparator) : 
-        defaultFieldSeparator;
-      const content = inputData.inner_content.trim();        
-      
-      // Split content by the main separator and process each item
-      return content
-        .split(separator)
-        .map(item => item.trim())
-        .filter(item => item !== "")
-        .map(item => item.split(fieldSeparator).map(field => field.trim().replace(/\w{2}: /g,'')));
-    }
-  }
-
-  function openAsFlashCards(inputData) {        
-    window.cardsAll = parseItemsFromSingleTagData(inputData);
-    window.cardsShuffled = ShuffleArray(cardsAll);
-    window.cardIndex = -1; // -1 is value for starting position, then NextCard function will iterate it to 0
-    navigateToScreen("flashcards-screen");
-    navigateCards("next");
-  }   
-
-  function navigateCards(direction) {
-    StopSpeaking();
-
-    if (direction === "next") {
-        cardIndex = (cardIndex >= window.cardsShuffled.length - 1) ? 0 : cardIndex + 1;
-    } else if (direction === "previous") {
-        cardIndex = (cardIndex <= 0) ? window.cardsShuffled.length - 1 : cardIndex - 1;
-    } else {
-        console.error(`Invalid direction: ${direction}. Use "next" or "previous".`);
-        return;
-    }
-
-    window.currentCard = cardsShuffled[cardIndex]; // Update the current card
-    cardFront.innerText = currentCard[0];
-    cardBack.innerText = "";
-    window.currentCardBackLoop = 1; // Reset back-side loop
-
-    if (document.querySelector('#checkbox-auto-speak').checked) {
-        Speak(currentCard[0]);
-    }
-  }
-  
-  function RandomCard() {
-    window.currentCard =  window.cardsAll[RandomIndex(window.cardsAll.length)];
-    cardFront.innerHTML = currentCard[0];   
-    cardBack.innerText = ""; 
-    window.currentCardBackLoop = 1;
-  }
-  
-  function TurnCard() {
-    if(currentCard.length >= 2) {
-      window.currentCardBack = currentCard[window.currentCardBackLoop];    
-      cardBack.innerText = window.currentCardBack;
-      if(window.currentCardBackLoop < currentCard.length - 1) {
-        window.currentCardBackLoop ++;
-      } else {
-        window.currentCardBackLoop = 1;
-      }
-    } else {
-      cardBack.innerText = "-- no back side --";//document.querySelector(".card-back").innerHTML = "-- no back side --";
-    }
-  }
-  
-  // TTS - source: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API      
-  
-  function VoiceList () {
-    const IntervalGetVoices = setInterval(function() {
-      try {    
-        voices_all = synth.getVoices();
-        if (voices_all.length) {
-          clearInterval(IntervalGetVoices);
-          
-          voices_filtered = voices_all.filter(v => supported_tts_languages.includes(v.lang.replace('_','-')) );
-          selectTtsVoices.innerHTML = "";
-          for (var voice of voices_filtered) {                
-            Log('voice lang: ' + voice.lang );
-            var option = document.createElement("option");
-            option.value = voice.voiceURI;
-            option.text = voice.lang +" - "+ voice.name;
-            selectTtsVoices.appendChild(option);
-          }
-          selectTtsVoices.selectedIndex = '0';
-        } else {
-          Log("Voices are not available yet");
-        }
-      } catch (e) {
-        Log(e);
-      }
-    }, 200);
-  }
-  
-  function Speak(textToRead){
-    if (!window.speechSynthesis){
-      alert("Your device does not support the SpeechSynthesis API");
-    }
-    else {
-      if (textToRead === "") {
-        alert('No text to read!');
-      } else if (voices_filtered.length) {
-        speechSynthesis.cancel();
-        let availableVoices = voices_filtered; //speechSynthesis.getVoices();
-        let utterance = new SpeechSynthesisUtterance();
-        utterance.text = textToRead;
-        utterance.voice = availableVoices.find(o => o.voiceURI === selectTtsVoices.value) || availableVoices[0];
-        utterance.pitch = document.getElementById('tts-pitch').value;
-        utterance.rate = document.getElementById('tts-rate').value;
-        speechSynthesis.speak(utterance);
-      }
-    }
-  }
-  
-  function StopSpeaking(){
-    if (!window.speechSynthesis){
-      alert("Your device does not support the SpeechSynthesis API");
-    } else {
-      speechSynthesis.cancel();
-    }
-  }
-  
-  function GetDateTime(outputFormat){
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hour = String(date.getHours()).padStart(2, '0');
-    const minute = String(date.getMinutes()).padStart(2, '0');
-    const second = String(date.getSeconds()).padStart(2, '0');
-    let formattedDate;
-
-    switch(outputFormat) {
-      case "YYYY-MM-DD":
-        formattedDate = `${year}-${month}-${day}`;
-        break;
-      case "YYYYMMDD":
-        formattedDate = `${year}${month}${day}`;
-        break;
-      default:
-        formattedDate = `${year}${month}${day}_${hour}${minute}${second}`;;
-        break
-    }
-
-    return formattedDate;
-  }
-  
-  function getEditorContent() {
-    return textareaMain ? textareaMain.value : null;
-  }
-  
-  function setEditorContent(newText) {
-    if (textareaMain) {
-      textareaMain.value = newText;
-    }
-  }
-  
-  function Log(message) {
-    if (message) {
-      logs.push(message);
-    }
-    textareaLogs.value = logs.join('\n\n');
-  }
-  
-  function HistoryAdd() {
-    historySteps.push(textareaMain.value);
-    currentStepText.innerHTML = historySteps.length;
-    btnHistoryBack.disabled = false;
-  }
-  
-  function HistoryBack() {
-    if(historySteps.length > 0){
-      setEditorContent(historySteps[historySteps.length-1]);
-      historySteps.pop();
-      currentStep.innerHTML = historySteps.length;
-      if(historySteps.length == 0) {
-        btnHistoryBack.disabled = true;
-      }
-    } 
-  }
-  
-  function HistoryReset() {
-    historySteps = [];
-    currentStepText.innerHTML = historySteps.length;
-    btnHistoryBack.disabled = true;
-  }
-  
-  function ToggleVisibility ( selector, triggeringElementId ) {
-    var element = document.querySelector(selector);
-    var triggeringElement = document.getElementById(triggeringElementId);
-    if (element) {
-      if (element.style.display === "none") {
-        element.style.display = "block";
-        if (triggeringElement) {
-          triggeringElement.innerHTML = triggeringElement.innerHTML.replace('Show', 'Hide');
-        }
-      } else {
-        element.style.display = "none";
-        if (triggeringElement) {
-          triggeringElement.innerHTML = triggeringElement.innerHTML.replace('Hide', 'Show');
-        }
-      }
-    }
-  }
-  
-  function insertAtCursor(textarea, text) {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    
-    textarea.value = textarea.value.substring(0, start) + text + textarea.value.substring(end);
-    textarea.selectionStart = textarea.selectionEnd = start + text.length;
-    textarea.focus();
-  }
-  
-  function exportData() {
+  exportData() {
     const appPrefix = appConfigs.db_key_prefix;
     const filteredData = Object.keys(localStorage)
-    .filter(key => key.startsWith(appPrefix))
-    .map(key => {
-      return { key: key, value: JSON.parse(localStorage.getItem(key)) }; 
-    });
+      .filter(key => key.startsWith(appPrefix))
+      .map(key => ({ key, value: JSON.parse(localStorage.getItem(key)) }));
     
     const json = JSON.stringify(filteredData, null, 2);
-    
     const blob = new Blob([json], { type: 'application/json' });
-    
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'textio_export_'+ GetDateTime('YYYYMMDD') +'.json';
+    link.download = 'textio_export_'+ utils.getDateTime('YYYYMMDD') +'.json';
     link.click();
-    
     URL.revokeObjectURL(link.href);
-  }
-  
-  function importData() {
+  },
+
+  importData() {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'application/json';
@@ -672,308 +249,633 @@ function loadLocalData() {
       }
       
       const reader = new FileReader();
-      
-      reader.onload = function(e) {
+      reader.onload = e => {
         try {
           const data = JSON.parse(e.target.result);
-          
-          if (Array.isArray(data)) {
-            const appPrefix = appConfigs.db_key_prefix;
+          if (!Array.isArray(data)) {
+            throw new Error('Invalid format');
+          }
+
+          const appPrefix = appConfigs.db_key_prefix;
+          data.forEach(item => {
+            if (!item.key?.startsWith(appPrefix)) return;
             
-            data.forEach(item => {
-              if (!item.key || !item.value || typeof item.key !== 'string') {
-                console.warn('Invalid item format:', item);
-                return; // Skip invalid items
-              }
+            const existingItem = localStorage.getItem(item.key);
+            if (existingItem) {
+              const existingValue = JSON.parse(existingItem);
+              const existingModified = existingValue.modified || 0;
+              const newModified = item.value.modified || 0;
               
-              // Validate the key prefix
-              if (!item.key.startsWith(appPrefix)) {
-                console.warn('Key does not start with app prefix:', item.key);
-                return; // Skip items with invalid keys
-              }
-              
-              // Check for duplicates and handle conflicts
-              const existingItem = localStorage.getItem(item.key);
-              if (existingItem) {
-                const existingValue = JSON.parse(existingItem);
-                
-                // Compare modified timestamps to resolve conflict
-                const existingModified = existingValue.modified || 0;
-                const newModified = item.value.modified || 0;
-                
-                if (newModified > existingModified) {
-                  console.info(`Replacing older item with key: ${item.key}`);
-                  localStorage.setItem(item.key, JSON.stringify(item.value));
-                } else {
-                  console.info(`Keeping existing item for key: ${item.key}`);
-                }
-              } else {
-                // No conflict, directly save the new item
+              if (newModified > existingModified) {
                 localStorage.setItem(item.key, JSON.stringify(item.value));
               }
-            });
-            
-            alert('Data successfully imported into localStorage.');
-            populateData(); // Refresh UI if necessary
-          } else {
-            alert('Invalid JSON format. The file must contain an array of objects with "key" and "value" properties.');
-          }
+            } else {
+              localStorage.setItem(item.key, JSON.stringify(item.value));
+            }
+          });
+          
+          alert('Data successfully imported');
+          this.populateDocList();
         } catch (error) {
           console.error('Error importing data:', error);
-          alert('Failed to import data. Please ensure the file is a valid JSON.');
+          alert('Failed to import data. Invalid format.');
         }
       };
-      
-      reader.readAsText(file); // Read the file as text
+      reader.readAsText(file);
     });
     
-    // Trigger the file input dialog
     fileInput.click();
-  }  
-  
-  // Universal Modal Functions
-  function openModal(contentId) {
-    const modal = document.getElementById("universalModal");
-    const content = document.getElementById(contentId);
-    if (modal && content) {
-      modal.classList.remove("hidden");
-      content.classList.remove("hidden");
+  }
+};
+
+// History Manager
+const historyManager = {
+  steps: [],
+
+  add() {
+    this.steps.push(elements.editor.main.value);
+    elements.history.currentStep.innerHTML = this.steps.length;
+    elements.history.backButton.disabled = false;
+  },
+
+  back() {
+    if (this.steps.length === 0) return;
+    
+    elements.editor.main.value = this.steps.pop();
+    elements.history.currentStep.innerHTML = this.steps.length;
+    elements.history.backButton.disabled = this.steps.length === 0;
+  },
+
+  reset() {
+    this.steps = [];
+    elements.history.currentStep.innerHTML = '0';
+    elements.history.backButton.disabled = true;
+  }
+};
+
+// File Manager
+const fileManager = {
+  clickHiddenInput() {
+    document.getElementById('fileInputHidden').click();
+  },
+
+  readFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      elements.editor.main.value = e.target.result;
+      docManager.setCurrentDoc(null);
+      historyManager.reset();
+    };
+    reader.readAsText(file);
+  }
+};
+
+// TTS Manager
+const ttsManager = {
+  synth: window.speechSynthesis,
+  voices: {
+    all: null,
+    filtered: null
+  },
+  supportedLanguages: ['cs-CZ', 'en-US', 'en-GB'],
+
+  async initVoices() {
+    const getVoices = () => {
+      return new Promise((resolve) => {
+        let voices = this.synth.getVoices();
+        if (voices.length) {
+          resolve(voices);
+        } else {
+          this.synth.addEventListener('voiceschanged', () => {
+            voices = this.synth.getVoices();
+            resolve(voices);
+          });
+        }
+      });
+    };
+
+    try {
+      this.voices.all = await getVoices();
+      this.voices.filtered = this.voices.all.filter(
+        v => this.supportedLanguages.includes(v.lang.replace('_','-'))
+      );
+      
+      const select = elements.tts.voicesSelect;
+      select.innerHTML = "";
+      
+      this.voices.filtered.forEach(voice => {
+        const option = document.createElement("option");
+        option.value = voice.voiceURI;
+        option.text = `${voice.lang} - ${voice.name}`;
+        select.appendChild(option);
+      });
+      
+      select.selectedIndex = 0;
+    } catch (error) {
+      console.error('Error initializing voices:', error);
+    }
+  },
+
+  speak(text) {
+    if (!window.speechSynthesis) {
+      alert("Your device does not support the SpeechSynthesis API");
+      return;
+    }
+
+    if (!text?.trim()) {
+      alert('No text to read!');
+      return;
+    }
+
+    if (!this.voices.filtered?.length) {
+      alert('No voices available');
+      return;
+    }
+
+    this.synth.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = this.voices.filtered.find(
+      v => v.voiceURI === elements.tts.voicesSelect.value
+    ) || this.voices.filtered[0];
+    
+    utterance.voice = selectedVoice;
+    utterance.pitch = document.getElementById('tts-pitch').value;
+    utterance.rate = document.getElementById('tts-rate').value;
+    
+    this.synth.speak(utterance);
+  },
+
+  stop() {
+    if (!window.speechSynthesis) {
+      alert("Your device does not support the SpeechSynthesis API");
+      return;
+    }
+    this.synth.cancel();
+  }
+};
+
+// Utility functions
+const utils = {
+  generateId(length = 10) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from(
+      { length }, 
+      () => chars.charAt(Math.floor(Math.random() * chars.length))
+    ).join('');
+  },
+
+  shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  },
+
+  getDateTime(format) {
+    const date = new Date();
+    const formatters = {
+      'YYYY-MM-DD': () => date.toISOString().split('T')[0],
+      'YYYYMMDD': () => date.toISOString().split('T')[0].replace(/-/g, ''),
+      'default': () => {
+        const pad = num => String(num).padStart(2, '0');
+        return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+      }
+    };
+    return (formatters[format] || formatters.default)();
+  },
+
+  randomIndex(range) {
+    return Math.floor(Math.random() * range);
+  },
+
+  sanitizeInput(text) {
+    return text
+      .replace(/<script.*?>.*?<\/script>/gi, '')
+      .replace(/<.*?>/g, '');
+  },
+
+  insertAtCursor(textarea, text) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    textarea.value = textarea.value.substring(0, start) + text + textarea.value.substring(end);
+    textarea.selectionStart = textarea.selectionEnd = start + text.length;
+    textarea.focus();
+  },
+
+  insertDate() {
+    this.insertAtCursor(elements.editor.main, this.getDateTime("YYYY-MM-DD"));
+  },
+
+  insertSeparator() {
+    this.insertAtCursor(elements.editor.main, '\n-----\n');
+  },
+
+  insertFieldSeparator() {
+    this.insertAtCursor(elements.editor.main, '===');
+  },
+
+  insertRandomId() {
+    this.insertAtCursor(elements.editor.main, this.generateId());
+  },
+
+  removeDiacritics(text) {
+    const char_map = {
+      'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE',
+      'Ç': 'C', 'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E', 'Ì': 'I', 'Í': 'I',
+      'Î': 'I', 'Ï': 'I', 'Ð': 'D', 'Ñ': 'N', 'Ò': 'O', 'Ó': 'O', 'Ô': 'O',
+      'Õ': 'O', 'Ö': 'O', 'Ő': 'O', 'Ø': 'O', 'Ù': 'U', 'Ú': 'U', 'Û': 'U',
+      'Ü': 'U', 'Ű': 'U', 'Ý': 'Y', 'Þ': 'TH', 'ß': 'ss', 'à': 'a', 'á': 'a',
+      'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c', 'è': 'e',
+      'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+      'ð': 'd', 'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+      'ő': 'o', 'ø': 'o', 'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ű': 'u',
+      'ý': 'y', 'þ': 'th', 'ÿ': 'y', 'Č': 'C', 'Ď': 'D', 'Ě': 'E', 'Ň': 'N',
+      'Ř': 'R', 'Š': 'S', 'Ť': 'T', 'Ů': 'U', 'Ž': 'Z', 'č': 'c', 'ď': 'd',
+      'ě': 'e', 'ň': 'n', 'ř': 'r', 'š': 's', 'ť': 't', 'ů': 'u', 'ž': 'z'
+    };
+    
+    return text.split('').map(char => char_map[char] || char).join('');
+  },
+
+  convertToSlug(text) {
+    if (!text) return '';
+    return this.removeDiacritics(text)
+      .toLowerCase()
+      .replace(/[^\w |\n]+/g,'')
+      .replace(/ +|\n+/g,'-');
+  },
+
+  callFunc(callback) {
+    if (!callback) return;
+    
+    historyManager.add();
+    const result = callback(elements.editor.main.value);
+
+    if (typeof result === "object") {
+      // If result is an object or array, stringify it with formatting for readability
+      elements.editor.main.value = JSON.stringify(result, null, 2); // 2 spaces for indentation
+    } else {
+      // If result is not an object, directly assign it
+      elements.editor.main.value = result;
     }
   }
+};
 
-  function closeModal() {
-    const modal = document.getElementById("universalModal");    
-    if (modal) {
-      const allContent = modal.querySelectorAll(".modal-body > div");
-      modal.classList.add("hidden");
-      allContent.forEach(content => content.classList.add("hidden"));
+// Flashcards Manager
+const flashcardsManager = {
+  currentCard: null,
+  cardsAll: [],
+  cardsShuffled: [],
+  cardIndex: -1,
+
+  processDoc(inputData) {
+    const content = inputData || elements.editor.main.value;
+    if (!content.trim()) return;
+
+    const parsedTags = transformManager.parseAllXmlTagsFromDoc(content);
+    
+    if (!parsedTags || parsedTags.length === 0) {
+      this.openAsFlashCards({
+        tag_name: "items", 
+        tag_attributes: {separator: "newline"}, 
+        inner_content: content
+      });
+      return;
+    }
+    
+    if (parsedTags.length === 1) {
+      this.openAsFlashCards(parsedTags[0]);
+    } else {
+      this.showXmlTagSelectionModal(parsedTags);
+    }
+  },
+
+  showXmlTagSelectionModal(tags) {
+    const cardsContainer = document.getElementById('parsedTagCards');    
+    cardsContainer.innerHTML = '';    
+    
+    tags.forEach((tag, index) => {
+      const card = document.createElement('div');
+      card.innerHTML = `
+          <div class="card-item">
+            <div class="card-content">
+              ${tag.tag_name}</br>
+              ${Object.entries(tag.tag_attributes).map(([key, value]) => `${key}: ${value}`).join('<br>')}</br>
+            </div>
+          </div>`;
+      card.onclick = () => {
+        uiManager.closeModal();
+        this.openAsFlashCards(tag);
+      };
+      cardsContainer.appendChild(card);
+    });
+
+    uiManager.openModal('tagSelectionModal');
+  },
+
+  parseItemsFromSingleTagData(inputData) {
+    if (!inputData) return;
+
+    if (inputData.tag_attributes && inputData.tag_attributes.separator) {
+      function mapSeparator(input) {
+        if (!input) return null;
+        
+        switch(true) {
+          case /newline|new line/.test(input):
+            return "\n";
+          case /empty row|empty-row|empty line|empty-line/.test(input):
+            return "\n\n";
+          default:
+            return input;
+        }
+      }
+
+      const separator = mapSeparator(inputData.tag_attributes.separator);
+      const defaultFieldSeparator = /\.{4}|=|\t/;
+      const fieldSeparator = inputData.tag_attributes.fieldSeparator ? 
+        mapSeparator(inputData.tag_attributes.fieldSeparator) : 
+        defaultFieldSeparator;
+      const content = inputData.inner_content.trim();        
+      
+      return content
+        .split(separator)
+        .map(item => item.trim())
+        .filter(item => item !== "")
+        .map(item => item.split(fieldSeparator).map(field => field.trim().replace(/\w{2}: /g,'')));
+    }
+  },
+
+  openAsFlashCards(inputData) {        
+    this.cardsAll = this.parseItemsFromSingleTagData(inputData);
+    this.cardsShuffled = utils.shuffleArray(this.cardsAll);
+    this.cardIndex = -1;
+    uiManager.navigateToScreen("flashcards-screen");
+    this.navigate("next");
+  },
+
+  navigate(direction) {
+    ttsManager.stop();
+
+    if (direction === "next") {
+      this.cardIndex = (this.cardIndex >= this.cardsShuffled.length - 1) ? 0 : this.cardIndex + 1;
+    } else if (direction === "previous") {
+      this.cardIndex = (this.cardIndex <= 0) ? this.cardsShuffled.length - 1 : this.cardIndex - 1;
+    }
+
+    this.currentCard = this.cardsShuffled[this.cardIndex];
+    elements.flashcards.cardFront.innerText = this.currentCard[0];
+    elements.flashcards.cardBack.innerText = "";
+    this.currentCardBackLoop = 1;
+
+    if (document.querySelector('#checkbox-auto-speak')?.checked) {
+      ttsManager.speak(this.currentCard[0]);
+    }
+  },
+
+  turnCard() {
+    if (this.currentCard.length >= 2) {
+      const backContent = this.currentCard[this.currentCardBackLoop];
+      elements.flashcards.cardBack.innerText = backContent;
+      
+      if (this.currentCardBackLoop < this.currentCard.length - 1) {
+        this.currentCardBackLoop++;
+      } else {
+        this.currentCardBackLoop = 1;
+      }
+    } else {
+      elements.flashcards.cardBack.innerText = "-- no back side --";
     }
   }
+};
 
-  function replaceText() {
-    HistoryAdd();
+// Transform Manager
+const transformManager = {
+  parseAllXmlTagsFromDoc(inputData) {
+    // If no input data provided, get from textarea
+    const textToProcess = inputData || elements.editor.main.value;
+    
+    // Helper function to parse attributes from a tag string
+    function parseAttributes(tagString) {
+      const attributes = {};
+      const attrRegex = /(\w+)="([^"]*)"/g;
+      let match;
+      
+      while ((match = attrRegex.exec(tagString)) !== null) {
+        attributes[match[1]] = match[2];
+      }
+      
+      return attributes;
+    }
+    
+    // Find all XML-like tags with their content
+    const tagRegex = /<([\w-]+)([^>]*)>([\s\S]*?)<\/\1>/gi;
+    const result = [];
+    let match;
+    
+    while ((match = tagRegex.exec(textToProcess)) !== null) {
+      result.push({
+        tag_name: match[1],
+        tag_attributes: parseAttributes(match[2]),
+        inner_content: match[3]
+      });
+    }
+    
+    return result.length > 0 ? result : null;
+  },
+
+  // Transformation functions - now they just transform and return result
+  yamlToVocabulary(input) {
+    return input.split('\n-----\n')
+      .map(i => i.trim()
+        .split('\n')
+        .map(i => i.replace(/^(en|cs):\s/g,''))
+        .join('\n===\n')
+      ).join('\n-----\n');
+  },
+
+  linesToList(input) {
+    return input.replace(/\n$/g,'').replace(/\n/g,',');
+  },
+
+  listToArray(input) {
+    return '["'+ input.replace(/,/g,'","') +'"]';
+  },
+
+  listToLines(input) {
+    return input.replace(/,/g,'\n');
+  },
+
+  sortList(input) {
+    return input.split(/[,\|]/).sort().join('\n');
+  },
+
+  removeSpaces(input) {
+    return input.trim().replace(/ /g, '');
+  },
+
+  removeEmptyLines(input) {
+    return input.replace(/\n\s*\n/g,'\n').replace(/^\s*\n/,'');
+  },
+
+  removeLineBreaks(input) {
+    return input.replace(/\n/g,'');
+  },
+
+  removeDiacritics(input) {
+    return utils.removeDiacritics(input);
+  },
+
+  encodeBase64(input) {
+    return btoa(input);
+  },
+
+  decodeBase64(input) {
+    return atob(input);
+  },
+
+  convertToSlug(input) {
+    return utils.convertToSlug(input);
+  },
+
+  parseMarkdownLinks(input) {
+    const rows = input.replace(/\n\n/g,'\n').split('\n');
+    const links = [];
+    for (const row of rows) {
+      const splitRow = row.trim().split('](');
+      if (splitRow?.[1]) {
+        links.push(splitRow[1].trim().replace(')',''));
+      }
+    }
+    return links.join('\n');
+  },
+
+  increaseLineBreaks(input) {
+    return input
+      .replace(/\n$/,'')
+      .replace(/\n{2,}/g,'\n\n')
+      .replace(/\n/g,'\n\n')
+      .replace(/\n{4,}/g,'\n\n\n\n');
+  },
+
+  editForTts(input) {
+    return input.toLowerCase()
+      .split("\n")
+      .map(line => {
+        if (!line) return line;
+        const lastChar = line.charAt(line.length-1);
+        if (!/\.|,|:/.test(lastChar)) {
+          line += ".";
+        }
+        return line.charAt(0).toUpperCase() + line.slice(1);
+      })
+      .join("\n");
+  },
+
+  excelToJsonMap(input) {
+    const rows = input.split("\n");
+    if (rows[rows.length-1] === "") {
+      rows.pop();
+    }
+    let result = "{\n";
+    if (rows.length > 0) {
+      result += rows
+        .map(row => {
+          const [key, value] = row.split("\t");
+          return `"${key}":"${value}"`;
+        })
+        .join(",\n");
+      result += "\n}";
+    }
+    return result;
+  },
+
+  encodeUri(input) {
+    return encodeURI(input);
+  },
+
+  decodeUri(input) {
+    const result = decodeURI(input);
+    const url_encode_map = {
+      '%20': ' ', '%3A': ':', '%2F': '/', '%2B': '+', '%2C': ',', '%2D': '-'
+    };
+    return Object.entries(url_encode_map)
+      .reduce((text, [pattern, replacement]) => 
+        text.replace(new RegExp(pattern,'g'), replacement), 
+        result
+      );
+  },
+
+  replaceText() {
     const oldText = document.getElementById("oldText").value;
     const newText = document.getElementById("newText").value;
-    const textarea = document.getElementById("textareaMain");
 
     if (!oldText) {
       alert("Please fill the field");
       return;
     }
 
-    const replacedContent = textarea.value.replaceAll(oldText, newText);
-    textarea.value = replacedContent;
-    closeModal();
+    utils.callFunc(input => input.replaceAll(oldText, newText));
+    uiManager.closeModal();
   }
+};
 
-  function clearInput(inputId) {
-    const inputField = document.getElementById(inputId);
-    if (inputField) {
-      inputField.value = '';
-      inputField.focus(); // Optional: Refocus the cleared field
-    }
-  }  
-
-  
-
-  
-  // Transformation functions
-
-  function populateParseAllTagsFromXml(inputData){
-    textareaMain.value = parseAllXmlTagsFromDoc(inputData);
-  }
-  
-  function yamlMultiDocToVocabularyItems(input) {
-    return input.split('\n-----\n')
-      .map((i) => {return i.trim()
-        .split('\n')
-        .map((i) => {return i.replace(/^(cs|en):\s/g,'')})
-        .join('\n===\n')
-      }).join('\n-----\n');
-    //return input.replace(/en: /g,'===\n').replace(/type: \w*\n/g,'').replace(/cs: /g,'');
-    //return input.trim().split('-----').map((i) => {i.replace(/\w{2}: /g,'').replace(/\n/g,'\n+++\n')}).join('-----');
-  }
-  
-  function ParseMarkdownLinks(input) {
-    rows = input.replace(/\n\n/g,'\n').split('\n');
-    links = [];
-    for ( let row of rows ){
-      var splitRow = row.trim().split('](');
-      if (splitRow && splitRow[1]) {
-        links.push(splitRow[1].trim().replace(')',''));
+// Eval Manager
+const evalManager = {
+  executeScript() {
+    try {
+      const result = eval(elements.editor.eval.value);
+      if (result !== undefined) {
+        elements.editor.main.value = result;
       }
+    } catch (error) {
+      elements.editor.logs.value = `Error: ${error.message}`;
+      console.error('Script execution error:', error);
     }
-    if ( links && links.length > 0 ){
-      return links.join('\n');
-    }
   }
-  
-  function RemoveLineBreaks(input) {
-    return input.replace(/\n/g,'');
-  }
-  
-  function LinesToList(input) {
-    return input.replace(/\n$/g,'').replace(/\n/g,',');
-  }
-  
-  function ListToLines(input) {
-    return input.replace(/,/g,'\n');
-  }
-  
-  function RemoveEmptyLines(input) {
-    return input.replace(/\n\s*\n/g,'\n').replace(/^\s*\n/,'');
-  }
-  
-  function IncreaseLineBreaks(input) {
-    return input.replace(/\n$/,'').replace(/\n{2,}/g,'\n\n').replace(/\n/g,'\n\n').replace(/\n{4,}/g,'\n\n\n\n');
-  }
-  
-  function ShowLineBreaks(input) {
-    return input.replace(/\n/g,'~\n');
-  }
-  
-  function ListToArray(input) {
-    return '["'+ input.replace(/,/g,'","') +'"]';
-  }
-  
-  var char_map = {
-    /* ** Latin ** */
-    'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE', 'Ç': 'C',
-    'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E', 'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
-    'Ð': 'D', 'Ñ': 'N', 'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O', 'Ő': 'O',
-    'Ø': 'O', 'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U', 'Ű': 'U', 'Ý': 'Y', 'Þ': 'TH',
-    'ß': 'ss',
-    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c',
-    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
-    'ð': 'd', 'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ő': 'o',
-    'ø': 'o', 'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ű': 'u', 'ý': 'y', 'þ': 'th', 'ÿ': 'y',
-    /* ** Czech ** */
-    'Č': 'C', 'Ď': 'D', 'Ě': 'E', 'Ň': 'N', 'Ř': 'R', 'Š': 'S', 'Ť': 'T', 'Ů': 'U', 'Ž': 'Z',
-    'č': 'c', 'ď': 'd', 'ě': 'e', 'ň': 'n', 'ř': 'r', 'š': 's', 'ť': 't', 'ů': 'u', 'ž': 'z'
-  };    
-  
-  function RemoveDiacritics(input) {
-    var text = input;
-    var result = '';
-    for (var i=0;i<text.length;i++) {
-      if (char_map[text[i]])
-        result += char_map[text[i]];
-      else
-      result += text[i];
-    }
-    return result;
-  }
-  
-  function ConvertToSlug(inputData) {
-    if (!inputData) return;
-    let result = '';
-    for (let i=0;i<inputData.length;i++) {
-      if (char_map[inputData[i]])
-        result += char_map[inputData[i]];
-      else
-        result += inputData[i];
-    }
-    return result.toLowerCase().replace(/[^\w |\n]+/g,'').replace(/ +|\n+/g,'-');
-  }
-  
-  function ExcelColumnsToJSONMap(input) {
-    var rows = input.split("\n");
-    if(rows[rows.length-1] == "") {
-      rows.pop();
-    }
-    var result = "{\n";
-    if(rows.length > 0) {
-      for(var i=0,len=rows.length; i<len; i++) {
-        var row = rows[i].split("\t");
-        if(row.length == 2) {
-          result += "\""+ row[0] +"\":\""+ row[1] +"\"";
-          if(i != rows.length-1) {
-            result += ",\n";
-          }
-        }
-      }
-      result += "\n}";
-    }
-    return result;
-  }
-  
-  function ListSort(input) {
-    return input.split(/[,\|]/).sort();
-  }
-  
-  function RemoveSpaces(input) {
-    return input.trim().replace(/ /g, '');
-  }
-  
-  function RemoveSpaces(input) {
-    return input.trim().replace(/ /g, '');
-  }
-  
-  function EvalCustomScript() {
-    HistoryAdd();
-    eval(textareaEval.value);
-  }
-  
-  function TTSedit(input) {
-    var b = input.toLowerCase().split("\n");
-    var c = [];
-    b.forEach(function(item){
-      var line = item;
-      var firstChar = line.charAt(0);
-      var lastChar = line.charAt(line.length-1);
-      if(line) {
-        if( !/\.|,|:/.test(lastChar) ){
-          line += "."
-        }
-        line = firstChar.toUpperCase() +""+ line.slice(1);
-      }
-      c.push(line);
-    });
-    return c.join("\n");
-  }
-  
-  function EncodeBase64(input) {
-    return btoa(input);
-  }
-  
-  function DecodeBase64(input) {
-    return atob(input);
-  }
-  
-  function EncodeUri(input) {
-    return encodeURI(input);           
-  }
-  
-  //Encoding reference incl. list of characters: https://www.w3schools.com/tags/ref_urlencode.ASP
-  var url_encode_map = {
-    '%20': ' ', '%3A': ':', '%2F': '/', '%2B': '+', '%2C': ',', '%2D': '-'
-  };
-  
-  function DecodeUri(input) {
-    var result = decodeURI(input);
-    for(const phrase in url_encode_map) {
-      result = result.replace(new RegExp(phrase,'g'), url_encode_map[phrase]);
-    }
-    return result;
-  }
-  
-  // page initialization      
-  window.addEventListener('DOMContentLoaded', () => {
-    populateData();
-    VoiceList();
-    currentDocName.innerText = uiConfigs.labels.not_saved_doc;
+};
 
-    const clearButtons = document.querySelectorAll(".clear-input");    
-    clearButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const inputContainer = button.closest(".input-container");
-        const inputField = inputContainer && inputContainer.querySelector("input");
-        if (inputField) {
-          inputField.value = "";
-        }         
-      });
-    });
-
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  // Editor Controls
+  document.getElementById('resetEditor').addEventListener('click', () => {
+    elements.editor.main.value = "";
+    docManager.setCurrentDoc(null);
+    historyManager.reset();
   });
+
+  document.getElementById('historyBack').addEventListener('click', () => historyManager.back());
+  document.getElementById('removeDoc').addEventListener('click', () => docManager.removeDoc());
+
+  // UI Toggles
+  document.getElementById('showCustomCode').addEventListener('change', (event) => {
+    document.getElementById('customCode').classList.toggle('hidden', !event.target.checked);
+  });
+
+  document.getElementById('showLogs').addEventListener('change', (event) => {
+    document.getElementById('logs').classList.toggle('hidden', !event.target.checked);
+  });
+
+  // Initialize data
+  docManager.populateDocList();
+  ttsManager.initVoices();
+  elements.editor.currentDocName.innerText = uiConfigs.labels.not_saved_doc;
+});
+
+// Make objects available globally for HTML event handlers
+window.docManager = docManager;
+window.historyManager = historyManager;
+window.utils = utils;
+window.ttsManager = ttsManager;
+window.uiManager = uiManager;
+window.fileManager = fileManager;
+window.transformManager = transformManager;
+window.flashcardsManager = flashcardsManager;
+window.evalManager = evalManager;
 
   

@@ -97,26 +97,26 @@
     <div class="screen" id="home-screen">
       <section>
         <nav> 
-          <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="ReadFile(event)" />
+          <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="fileManager.readFile(event)" />
           
           <button id="historyBack" disabled>Step back</button>
           <button id="resetEditor">New</button>
           
           <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
             <option value="">-Open-</option>
-            <option value="ClickHiddenFileInput()">Open file</option>
+            <option value="fileManager.clickHiddenInput()">Open file</option>
             <optgroup id="optgroupLcRecords" label="Open document (LS):"></optgroup>           						
             <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
           </select>
           
-          <select id="saveOptions" class="mobile-dropdown" style="max-width: 55px;">
+          <select id="saveOptions" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" class="mobile-dropdown" style="max-width: 55px;">
             <option value="" disabled selected>Save</option>
-            <option value="OverwriteOpenedDoc">Save (overwrite)</option>
-            <option value="SaveAsNewDoc">Save as new</option>
-            <option value="DownloadFile">Download</option>
+            <option value="docManager.overwriteOpened()">Save (overwrite)</option>
+            <option value="docManager.saveAsNew()">Save as new</option>
+            <option value="docManager.downloadFile()">Download</option>
           </select>
           
-          <button id="btnSettings" onclick="navigateToScreen('settings-screen')">Settings</button>
+          <button id="btnSettings" onclick="uiManager.navigateToScreen('settings-screen')">Settings</button>
           
           <br>
           
@@ -130,30 +130,30 @@
       </section>
       
       <section id="editor-buttons">
-        <select id="navButtonsTools" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
+        <select id="navButtonsTools" onChange="if(this.value){utils.callFunc(transformManager[this.value])}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
           <option value="">-Transform-</option>
-          <option value="CallFunc(yamlMultiDocToVocabularyItems);">Vocabulary yaml to separated item</option>
-          <option value="CallFunc(parseAllTagsFromXml);">Parse All Tags From Xml</option>          
-          <option value="CallFunc(LinesToList);">Rows to List</option>
-          <option value="CallFunc(ListToArray);">List to Array</option>
-          <option value="CallFunc(ListToLines);">List to Rows</option>
-          <option value="CallFunc(ListSort);">Sort list</option>
-          <option value="CallFunc(RemoveSpaces);">Remove spaces</option>
-          <option value="CallFunc(RemoveEmptyLines);">Remove empty rows</option>  		
-          <option value="CallFunc(RemoveLineBreaks);">Remove line breaks</option>
-          <option value="CallFunc(RemoveDiacritics);">Remove diacritics</option>
-          <option value="CallFunc(EncodeBase64)">Encode Base64</option>
-          <option value="CallFunc(DecodeBase64)">Decode Base64</option>
-          <option value="CallFunc(ConvertToSlug);">Convert to Slug</option>
-          <option value="CallFunc(ParseMarkdownLinks)">Parse markdown links</option>
-          <option value="CallFunc(IncreaseLineBreaks);">TTS: increase line breaks</option>
-          <option value="CallFunc(TTSedit);">TTS: dot end, lowerCase, capitilize</option>
-          <option value="CallFunc(ExcelColumnsToJSONMap);">2 excel columns to JSON map</option>      
-          <option value="CallFunc(EncodeUri)">Encode URL</option>
-          <option value="CallFunc(DecodeUri)">Decode URL</option>	      
+          <option value="yamlToVocabulary">Vocabulary yaml to separated item</option>
+          <option value="parseAllXmlTagsFromDoc">Parse All Tags From Xml</option>          
+          <option value="linesToList">Rows to List</option>
+          <option value="listToArray">List to Array</option>
+          <option value="listToLines">List to Rows</option>
+          <option value="sortList">Sort list</option>
+          <option value="removeSpaces">Remove spaces</option>
+          <option value="removeEmptyLines">Remove empty rows</option>  		
+          <option value="removeLineBreaks">Remove line breaks</option>
+          <option value="removeDiacritics">Remove diacritics</option>
+          <option value="encodeBase64">Encode Base64</option>
+          <option value="decodeBase64">Decode Base64</option>
+          <option value="convertToSlug">Convert to Slug</option>
+          <option value="parseMarkdownLinks">Parse markdown links</option>
+          <option value="increaseLineBreaks">TTS: increase line breaks</option>
+          <option value="editForTts">TTS: dot end, lowerCase, capitilize</option>
+          <option value="excelToJsonMap">2 excel columns to JSON map</option>      
+          <option value="encodeUri">Encode URL</option>
+          <option value="decodeUri">Decode URL</option>	      
         </select>
         
-        <select id="insertOptions" class="mobile-dropdown" style="max-width: 60px;">
+        <select id="insertOptions" onChange="if(this.value){utils[this.value]()}; this.selectedIndex = '0'; this.blur();" class="mobile-dropdown" style="max-width: 60px;">
           <option value="" disabled selected>Insert</option>
           <option value="insertDate">Date</option>
           <option value="insertSeparator">Separator</option>
@@ -161,15 +161,15 @@
           <option value="insertRandomId">Random id</option>
         </select>
         
-        <button onclick="openModal('replaceFeature')">Replace text</button>
+        <button onclick="uiManager.openModal('replaceFeature')">Replace text</button>
         
         <br> 
            
-        <button id="processDocData" class='orange'onclick="docToFlashCards()">Doc to flash cards</button>
+        <button id="processDocData" class='orange' onclick="flashcardsManager.processDoc()">Doc to flash cards</button>
 
         <br>
         
-        <button id="btnToggleTtsSection" onclick="ToggleVisibility('#tts-controls', this.id)">Show speech</button>
+        <button id="btnToggleTtsSection" onclick="uiManager.toggleVisibility('#tts-controls', this.id)">Show speech</button>
       </section>
       
       <section id="tts-controls" class="expandable-section" style="display: none;">
@@ -194,15 +194,15 @@
           <input type="checkbox" id="checkbox-auto-speak">
           <br>
           <br>
-          <button id="tts-play" onclick="Speak(textareaMain.value)">Speak</button>
-          <button id="tts-reset" onclick="speechSynthesis.cancel()">Stop</button>
+          <button id="tts-play" onclick="ttsManager.speak(elements.editor.main.value)">Speak</button>
+          <button id="tts-reset" onclick="ttsManager.stop()">Stop</button>
           <br>
         </naV>
       </section>
             
       <section id="customCode" class="hidden">
         <textarea id="textareaEval"></textarea>    
-        <button onclick="EvalCustomScript();">Execute custom script</button>
+        <button onclick="evalManager.executeScript()">Execute custom script</button>
       </section>       
       
       <section id="logs" class="hidden">
@@ -212,17 +212,18 @@
     
     <!-- Flashcards Screen -->
     <div class="screen hidden" id="flashcards-screen">  
-      <div class="back-btn" onclick="navigateToScreen('home-screen'); StopSpeaking();">Back</div>  
+      <div class="back-btn" onclick="uiManager.navigateToScreen('home-screen'); ttsManager.stop();">Back</div>  
       <div class="flashcards-content">
         <div class="card-front"></div>
         <div class="card-back"></div>
       </div>
       <div class="flashcards-controls">
-        <button onclick="navigateCards('previous')">Previous</button><button onclick="navigateCards('next')">Next</button>
+        <button onclick="flashcardsManager.navigate('previous')">Previous</button>
+        <button onclick="flashcardsManager.navigate('next')">Next</button>
         <br>       
-        <button onclick="TurnCard()">Turn</button>          
+        <button onclick="flashcardsManager.turnCard()">Turn</button>          
         <br>
-        <button onclick="Speak(currentCard[0])">Read aloud</button>
+        <button onclick="ttsManager.speak(flashcardsManager.currentCard[0])">Read aloud</button>
         <br>
       </div>    
     </div>
@@ -230,14 +231,14 @@
     <!-- Settings Screen -->
     <div class="screen hidden" id="settings-screen">
       <div class="screen-container">
-        <div class="back-btn" onclick="navigateToScreen('home-screen')">Back</div>
+        <div class="back-btn" onclick="uiManager.navigateToScreen('home-screen')">Back</div>
         <h2 class="screen-title">Settings</h2>
         <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
         <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
         <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
-        <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
-        <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
-        <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
+        <div class="row"><button class="btn-outline" onclick="docManager.exportData()">Export data</button></div>
+        <div class="row"><button class="btn-outline" onclick="docManager.importData()">Import data</button></div>
+        <div class="row"><button class="btn-outline" onclick="docManager.removeAllDocs()">Remove app data</button></div>
       </div>
     </div>
 
@@ -258,9 +259,9 @@
     
     <!-- Modals -->
     <div id="universalModal" class="modal hidden">
-      <div class="modal-overlay" onclick="closeModal()"></div>
+      <div class="modal-overlay" onclick="uiManager.closeModal()"></div>
       <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">×</button>
+        <button class="modal-close" onclick="uiManager.closeModal()">×</button>
         <div class="modal-body">
           
           <!-- Replace Feature Modal Content -->
@@ -275,7 +276,7 @@
               <input type="text" id="newText" placeholder="Replacing text" />
               <button class="clear-input">×</button>
             </div>
-            <button onclick="replaceText()">Replace</button>
+            <button onclick="transformManager.replaceText()">Replace</button>
           </div>
 
           <!-- Tag Selection Modal Content -->
