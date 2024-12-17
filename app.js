@@ -524,6 +524,81 @@ const utils = {
       // If result is not an object, directly assign it
       elements.editor.main.value = result;
     }
+  },
+
+  mapSeparator(input) {
+    if (!input) return null;
+    
+    switch(true) {
+      case /newline|new line/.test(input):
+        return "\n";
+      case /empty row|empty-row|empty line|empty-line/.test(input):
+        return "\n\n";
+      default:
+        return input;
+    }
+  },
+
+  convertYamlToJson(yamlText) {
+    return jsyaml.load(yamlText);
+  },
+
+  parseJsonFields(jsonItems) {
+    if (!Array.isArray(jsonItems) || jsonItems.length === 0) return [];
+    
+    const fields = new Set();
+    const fieldPaths = new Map(); // Store field -> paths mapping
+    
+    function collectFields(obj, parentPath = '', processedObjects = new WeakSet()) {
+      if (obj === null || typeof obj !== 'object') return;
+      if (processedObjects.has(obj)) return;
+      processedObjects.add(obj);
+
+      if (Array.isArray(obj)) {
+        obj.forEach((item, index) => {
+          if (typeof item === 'object' && item !== null) {
+            collectFields(item, `${parentPath}[${index}]`, processedObjects);
+          }
+        });
+        return;
+      }
+
+      Object.entries(obj).forEach(([key, value]) => {
+        const currentPath = parentPath ? `${parentPath}.${key}` : key;
+        fields.add(key);
+        
+        // Store or append the path for this field
+        if (!fieldPaths.has(key)) {
+          fieldPaths.set(key, new Set());
+        }
+        fieldPaths.get(key).add(currentPath);
+
+        if (typeof value === 'object' && value !== null) {
+          collectFields(value, currentPath, processedObjects);
+        }
+      });
+    }
+
+    // Process all items to get all possible fields
+    jsonItems.forEach(item => collectFields(item));
+    
+    // Convert to array of objects with field and paths
+    return [...fields].sort().map(field => ({
+      field: field,
+      paths: [...fieldPaths.get(field)].sort()
+    }));
+  },
+
+  // Helper function to get nested object values by path
+  getNestedValue(obj, path) {
+    return path.split('.').reduce((current, part) => current && current[part], obj);
+  },
+
+  splitBySeparator(input, separator) {
+    if (!input) return [];
+    if (!separator) return [input];
+    const mappedSeparator = this.mapSeparator(separator); // || "\n-----\n"
+    return input.split(mappedSeparator).map(item => item.trim()).filter(item => item.length > 0);
   }
 };
 
@@ -533,6 +608,10 @@ const flashcardsManager = {
   cardsAll: [],
   cardsShuffled: [],
   cardIndex: -1,
+  selectedFields: {
+    front: null,
+    back: null
+  },
 
   processDoc(inputData) {
     const content = inputData || elements.editor.main.value;
@@ -550,7 +629,7 @@ const flashcardsManager = {
     }
     
     if (parsedTags.length === 1) {
-      this.openAsFlashCards(parsedTags[0]);
+      this.processTagData(parsedTags[0]);
     } else {
       this.showXmlTagSelectionModal(parsedTags);
     }
@@ -571,7 +650,7 @@ const flashcardsManager = {
           </div>`;
       card.onclick = () => {
         uiManager.closeModal();
-        this.openAsFlashCards(tag);
+        this.processTagData(tag);
       };
       cardsContainer.appendChild(card);
     });
@@ -579,27 +658,76 @@ const flashcardsManager = {
     uiManager.openModal('tagSelectionModal');
   },
 
+  processTagData(tagData) {
+    if (tagData.inner_content && tagData.tag_attributes?.format === 'yaml') {
+      const items = utils.splitBySeparator(tagData.inner_content, tagData.tag_attributes.separator);
+      console.log('items', items);      
+      
+      const jsonItems = items.map(item => utils.convertYamlToJson(item));
+      console.log('jsonItems', jsonItems);
+
+      if (jsonItems.length > 0) {
+        this.showFieldMappingModal(jsonItems);
+      }
+    } else {
+      this.openAsFlashCards(tagData);
+    }
+  },
+
+  showFieldMappingModal(jsonItems) {
+    const fields = utils.parseJsonFields(jsonItems);
+    const modalContent = document.getElementById('fieldMappingModal');
+    
+    // Store jsonItems for later use
+    this.currentJsonItems = jsonItems;
+    
+    modalContent.innerHTML = `
+      <h3>Select Fields for Flashcards</h3>
+      <div>
+        <label>Front of card:</label>
+        <select id="frontFieldSelect">
+          ${fields.map(f => `<option value="${f.field}">${f.field}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label>Back of card:</label>
+        <select id="backFieldSelect">
+          ${fields.map(f => `<option value="${f.field}">${f.field}</option>`).join('')}
+        </select>
+      </div>
+      <button onclick="flashcardsManager.applyFieldMapping()">Start Flashcards</button>
+    `;
+
+    uiManager.openModal('fieldMappingModal');
+  },
+
+  applyFieldMapping() {
+    const frontField = document.getElementById('frontFieldSelect').value;
+    const backField = document.getElementById('backFieldSelect').value;
+    
+    this.selectedFields = { front: frontField, back: backField };
+    
+    // Filter and map only the selected fields
+    this.cardsAll = this.currentJsonItems
+      .filter(item => item[frontField] && item[backField]) // Only include items that have both selected fields
+      .map(item => [item[frontField], item[backField]]);
+      
+    this.cardsShuffled = utils.shuffleArray(this.cardsAll);
+    this.cardIndex = -1;
+    
+    uiManager.closeModal();
+    uiManager.navigateToScreen("flashcards-screen");
+    this.navigate("next");
+  },
+
   parseItemsFromSingleTagData(inputData) {
     if (!inputData) return;
 
-    if (inputData.tag_attributes && inputData.tag_attributes.separator) {
-      function mapSeparator(input) {
-        if (!input) return null;
-        
-        switch(true) {
-          case /newline|new line/.test(input):
-            return "\n";
-          case /empty row|empty-row|empty line|empty-line/.test(input):
-            return "\n\n";
-          default:
-            return input;
-        }
-      }
-
-      const separator = mapSeparator(inputData.tag_attributes.separator);
+    if (inputData.tag_attributes?.separator) {
+      const separator = utils.mapSeparator(inputData.tag_attributes.separator);
       const defaultFieldSeparator = /\.{4}|=|\t/;
       const fieldSeparator = inputData.tag_attributes.fieldSeparator ? 
-        mapSeparator(inputData.tag_attributes.fieldSeparator) : 
+        utils.mapSeparator(inputData.tag_attributes.fieldSeparator) : 
         defaultFieldSeparator;
       const content = inputData.inner_content.trim();        
       
@@ -607,7 +735,7 @@ const flashcardsManager = {
         .split(separator)
         .map(item => item.trim())
         .filter(item => item !== "")
-        .map(item => item.split(fieldSeparator).map(field => field.trim().replace(/^(en|cs): /g,'')));
+        .map(item => item.split(fieldSeparator).map(field => field.trim()));
     }
   },
 
