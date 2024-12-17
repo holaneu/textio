@@ -540,7 +540,56 @@ const utils = {
   },
 
   convertYamlToJson(yamlText) {
-    return jsyaml.load(yamlText);
+    try {
+      // First try parsing as is
+      const result = jsyaml.load(yamlText);
+      if (result !== null && result !== undefined) {
+        return result;
+      }
+    } catch (e) {
+      console.log('First parsing attempt failed:', e.message);
+    }
+
+    try {
+      // Try parsing without any markers
+      const cleanYaml = yamlText
+        .replace(/^---\n/, '')  // Remove leading document marker
+        .replace(/\n---$/, '')  // Remove trailing document marker
+        .trim();
+        
+      const result = jsyaml.load(cleanYaml);
+      if (result !== null && result !== undefined) {
+        return result;
+      }
+    } catch (e) {
+      console.log('Second parsing attempt failed:', e.message);
+    }
+
+    // Fallback to simple key-value parsing for basic structures
+    if (yamlText.split('\n').every(line => !line.includes('  '))) {
+      const result = {};
+      const lines = yamlText.split('\n');
+      
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine || !trimmedLine.includes(':')) return;
+        
+        // Find the first colon that separates key from value
+        const colonIndex = trimmedLine.indexOf(':');
+        const key = trimmedLine.substring(0, colonIndex).trim();
+        const value = trimmedLine.substring(colonIndex + 1).trim();
+        
+        if (key && value) {
+          result[key] = value;
+        }
+      });
+      
+      if (Object.keys(result).length > 0) {
+        return result;
+      }
+    }
+    
+    throw new Error('Failed to parse YAML: Invalid format');
   },
 
   parseJsonFields(jsonItems) {
