@@ -122,6 +122,7 @@ const docManager = {
       elements.editor.main.value = record.content;
       this.setCurrentDoc(record);
       historyManager.reset();
+      flashcardsManager.cleanup();
     }
   },
 
@@ -206,6 +207,7 @@ const docManager = {
       this.populateDocList();
       this.setCurrentDoc(null);
       historyManager.reset();
+      flashcardsManager.cleanup();
     }
   },
 
@@ -662,7 +664,36 @@ const flashcardsManager = {
     back: null
   },
 
+  cleanup() {
+    // Clear all stored data
+    this.currentCard = null;
+    this.cardsAll = [];
+    this.cardsShuffled = [];
+    this.cardIndex = -1;
+    this.currentJsonItems = null;
+    this.selectedFields = {
+      front: null,
+      back: null
+    };
+    this.currentCardBackLoop = 1;
+
+    // Reset UI elements
+    if (document.getElementById('currentCardIndex')) {
+      document.getElementById('currentCardIndex').textContent = '0';
+    }
+    if (document.getElementById('totalCards')) {
+      document.getElementById('totalCards').textContent = '0';
+    }
+    if (elements.flashcards.cardFront) {
+      elements.flashcards.cardFront.innerText = '';
+    }
+    if (elements.flashcards.cardBack) {
+      elements.flashcards.cardBack.innerText = '';
+    }
+  },
+
   processDoc(inputData) {
+    this.cleanup(); // Clean up before processing new document
     const content = inputData || elements.editor.main.value;
     if (!content.trim()) return;
 
