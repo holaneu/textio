@@ -741,6 +741,7 @@ const flashcardsManager = {
       <div>
         <label>Back of card:</label>
         <select id="backFieldSelect">
+          <option value="empty">- empty -</option>
           ${fields.map(f => `<option value="${f.field}">${f.field}</option>`).join('')}
         </select>
       </div>
@@ -757,16 +758,15 @@ const flashcardsManager = {
     this.selectedFields = { front: frontField, back: backField };
     
     // Filter and map only the selected fields
-    this.cardsAll = this.currentJsonItems
-      .filter(item => item[frontField] && item[backField]) // Only include items that have both selected fields
-      .map(item => [item[frontField], item[backField]]);
+    const cards = this.currentJsonItems
+      .filter(item => item[frontField]) // Only check if front field exists
+      .map(item => [
+        item[frontField], 
+        backField === 'empty' ? '' : (item[backField] || '') // Use empty string if back field is 'empty' or field doesn't exist
+      ]);
       
-    this.cardsShuffled = utils.shuffleArray(this.cardsAll);
-    this.cardIndex = -1;
-    
+    this.initializeFlashcards(cards);
     uiManager.closeModal();
-    uiManager.navigateToScreen("flashcards-screen");
-    this.navigate("next");
   },
 
   parseItemsFromSingleTagData(inputData) {
@@ -789,9 +789,21 @@ const flashcardsManager = {
   },
 
   openAsFlashCards(inputData) {        
-    this.cardsAll = this.parseItemsFromSingleTagData(inputData);
+    const cards = this.parseItemsFromSingleTagData(inputData);
+    this.initializeFlashcards(cards);
+  },
+
+  initializeFlashcards(cards) {
+    if (!cards || cards.length === 0) {
+      alert('No cards found in the input data');
+      return;
+    }
+    
+    this.cardsAll = cards;
     this.cardsShuffled = utils.shuffleArray(this.cardsAll);
     this.cardIndex = -1;
+    
+    document.getElementById('totalCards').textContent = this.cardsShuffled.length;
     uiManager.navigateToScreen("flashcards-screen");
     this.navigate("next");
   },
@@ -809,6 +821,9 @@ const flashcardsManager = {
     elements.flashcards.cardFront.innerText = this.currentCard[0];
     elements.flashcards.cardBack.innerText = "";
     this.currentCardBackLoop = 1;
+
+    // Update counter
+    document.getElementById('currentCardIndex').textContent = this.cardIndex + 1;
 
     if (document.querySelector('#checkbox-auto-speak')?.checked) {
       ttsManager.speak(this.currentCard[0]);

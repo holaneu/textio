@@ -295,6 +295,12 @@ dialog {
   border-radius: 10px;
 }
 
+#flashcards-screen .flashcards-counter {
+  color: #45edf5;
+  font-size: 16px;
+  margin: 10px 0;
+  text-align: center;
+}
 
 @media (max-width: 600px) {
   .mobile-dropdown {
