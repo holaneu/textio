@@ -122,6 +122,7 @@ const docManager = {
       elements.editor.main.value = record.content;
       this.setCurrentDoc(record);
       historyManager.reset();
+      flashcardsManager.cleanup();
     }
   },
 
@@ -206,6 +207,7 @@ const docManager = {
       this.populateDocList();
       this.setCurrentDoc(null);
       historyManager.reset();
+      flashcardsManager.cleanup();
     }
   },
 
@@ -662,7 +664,36 @@ const flashcardsManager = {
     back: null
   },
 
+  cleanup() {
+    // Clear all stored data
+    this.currentCard = null;
+    this.cardsAll = [];
+    this.cardsShuffled = [];
+    this.cardIndex = -1;
+    this.currentJsonItems = null;
+    this.selectedFields = {
+      front: null,
+      back: null
+    };
+    this.currentCardBackLoop = 1;
+
+    // Reset UI elements
+    if (document.getElementById('currentCardIndex')) {
+      document.getElementById('currentCardIndex').textContent = '0';
+    }
+    if (document.getElementById('totalCards')) {
+      document.getElementById('totalCards').textContent = '0';
+    }
+    if (elements.flashcards.cardFront) {
+      elements.flashcards.cardFront.innerText = '';
+    }
+    if (elements.flashcards.cardBack) {
+      elements.flashcards.cardBack.innerText = '';
+    }
+  },
+
   processDoc(inputData) {
+    this.cleanup(); // Clean up before processing new document
     const content = inputData || elements.editor.main.value;
     if (!content.trim()) return;
 
@@ -741,6 +772,7 @@ const flashcardsManager = {
       <div>
         <label>Back of card:</label>
         <select id="backFieldSelect">
+          <option value="empty">- empty -</option>
           ${fields.map(f => `<option value="${f.field}">${f.field}</option>`).join('')}
         </select>
       </div>
@@ -757,16 +789,15 @@ const flashcardsManager = {
     this.selectedFields = { front: frontField, back: backField };
     
     // Filter and map only the selected fields
-    this.cardsAll = this.currentJsonItems
-      .filter(item => item[frontField] && item[backField]) // Only include items that have both selected fields
-      .map(item => [item[frontField], item[backField]]);
+    const cards = this.currentJsonItems
+      .filter(item => item[frontField]) // Only check if front field exists
+      .map(item => [
+        item[frontField], 
+        backField === 'empty' ? '' : (item[backField] || '') // Use empty string if back field is 'empty' or field doesn't exist
+      ]);
       
-    this.cardsShuffled = utils.shuffleArray(this.cardsAll);
-    this.cardIndex = -1;
-    
+    this.initializeFlashcards(cards);
     uiManager.closeModal();
-    uiManager.navigateToScreen("flashcards-screen");
-    this.navigate("next");
   },
 
   parseItemsFromSingleTagData(inputData) {
@@ -789,9 +820,21 @@ const flashcardsManager = {
   },
 
   openAsFlashCards(inputData) {        
-    this.cardsAll = this.parseItemsFromSingleTagData(inputData);
+    const cards = this.parseItemsFromSingleTagData(inputData);
+    this.initializeFlashcards(cards);
+  },
+
+  initializeFlashcards(cards) {
+    if (!cards || cards.length === 0) {
+      alert('No cards found in the input data');
+      return;
+    }
+    
+    this.cardsAll = cards;
     this.cardsShuffled = utils.shuffleArray(this.cardsAll);
     this.cardIndex = -1;
+    
+    document.getElementById('totalCards').textContent = this.cardsShuffled.length;
     uiManager.navigateToScreen("flashcards-screen");
     this.navigate("next");
   },
@@ -809,6 +852,9 @@ const flashcardsManager = {
     elements.flashcards.cardFront.innerText = this.currentCard[0];
     elements.flashcards.cardBack.innerText = "";
     this.currentCardBackLoop = 1;
+
+    // Update counter
+    document.getElementById('currentCardIndex').textContent = this.cardIndex + 1;
 
     if (document.querySelector('#checkbox-auto-speak')?.checked) {
       ttsManager.speak(this.currentCard[0]);
