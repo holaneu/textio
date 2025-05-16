@@ -215,10 +215,13 @@
     
     <!-- Flashcards Screen -->
     <div class="screen hidden" id="flashcards-screen">  
-      <div class="back-btn" onclick="flashcardsManager.cleanup(); uiManager.navigateToScreen('home-screen'); ttsManager.stop();">Back</div>  
-      <div class="flashcards-counter">
-        <span id="currentCardIndex">0</span> / <span id="totalCards">0</span>
-      </div>
+      <header>
+        <div class="back-btn" onclick="flashcardsManager.cleanup(); uiManager.navigateToScreen('home-screen'); ttsManager.stop();">Back</div>  
+        <div class="flashcards-counter">
+          <span id="currentCardIndex">0</span> / <span id="totalCards">0</span>
+        </div>
+      </header>
+      
       <div class="flashcards-content">
         <div class="card-front"></div>
         <div class="card-back"></div>
@@ -228,8 +231,8 @@
         <button onclick="flashcardsManager.navigate('next')">Next</button>
         <br>       
         <button onclick="flashcardsManager.turnCard()">Turn</button>          
-        <br>
-        <button onclick="ttsManager.speak(flashcardsManager.currentCard[0])">Read aloud</button>
+
+        <button onclick="ttsManager.speak(flashcardsManager.currentCard[0])" class="readAload">Read aloud</button>
         <br>
       </div>    
     </div>
