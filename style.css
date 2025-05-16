@@ -155,7 +155,8 @@ header em {
   color: white;
   padding: 20px;
   font-size: 20px;
-  margin-top: 60px;
+  margin-top: 65px;
+  margin-bottom: 120px;
 }
 #flashcards-screen .flashcards-controls {
   width: 100%;
@@ -168,8 +169,16 @@ header em {
 
 
 #flashcards-screen .flashcards-controls button {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  padding: 10px 20px;
 }
+
+#flashcards-screen .flashcards-controls .readAload {
+  position: absolute;
+    top: 20px;
+    left: 30px;
+}
+
 
 #flashcards-screen nav button {
   padding: 12px 20px;
