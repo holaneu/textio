@@ -179,6 +179,14 @@ header em {
     left: 30px;
 }
 
+#flashcards-screen .flashcards-controls .icon-container {
+  height: 50px;
+}
+
+#flashcards-screen .flashcards-controls svg {
+  fill: white;
+}
+
 
 #flashcards-screen nav button {
   padding: 12px 20px;
