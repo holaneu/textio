@@ -694,17 +694,36 @@ const flashcardsManager = {
 
   processDoc(inputData) {
     this.cleanup(); // Clean up before processing new document
-    const content = inputData || elements.editor.main.value;
+    let content = inputData || elements.editor.main.value;
     if (!content.trim()) return;
-
+    content = content.trim();
+    // Parse XML-like tags from the content as default
     const parsedTags = transformManager.parseAllXmlTagsFromDoc(content);
-    
+    // If no XML-like tags found, check for other separators
     if (!parsedTags || parsedTags.length === 0) {
-      this.openAsFlashCards({
-        tag_name: "items", 
-        tag_attributes: {separator: "newline"}, 
-        inner_content: content
-      });
+
+      if (content.split("\n-----\n").length > 1) {
+        this.openAsFlashCards({
+          tag_name: "items", 
+          tag_attributes: {separator: "-----"}, 
+          inner_content: content
+        });
+
+      } else if (content.split("\n\n").length > 1) {
+        this.openAsFlashCards({
+          tag_name: "items", 
+          tag_attributes: {separator: "\n\n"}, 
+          inner_content: content
+        });
+
+      } else {
+        this.openAsFlashCards({
+          tag_name: "items", 
+          tag_attributes: {separator: "\n"}, 
+          inner_content: content
+        });
+      }
+
       return;
     }
     
@@ -805,7 +824,7 @@ const flashcardsManager = {
 
     if (inputData.tag_attributes?.separator) {
       const separator = utils.mapSeparator(inputData.tag_attributes.separator);
-      const defaultFieldSeparator = /\.{4}|=|\t/;
+      const defaultFieldSeparator = /\.{4}|==|\t/;
       const fieldSeparator = inputData.tag_attributes.fieldSeparator ? 
         utils.mapSeparator(inputData.tag_attributes.fieldSeparator) : 
         defaultFieldSeparator;
