@@ -528,16 +528,16 @@ const utils = {
     }
   },
 
-  mapSeparator(input) {
-    if (!input) return null;
+  mapSeparator(separator) {
+    if (!separator) return null;
     
     switch(true) {
-      case /newline|new line/.test(input):
+      case /newline|new line/.test(separator):
         return "\n";
-      case /empty row|empty-row|empty line|empty-line/.test(input):
+      case /empty row|empty-row|empty line|empty-line/.test(separator):
         return "\n\n";
       default:
-        return input;
+        return separator;
     }
   },
 
@@ -648,8 +648,12 @@ const utils = {
   splitBySeparator(input, separator) {
     if (!input) return [];
     if (!separator) return [input];
-    const mappedSeparator = this.mapSeparator(separator); // || "\n-----\n"
-    return input.split(mappedSeparator).map(item => item.trim()).filter(item => item.length > 0);
+    const mappedSeparator = this.mapSeparator(separator);
+    // Split and filter out empty items, including those caused by trailing separators
+    return input
+      .split(mappedSeparator)
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
   },
 
   detectStringIsJson(str) {
@@ -720,10 +724,14 @@ const flashcardsManager = {
     this.cleanup();
     let content = inputData || elements.editor.main.value;
     if (!content.trim()) return;
-    content = content.trim();
+    content = "\n" + content.trim() + "\n"; // Ensure content starts and ends with a newline for consistent parsing
+
+    // Clean up consecutive separator rows (-----\n-----, etc.)
+    content = content.replace(/(?:\n*-{5,}\n*){2,}/g, '\n-----\n');
+    content = content.replace(/^(?:\n*-{5,}\n*)+/, '\n-----\n');
+    content = content.replace(/(?:\n*-{5,}\n*)+$/, '\n-----\n');
 
     const parsedTags = transformManager.parseAllXmlTagsFromDoc(content);
-    console.info('**** parsedTags', parsedTags);
 
     // If no XML-like tags found, check for other separators
     if (!parsedTags || parsedTags.length === 0) {
@@ -731,8 +739,8 @@ const flashcardsManager = {
       let items;
       let separator;
       if (content.split("\n-----\n").length > 1) {
-        items = utils.splitBySeparator(content, "-----");
-        separator = "-----";
+        items = utils.splitBySeparator(content, "\n-----\n");
+        separator = "\n-----\n";
       } else if (content.split("\n\n").length > 1) {
         items = utils.splitBySeparator(content, "\n\n");
         separator = "\n\n";
@@ -760,12 +768,14 @@ const flashcardsManager = {
         }
       }
 
-      // Fallback - transformation to single tag data format
-      this.openAsFlashCards({
-        tag_name: "items", 
-        tag_attributes: {separator: separator}, 
+      // Fallback - transformation to single tag data formatted obj
+      const singleTagDataOgj = {
+        tag_name: "items",
+        tag_attributes: { separator: separator },
         inner_content: content
-      });
+      };
+      this.openAsFlashCards(singleTagDataOgj);
+      console.log('**** singleTagDataOgj', singleTagDataOgj)
       return;
     }
 
@@ -886,7 +896,7 @@ const flashcardsManager = {
       const fieldSeparator = inputData.tag_attributes.fieldSeparator ? 
         utils.mapSeparator(inputData.tag_attributes.fieldSeparator) : 
         defaultFieldSeparator;
-      const content = inputData.inner_content.trim();        
+      const content = "\n"+ inputData.inner_content.trim() + "\n"; // Ensure content starts and ends with a newline for consistent parsing
       
       return content
         .split(separator)
