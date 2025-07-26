@@ -650,6 +650,30 @@ const utils = {
     if (!separator) return [input];
     const mappedSeparator = this.mapSeparator(separator); // || "\n-----\n"
     return input.split(mappedSeparator).map(item => item.trim()).filter(item => item.length > 0);
+  },
+
+  detectStringIsJson(str) {
+    if (str === null || str === undefined) return false;
+    let value = String(str).trim();
+    if (value === '') return false;
+    for (let i = 0; i < 3; i++) {
+      try {
+        JSON.parse(value);
+        return true;
+      } catch (e) {
+        if ((value.startsWith('"') && value.endsWith('"')) || value.includes('\\"')) {
+          try {
+            value = JSON.parse(value);
+            value = String(value).trim();
+          } catch (decodeError) {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
+    }
+    return false;
   }
 };
 
@@ -693,40 +717,58 @@ const flashcardsManager = {
   },
 
   processDoc(inputData) {
-    this.cleanup(); // Clean up before processing new document
+    this.cleanup();
     let content = inputData || elements.editor.main.value;
     if (!content.trim()) return;
     content = content.trim();
-    // Parse XML-like tags from the content as default
+
     const parsedTags = transformManager.parseAllXmlTagsFromDoc(content);
+    console.info('**** parsedTags', parsedTags);
+
     // If no XML-like tags found, check for other separators
     if (!parsedTags || parsedTags.length === 0) {
-
+      // Try splitting by separators
+      let items;
+      let separator;
       if (content.split("\n-----\n").length > 1) {
-        this.openAsFlashCards({
-          tag_name: "items", 
-          tag_attributes: {separator: "-----"}, 
-          inner_content: content
-        });
-
+        items = utils.splitBySeparator(content, "-----");
+        separator = "-----";
       } else if (content.split("\n\n").length > 1) {
-        this.openAsFlashCards({
-          tag_name: "items", 
-          tag_attributes: {separator: "\n\n"}, 
-          inner_content: content
-        });
-
+        items = utils.splitBySeparator(content, "\n\n");
+        separator = "\n\n";
       } else {
-        this.openAsFlashCards({
-          tag_name: "items", 
-          tag_attributes: {separator: "\n"}, 
-          inner_content: content
-        });
+        items = utils.splitBySeparator(content, "\n");
+        separator = "\n";
       }
 
+      // Detect if items are JSON
+      const sampleCount = Math.min(items.length, 3);
+      const jsonDetected = items.slice(0, sampleCount).every(item => utils.detectStringIsJson(item));
+      if (jsonDetected) {
+        // Parse all items as JSON
+        const jsonItems = items.map(item => {
+          try {
+            return JSON.parse(item);
+          } catch (e) {
+            return null;
+          }
+        }).filter(Boolean);
+
+        if (jsonItems.length > 0) {
+          this.showFieldMappingModal(jsonItems);
+          return;
+        }
+      }
+
+      // Fallback - transformation to single tag data format
+      this.openAsFlashCards({
+        tag_name: "items", 
+        tag_attributes: {separator: separator}, 
+        inner_content: content
+      });
       return;
     }
-    
+
     if (parsedTags.length === 1) {
       this.processTagData(parsedTags[0]);
     } else {
@@ -758,19 +800,35 @@ const flashcardsManager = {
   },
 
   processTagData(tagData) {
-    if (tagData.inner_content && tagData.tag_attributes?.format === 'yaml') {
+    // If format is 'json', parse items as JSON
+    if (tagData.inner_content && tagData.tag_attributes?.format === 'json') {
       const items = utils.splitBySeparator(tagData.inner_content, tagData.tag_attributes.separator);
-      console.log('items', items);      
-      
-      const jsonItems = items.map(item => utils.convertYamlToJson(item));
-      console.log('jsonItems', jsonItems);
+      const jsonItems = items.map(item => {
+        try {
+          return JSON.parse(item);
+        } catch (e) {
+          return null;
+        }
+      }).filter(Boolean);
 
       if (jsonItems.length > 0) {
         this.showFieldMappingModal(jsonItems);
+        return;
       }
-    } else {
-      this.openAsFlashCards(tagData);
     }
+
+    // If format is 'yaml', use previous logic
+    if (tagData.inner_content && tagData.tag_attributes?.format === 'yaml') {
+      const items = utils.splitBySeparator(tagData.inner_content, tagData.tag_attributes.separator);
+      const jsonItems = items.map(item => utils.convertYamlToJson(item));
+      if (jsonItems.length > 0) {
+        this.showFieldMappingModal(jsonItems);
+        return;
+      }
+    }
+
+    // Fallback
+    this.openAsFlashCards(tagData);
   },
 
   showFieldMappingModal(jsonItems) {
@@ -1120,4 +1178,4 @@ window.transformManager = transformManager;
 window.flashcardsManager = flashcardsManager;
 window.evalManager = evalManager;
 
-  
+
