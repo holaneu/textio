@@ -12,6 +12,46 @@ html * {
 }
 
 /* UI components */
+.screen-container {
+  padding: 0;
+}
+
+.screen-container .screen-header {
+  padding: 20px;
+}
+
+.screen-container .screen-nav {
+  padding: 0;
+}
+
+.screen-container .screen-main {
+  padding: 0 20px;
+}
+
+.screen-container .screen-footer {
+  padding: 20px;
+}
+
+.screen-container .screen-title {
+  margin-bottom: 15px;
+  margin-top: 10px;
+  padding: 0;
+  font-size: 14px;
+  color: teal;
+}
+
+.screen-container .screen-main .row {
+  margin-bottom: 15px;
+}
+
+.screen-container .screen-main section {
+  margin-bottom: 15px;
+}
+
+.screen-container .screen-nav .row {
+  margin-bottom: 11px;
+}
+
 .card-list {
   list-style-type: none;
   padding: 0;
@@ -63,6 +103,7 @@ body {
   background-repeat: no-repeat;
   background-position: left center;
   padding-left: 35px; /* Adjust this as necessary for spacing */
+  font-size: 16px;
 }
 
 h2 {
@@ -73,7 +114,6 @@ h2 {
   color:teal;
 }
 button, select {
-  margin-bottom: 7px;
   margin-right: 3px;
   padding: 7px 10px;
   background: #292929;
@@ -114,13 +154,13 @@ button:disabled {
   padding: 5px 10px;
   color: silver;
 }
-#home-screen header {
+
+/*#home-screen header {
   background:black;
   padding: 5px 10px;
   color:white;
-  text-align:center;
-  margin-bottom: 5px;
-}
+}*/
+
 header a {
   text-decoration: none;
   color: #00BCD4;
@@ -140,7 +180,7 @@ header em {
 #flashcards-screen {
   padding: 0;
   background: rgba(0,0,0);
-  text-align: center;
+  /*text-align: center;*/
 }
 
 #flashcards-screen header{
@@ -148,6 +188,7 @@ header em {
   background: rgba(0,0,0);
   position: fixed;
   top: 0px;
+  left: 0px;
   width: 100%;
 }
 
@@ -163,6 +204,7 @@ header em {
   text-align: center;
   position: fixed;
   bottom: 0px;
+  left: 0px;
   padding: 20px;
   background: black;
 }
@@ -329,10 +371,6 @@ dialog {
   padding: 20px;
   background: #1a1a1a;
   border-radius: 10px;
-}
-
-#home-screen {
-  padding: 10px;
 }
 
 #flashcards-screen .flashcards-counter {
