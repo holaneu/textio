@@ -98,187 +98,233 @@
     
     <!-- Home Screen -->
     <div class="screen" id="home-screen">
-      <section>
-        <nav> 
-          <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="fileManager.readFile(event)" />
-          
-          <button id="historyBack" disabled>Step back</button>
-          <button id="resetEditor">New</button>
-          
-          <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
-            <option value="">-Open-</option>
-            <option value="fileManager.clickHiddenInput()">Open file</option>
-            <optgroup id="optgroupLcRecords" label="Open document (LS):"></optgroup>           						
-            <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
-          </select>
-          
-          <select id="saveOptions" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" class="mobile-dropdown" style="max-width: 55px;">
-            <option value="" disabled selected>Save</option>
-            <option value="docManager.overwriteOpened()">Save (overwrite)</option>
-            <option value="docManager.saveAsNew()">Save as new</option>
-            <option value="docManager.downloadFile()">Download</option>
-          </select>
-          
-          <button id="btnSettings" onclick="uiManager.navigateToScreen('settings-screen')">Settings</button>
-          
-          <br>
-          
-          <span>Document: <em id="currentDocName"></em></span>
-          <span>Current step:<em id="currentStep">0</em></span>
-        </nav>
-      </section>			
-      
-      <section id="editor-textarea-main">
-        <textarea id="textareaMain"></textarea>
-      </section>
-      
-      <section id="editor-buttons">
-        <select id="navButtonsTools" onChange="if(this.value){utils.callFunc(transformManager[this.value])}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
-          <option value="">-Transform-</option>
-          <option value="yamlToVocabulary">Vocabulary yaml to separated item</option>
-          <option value="parseAllXmlTagsFromDoc">Parse All Tags From Xml</option>          
-          <option value="linesToList">Rows to List</option>
-          <option value="listToArray">List to Array</option>
-          <option value="listToLines">List to Rows</option>
-          <option value="sortList">Sort list</option>
-          <option value="removeSpaces">Remove spaces</option>
-          <option value="removeEmptyLines">Remove empty rows</option>  		
-          <option value="removeLineBreaks">Remove line breaks</option>
-          <option value="removeDiacritics">Remove diacritics</option>
-          <option value="encodeBase64">Encode Base64</option>
-          <option value="decodeBase64">Decode Base64</option>
-          <option value="convertToSlug">Convert to Slug</option>
-          <option value="parseMarkdownLinks">Parse markdown links</option>
-          <option value="increaseLineBreaks">TTS: increase line breaks</option>
-          <option value="editForTts">TTS: dot end, lowerCase, capitilize</option>
-          <option value="excelToJsonMap">2 excel columns to JSON map</option>      
-          <option value="encodeUri">Encode URL</option>
-          <option value="decodeUri">Decode URL</option>	      
-        </select>
-        
-        <select id="insertOptions" onChange="if(this.value){utils[this.value]()}; this.selectedIndex = '0'; this.blur();" class="mobile-dropdown" style="max-width: 60px;">
-          <option value="" disabled selected>Insert</option>
-          <option value="insertDate">Date</option>
-          <option value="insertSeparator">Separator</option>
-          <option value="insertFieldSeparator">Field Separator</option>
-          <option value="insertRandomId">Random id</option>
-        </select>
-        
-        <button onclick="uiManager.openModal('replaceFeature')">Replace text</button>
-        
-        <br> 
-           
-        <button id="processDocData" class='orange' onclick="flashcardsManager.processDoc()">Doc to flash cards</button>
-
-        <br>
-        
-        <button id="btnToggleTtsSection" onclick="uiManager.toggleVisibility('#tts-controls', this.id)">Show speech</button>
-      </section>
-      
-      <section id="tts-controls" class="expandable-section" style="display: none;">
-        <nav>
-          Voice: 
-          <select id="tts-voices"></select></br>
-          Rate: 
-          <select id="tts-rate">
-            <option value="0.3">very slow</option>
-            <option value="0.6">slow</option>
-            <option value="1" selected>normal</option>
-            <option value="1.5">fast</option>
-            <option value="1.8">very fast</option>
-          </select>
-          Pitch:
-          <select id="tts-pitch">
-            <option value="0">low</option>
-            <option value="1" selected>normal</option>
-            <option value="2">high</option>
-          </select></br>
-          Flash cards auto-speak: 
-          <input type="checkbox" id="checkbox-auto-speak">
-          <br>
-          <br>
-          <button id="tts-play" onclick="ttsManager.speak(elements.editor.main.value)">Speak</button>
-          <button id="tts-reset" onclick="ttsManager.stop()">Stop</button>
-          <br>
-        </naV>
-      </section>
+      <div class="screen-container">
+        <header class="screen-header">          
+          <nav class="screen-nav"> 
+            <div class="row">
+              <input id="fileInputHidden" type='file' style="visibility:hidden;display:none;" onchange="fileManager.readFile(event)" />            
             
-      <section id="customCode" class="hidden">
-        <textarea id="textareaEval"></textarea>    
-        <button onclick="evalManager.executeScript()">Execute custom script</button>
-      </section>       
-      
-      <section id="logs" class="hidden">
-        <textarea id="textarea-logs"></textarea>
-      </section>
+              <button id="resetEditor">New</button>
+              
+              <select id="navButtonsOpen" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" style="max-width:85px">
+                <option value="">-Open-</option>
+                <option value="fileManager.clickHiddenInput()">Open file</option>
+                <optgroup id="optgroupLcRecords" label="Open document (LS):"></optgroup>           						
+                <!--<option value="LoadFile('slovicka-en.txt')" value="">Open file from server</option>-->
+              </select>
+
+              <button id="btnSettings" onclick="uiManager.navigateToScreen('settings-screen')">Settings</button>
+            </div>
+
+            <div class="row">
+              <span><em id="currentDocName"></em></span>
+            </div>
+
+            <div class="row">
+              <button id="historyBack" disabled>Step back</button>
+
+              <select id="saveOptions" onChange="if(this.value){eval(this.value)}; this.selectedIndex = '0'; this.blur();" class="mobile-dropdown" style="max-width: 55px;">
+                <option value="" disabled selected>Save</option>
+                <option value="docManager.overwriteOpened()">Save (overwrite)</option>
+                <option value="docManager.saveAsNew()">Save as new</option>
+                <option value="docManager.downloadFile()">Download</option>
+              </select>
+
+              <button class="btn-outline" id="removeDoc">Delete</button>
+            </div>       
+            
+                        
+          </nav>          
+          
+        </header>
+
+        <main class="screen-main">          
+          <section id="editor-textarea-main">
+            <textarea id="textareaMain"></textarea>
+          </section>
+          
+          <section id="editor-buttons">
+            <select id="navButtonsTools" onChange="if(this.value){utils.callFunc(transformManager[this.value])}; this.selectedIndex = '0'; this.blur();" style="max-width:115px">
+              <option value="">-Transform-</option>
+              <option value="yamlToVocabulary">Vocabulary yaml to separated item</option>
+              <option value="parseAllXmlTagsFromDoc">Parse All Tags From Xml</option>          
+              <option value="linesToList">Rows to List</option>
+              <option value="listToArray">List to Array</option>
+              <option value="listToLines">List to Rows</option>
+              <option value="sortList">Sort list</option>
+              <option value="removeSpaces">Remove spaces</option>
+              <option value="removeEmptyLines">Remove empty rows</option>  		
+              <option value="removeLineBreaks">Remove line breaks</option>
+              <option value="removeDiacritics">Remove diacritics</option>
+              <option value="encodeBase64">Encode Base64</option>
+              <option value="decodeBase64">Decode Base64</option>
+              <option value="convertToSlug">Convert to Slug</option>
+              <option value="parseMarkdownLinks">Parse markdown links</option>
+              <option value="increaseLineBreaks">TTS: increase line breaks</option>
+              <option value="editForTts">TTS: dot end, lowerCase, capitilize</option>
+              <option value="excelToJsonMap">2 excel columns to JSON map</option>      
+              <option value="encodeUri">Encode URL</option>
+              <option value="decodeUri">Decode URL</option>	      
+            </select>
+            
+            <select id="insertOptions" onChange="if(this.value){utils[this.value]()}; this.selectedIndex = '0'; this.blur();" class="mobile-dropdown" style="max-width: 60px;">
+              <option value="" disabled selected>Insert</option>
+              <option value="insertDate">Date</option>
+              <option value="insertSeparator">Separator</option>
+              <option value="insertFieldSeparator">Field Separator</option>
+              <option value="insertRandomId">Random id</option>
+            </select>
+            
+            <button onclick="uiManager.openModal('replaceFeature')">Replace text</button>
+            
+          </section>
+
+          <section>    
+            <button id="processDocData" class='orange' onclick="flashcardsManager.processDoc()">Doc to flash cards</button>
+
+            <button id="btnToggleTtsSection" onclick="uiManager.toggleVisibility('#tts-controls', this.id)">Show speech</button>
+          </section>
+          
+          <section id="tts-controls" class="expandable-section" style="display: none;">
+            <nav>
+              <div class="row">
+                Voice: 
+                <select id="tts-voices"></select>
+              </div>
+              <div class="row">
+                Rate: 
+              <select id="tts-rate">
+                <option value="0.3">very slow</option>
+                <option value="0.6">slow</option>
+                <option value="1" selected>normal</option>
+                <option value="1.5">fast</option>
+                <option value="1.8">very fast</option>
+              </select>
+              Pitch:
+              <select id="tts-pitch">
+                <option value="0">low</option>
+                <option value="1" selected>normal</option>
+                <option value="2">high</option>
+              </select>
+              </div>
+
+              <div class="row">
+                Flash cards auto-speak: 
+                <input type="checkbox" id="checkbox-auto-speak">  
+              </div>
+
+              <div class="row">
+                <button id="tts-play" onclick="ttsManager.speak(elements.editor.main.value)">Speak</button>
+                <button id="tts-reset" onclick="ttsManager.stop()">Stop</button>
+              </div>
+            </nav>
+          </section>
+                
+          <section id="customCode" class="hidden">
+            <textarea id="textareaEval"></textarea>    
+            <button onclick="evalManager.executeScript()">Execute custom script</button>
+          </section>       
+          
+          <section id="logs" class="hidden">
+            <textarea id="textarea-logs"></textarea>
+          </section>
+        </main>
+      </div>
     </div>
     
     <!-- Flashcards Screen -->
     <div class="screen hidden" id="flashcards-screen">  
-      <header>
-        <div class="back-btn" onclick="flashcardsManager.cleanup(); uiManager.navigateToScreen('home-screen'); ttsManager.stop();">Back</div>  
-        <div class="flashcards-counter">
-          <span id="currentCardIndex">0</span> / <span id="totalCards">0</span>
+      <div class="screen-container">
+
+        <header>
+          <div class="back-btn" onclick="flashcardsManager.cleanup(); uiManager.navigateToScreen('home-screen'); ttsManager.stop();">Back</div>
+
+          <div class="flashcards-counter">
+            <span id="currentCardIndex">0</span> / <span id="totalCards">0</span>
+          </div>
+        </header>
+        
+        <div class="flashcards-content">
+          <div class="card-front"></div>
+          <div class="card-back"></div>
         </div>
-      </header>
-      
-      <div class="flashcards-content">
-        <div class="card-front"></div>
-        <div class="card-back"></div>
+
+        <div class="flashcards-controls">
+          <button onclick="ttsManager.speak(flashcardsManager.currentCard[0])" class="control-button">
+            <div class="icon-container">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
+                <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
+                <path d="M10.025 8a4.5 4.5 0 0 1-1.318 3.182L8 10.475A3.5 3.5 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.5 4.5 0 0 1 10.025 8M7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12zM4.312 6.39 6 5.04v5.92L4.312 9.61A.5.5 0 0 0 4 9.5H2v-3h2a.5.5 0 0 0 .312-.11"/>
+              </svg>
+            </div>
+            <span class="button-text">Read</span>
+          </button>
+
+          <button onclick="flashcardsManager.navigate('previous')" class="control-button">
+            <div class="icon-container">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+              </svg>
+            </div>
+            <span class="button-text">Prev</span>
+          </button>
+
+          <button onclick="flashcardsManager.navigate('next')" class="control-button">
+            <div class="icon-container">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
+              </svg>
+            </div>
+            <span class="button-text">Next</span>
+          </button>
+
+          <button onclick="flashcardsManager.turnCard()" class="control-button">
+            <div class="icon-container">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9"/>
+                <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"/>
+              </svg>
+            </div>
+            <span class="button-text">Turn</span>
+          </button>
+        </div>    
       </div>
-      <div class="flashcards-controls">
-        <button onclick="ttsManager.speak(flashcardsManager.currentCard[0])" class="control-button">
-          <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
-              <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
-              <path d="M10.025 8a4.5 4.5 0 0 1-1.318 3.182L8 10.475A3.5 3.5 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.5 4.5 0 0 1 10.025 8M7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12zM4.312 6.39 6 5.04v5.92L4.312 9.61A.5.5 0 0 0 4 9.5H2v-3h2a.5.5 0 0 0 .312-.11"/>
-            </svg>
-          </div>
-          <span class="button-text">Read</span>
-        </button>
-
-        <button onclick="flashcardsManager.navigate('previous')" class="control-button">
-          <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
-            </svg>
-          </div>
-          <span class="button-text">Prev</span>
-        </button>
-
-        <button onclick="flashcardsManager.navigate('next')" class="control-button">
-          <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
-            </svg>
-          </div>
-          <span class="button-text">Next</span>
-        </button>
-
-        <button onclick="flashcardsManager.turnCard()" class="control-button">
-          <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9"/>
-              <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"/>
-            </svg>
-          </div>
-          <span class="button-text">Turn</span>
-        </button>
-      </div>    
     </div>
     
     <!-- Settings Screen -->
     <div class="screen hidden" id="settings-screen">
       <div class="screen-container">
-        <div class="back-btn" onclick="uiManager.navigateToScreen('home-screen')">Back</div>
-        <h2 class="screen-title">Settings</h2>
-        <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
-        <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
-        <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
-        <div class="row"><button class="btn-outline" onclick="docManager.exportData()">Export data</button></div>
-        <div class="row"><button class="btn-outline" onclick="docManager.importData()">Import data</button></div>
-        <div class="row"><button class="btn-outline" onclick="docManager.removeAllDocs()">Remove app data</button></div>
+        <header class="screen-header">
+          <nav class="screen-nav">
+            <div class="back-btn" onclick="uiManager.navigateToScreen('home-screen')">Back</div>
+          </nav>
+        </header>
+        
+        <main class="screen-main">
+          <h2 class="screen-title">Settings</h2>
+                   
+          <div class="row">
+            <button class="btn-outline" onclick="docManager.exportData()">Export data</button>
+          </div>
+
+          <div class="row">
+            <button class="btn-outline" onclick="docManager.importData()">Import data</button>
+          </div>
+
+          <div class="row">
+            <button class="btn-outline" onclick="docManager.removeAllDocs()">Remove all app data</button>
+          </div>
+
+          <div class="row">
+            <input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label>
+          </div>
+
+          <div class="row">
+            <input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label>
+          </div> 
+        </main>
+        
       </div>
     </div>
 
@@ -287,12 +333,7 @@
       <div class="screen-container">
         <div class="back-btn" onclick="navigateToScreen('home-screen')"></div>
         <h2 class="screen-title">Items data processing</h2>
-        <div class="row"><input type="checkbox" id="showCustomCode"> <label for="showCustomCode">Show custom code</label></div>
-        <div class="row"><input type="checkbox" id="showLogs"> <label for="showLogs">Show logs</label></div>          
-        <div class="row"><button class="btn-outline" id="removeDoc">Remove document</button></div>
-        <div class="row"><button class="btn-outline" onclick="exportData()">Export data</button></div>
-        <div class="row"><button class="btn-outline" onclick="importData()">Import data</button></div>
-        <div class="row"><button class="btn-outline" onclick="RemoveAppData()">Remove app data</button></div>
+        
       </div>
     </div>
 
