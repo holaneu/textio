@@ -296,7 +296,6 @@ const historyManager = {
 
   add() {
     this.steps.push(elements.editor.main.value);
-    //elements.history.currentStep.innerHTML = this.steps.length;
     elements.history.backButton.disabled = false;
   },
 
@@ -304,13 +303,11 @@ const historyManager = {
     if (this.steps.length === 0) return;
     
     elements.editor.main.value = this.steps.pop();
-    //elements.history.currentStep.innerHTML = this.steps.length;
     elements.history.backButton.disabled = this.steps.length === 0;
   },
 
   reset() {
     this.steps = [];
-    //elements.history.currentStep.innerHTML = '0';
     elements.history.backButton.disabled = true;
   }
 };
