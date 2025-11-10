@@ -310,7 +310,7 @@ const historyManager = {
 
   reset() {
     this.steps = [];
-    elements.history.currentStep.innerHTML = '0';
+    //elements.history.currentStep.innerHTML = '0';
     elements.history.backButton.disabled = true;
   }
 };
