@@ -290,6 +290,119 @@ const docManager = {
   }
 };
 
+// Supabase Sync (optional; plain REST, no library). Setup: supabase/schema.sql
+const supabaseSync = {
+  get cfg() {
+    try { return JSON.parse(localStorage.getItem(appConfigs.app_prefix + 'supabase') || '{}'); }
+    catch { return {}; }
+  },
+  set cfg(v) { localStorage.setItem(appConfigs.app_prefix + 'supabase', JSON.stringify(v)); },
+
+  async _auth(path, body) {
+    const { url, key } = this.cfg;
+    const res = await fetch(`${url}/auth/v1/${path}`, {
+      method: 'POST',
+      headers: { apikey: key, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || data.error_description || data.message || res.status);
+    return data;
+  },
+
+  configure() {
+    const c = this.cfg;
+    const url = prompt('Supabase project URL (https://xxx.supabase.co):', c.url || '');
+    if (!url) return;
+    const key = prompt('Supabase anon (public) key:', c.key || '');
+    if (!key) return;
+    this.cfg = { url: url.trim().replace(/\/$/, ''), key: key.trim() };
+  },
+
+  async signIn() {
+    if (!this.cfg.url) this.configure();
+    if (!this.cfg.url) return;
+    const email = prompt('Email:');
+    const password = email && prompt('Password:');
+    if (!password) return;
+    try {
+      let s;
+      try {
+        s = await this._auth('token?grant_type=password', { email, password });
+      } catch (e) {
+        if (!confirm(`Sign in failed (${e.message}). Create new account?`)) return;
+        s = await this._auth('signup', { email, password });
+        if (!s.access_token) { alert('Confirm your email, then sign in again.'); return; }
+      }
+      this.cfg = { ...this.cfg, access_token: s.access_token, refresh_token: s.refresh_token, email };
+      alert('Signed in as ' + email);
+    } catch (e) { alert('Sign in failed: ' + e.message); }
+  },
+
+  signOut() {
+    const { url, key } = this.cfg;
+    this.cfg = { url, key };
+  },
+
+  async _refresh() {
+    const { refresh_token } = this.cfg;
+    if (!refresh_token) throw new Error('Not signed in');
+    const s = await this._auth('token?grant_type=refresh_token', { refresh_token });
+    this.cfg = { ...this.cfg, access_token: s.access_token, refresh_token: s.refresh_token };
+  },
+
+  async _rest(method, query, body, retry = true) {
+    const { url, key, access_token } = this.cfg;
+    if (!access_token) throw new Error('Not signed in');
+    const res = await fetch(`${url}/rest/v1/textio_documents${query}`, {
+      method,
+      headers: {
+        apikey: key,
+        Authorization: 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (res.status === 401 && retry) { await this._refresh(); return this._rest(method, query, body, false); }
+    if (!res.ok) throw new Error(await res.text());
+    return method === 'GET' ? res.json() : null;
+  },
+
+  // Two-way merge, newest "modified" wins.
+  async sync() {
+    try {
+      const remote = await this._rest('GET', '?select=id,name,content,created,modified,timestamp');
+      const remoteById = new Map(remote.map(r => [r.id, r]));
+      const local = docManager.loadLocalData();
+      const localIds = new Set(local.map(d => d.id));
+      const push = [];
+
+      local.forEach(d => {
+        const lm = JSON.parse(localStorage.getItem(d.lcKey)).modified || 0;
+        const r = remoteById.get(d.id);
+        if (!r || lm > r.modified) {
+          push.push({ id: d.id, name: d.name, content: d.content, created: d.created, modified: lm, timestamp: d.timestamp });
+        }
+      });
+
+      let pulled = 0;
+      remote.forEach(r => {
+        const key = appConfigs.db_key_prefix + r.id;
+        const l = localIds.has(r.id) ? JSON.parse(localStorage.getItem(key)) : null;
+        if (!l || r.modified > (l.modified || 0)) {
+          localStorage.setItem(key, JSON.stringify(r));
+          pulled++;
+        }
+      });
+
+      if (push.length) await this._rest('POST', '?on_conflict=user_id,id', push);
+      docManager.populateDocList();
+      alert(`Sync done. Uploaded ${push.length}, downloaded ${pulled}.`);
+    } catch (e) { alert('Sync failed: ' + e.message); }
+  }
+};
+
 // History Manager
 const historyManager = {
   steps: [],
@@ -1176,6 +1289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make objects available globally for HTML event handlers
 window.docManager = docManager;
+window.supabaseSync = supabaseSync;
 window.historyManager = historyManager;
 window.utils = utils;
 window.ttsManager = ttsManager;
