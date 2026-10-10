@@ -7,6 +7,7 @@ create table if not exists public.textio_documents (
   created     bigint,
   modified    bigint not null default 0,
   timestamp   text,
+  deleted     boolean not null default false,
   primary key (user_id, id)
 );
 
@@ -16,3 +17,6 @@ create policy "own documents" on public.textio_documents
   for all to authenticated
   using (user_id = auth.uid())
   with check (user_id = auth.uid());
+
+-- Already ran the first version? Add the tombstone column:
+-- alter table public.textio_documents add column if not exists deleted boolean not null default false;

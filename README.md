@@ -42,4 +42,4 @@ Demo:
 ## Optional cloud sync (Supabase, free tier)
 1. Create a Supabase project, run `supabase/schema.sql` in the SQL editor.
 2. In Textio → Settings: "Supabase: set project" (URL + anon key), "Sign in", then "Sync documents".
-Sync is a two-way merge (newest `modified` wins); deletions are not synced yet.
+Sync is automatic once signed in (on load, after saves/deletes, when the tab regains focus, every minute); the button forces it. Two-way merge, newest `modified` wins; deletions sync via `deleted` tombstone rows.

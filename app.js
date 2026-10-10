@@ -148,6 +148,7 @@ const docManager = {
       );
       this.populateDocList();
       this.setCurrentDoc(record);
+      supabaseSync.scheduleSync();
     } catch (error) {
       console.error('Error saving document:', error);
       alert('Failed to save document');
@@ -175,6 +176,7 @@ const docManager = {
       };
       localStorage.setItem(key, JSON.stringify(record));
       this.setCurrentDoc(record);
+      supabaseSync.scheduleSync();
     } catch (error) {
       console.error('Error overwriting document:', error);
       alert('Failed to save document');
@@ -203,6 +205,7 @@ const docManager = {
     if (confirmation) {
       const key = appConfigs.db_key_prefix + this.currentDoc.id;
       localStorage.removeItem(key);
+      supabaseSync.markDeleted(this.currentDoc.id);
       elements.editor.main.value = "";
       this.populateDocList();
       this.setCurrentDoc(null);
@@ -217,6 +220,7 @@ const docManager = {
       const records = this.loadLocalData();
       records.forEach(item => {
         localStorage.removeItem(appConfigs.db_key_prefix + item.id);
+        supabaseSync.markDeleted(item.id);
       });
       this.populateDocList();
       this.setCurrentDoc(null);
@@ -336,6 +340,7 @@ const supabaseSync = {
       }
       this.cfg = { ...this.cfg, access_token: s.access_token, refresh_token: s.refresh_token, email };
       alert('Signed in as ' + email);
+      this.sync(true);
     } catch (e) { alert('Sign in failed: ' + e.message); }
   },
 
@@ -369,37 +374,99 @@ const supabaseSync = {
     return method === 'GET' ? res.json() : null;
   },
 
-  // Two-way merge, newest "modified" wins.
-  async sync() {
+  get tombstones() {
+    try { return JSON.parse(localStorage.getItem(appConfigs.app_prefix + 'tombstones') || '{}'); }
+    catch { return {}; }
+  },
+  set tombstones(v) { localStorage.setItem(appConfigs.app_prefix + 'tombstones', JSON.stringify(v)); },
+
+  // Called by docManager after a local delete; remembered until pushed.
+  markDeleted(id) {
+    const t = this.tombstones;
+    t[id] = Date.now();
+    this.tombstones = t;
+    this.scheduleSync();
+  },
+
+  _timer: null,
+  scheduleSync() {
+    if (!this.cfg.access_token) return;
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => this.sync(true), 3000);
+  },
+
+  // Auto sync: on load, when the tab becomes visible, and every minute.
+  startAuto() {
+    if (this._auto) return;
+    this._auto = true;
+    const run = () => { if (this.cfg.access_token) this.sync(true); };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) run(); });
+    window.addEventListener('online', run);
+    setInterval(() => { if (!document.hidden) run(); }, 60000);
+    run();
+  },
+
+  _syncing: false,
+  // Two-way merge, newest "modified" wins. Deletions are synced as tombstone rows (deleted = true).
+  async sync(silent = false) {
+    if (this._syncing) return;
+    this._syncing = true;
     try {
-      const remote = await this._rest('GET', '?select=id,name,content,created,modified,timestamp');
+      const remote = await this._rest('GET', '?select=id,name,content,created,modified,timestamp,deleted');
       const remoteById = new Map(remote.map(r => [r.id, r]));
+      const tombs = this.tombstones;
+      const push = [];
+      const doneTombs = [];
+
+      Object.entries(tombs).forEach(([id, at]) => {
+        const r = remoteById.get(id);
+        if (r && !r.deleted && r.modified > at) { doneTombs.push(id); return; } // edited elsewhere after delete: keep it
+        if (r && r.deleted) { doneTombs.push(id); return; }
+        push.push({ id, name: '', content: '', modified: at, deleted: true });
+        doneTombs.push(id);
+      });
+
       const local = docManager.loadLocalData();
       const localIds = new Set(local.map(d => d.id));
-      const push = [];
-
       local.forEach(d => {
         const lm = JSON.parse(localStorage.getItem(d.lcKey)).modified || 0;
         const r = remoteById.get(d.id);
         if (!r || lm > r.modified) {
-          push.push({ id: d.id, name: d.name, content: d.content, created: d.created, modified: lm, timestamp: d.timestamp });
+          push.push({ id: d.id, name: d.name, content: d.content, created: d.created, modified: lm, timestamp: d.timestamp, deleted: false });
         }
       });
 
-      let pulled = 0;
+      let pulled = 0, removed = 0;
       remote.forEach(r => {
         const key = appConfigs.db_key_prefix + r.id;
         const l = localIds.has(r.id) ? JSON.parse(localStorage.getItem(key)) : null;
-        if (!l || r.modified > (l.modified || 0)) {
-          localStorage.setItem(key, JSON.stringify(r));
+        if (r.deleted) {
+          if (l && r.modified >= (l.modified || 0)) {
+            localStorage.removeItem(key);
+            removed++;
+            if (docManager.currentDoc?.id === r.id) docManager.setCurrentDoc(null);
+          }
+        } else if (!l && tombs[r.id] && tombs[r.id] >= r.modified) {
+          // deleted locally, tombstone pushed above
+        } else if (!l || r.modified > (l.modified || 0)) {
+          const { deleted, ...rec } = r;
+          localStorage.setItem(key, JSON.stringify(rec));
           pulled++;
         }
       });
 
       if (push.length) await this._rest('POST', '?on_conflict=user_id,id', push);
+      if (doneTombs.length) {
+        const t = this.tombstones;
+        doneTombs.forEach(id => delete t[id]);
+        this.tombstones = t;
+      }
       docManager.populateDocList();
-      alert(`Sync done. Uploaded ${push.length}, downloaded ${pulled}.`);
-    } catch (e) { alert('Sync failed: ' + e.message); }
+      const msg = `Sync done. Uploaded ${push.length}, downloaded ${pulled}, removed ${removed}.`;
+      if (silent) console.log(msg); else alert(msg);
+    } catch (e) {
+      if (silent) console.warn('Sync failed:', e.message); else alert('Sync failed: ' + e.message);
+    } finally { this._syncing = false; }
   }
 };
 
@@ -1283,6 +1350,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize data
   docManager.populateDocList();
+  supabaseSync.startAuto();
   ttsManager.initVoices();
   elements.editor.currentDocName.innerText = uiConfigs.labels.not_saved_doc;
 });
